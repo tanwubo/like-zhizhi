@@ -138,3 +138,28 @@ test("seed owner can create an admin checklist draft", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/content\/checklist$/);
   await expect(page.getByText(title)).toBeVisible();
 });
+
+test("seed owner can create an admin footprint place", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const name = `端到端足迹 ${suffix}`;
+
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/content/footprints");
+  await expect(page.getByRole("heading", { name: "足迹管理" })).toBeVisible();
+  await page.getByRole("link", { name: "新建足迹" }).click();
+  await page.getByLabel("地点名称").fill(name);
+  await page.getByLabel("地点说明").fill("这是一条端到端创建的足迹地点。");
+  await page.getByLabel("纬度").fill("31.2397");
+  await page.getByLabel("经度").fill("121.4998");
+  await page.getByLabel("访问标题").fill("第一次记录");
+  await page.getByLabel("访问说明").fill("用来验证足迹访问记录。");
+  await page.getByLabel("访问日期").fill("2026-05-15");
+  await page.getByRole("button", { name: "保存足迹" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/footprints$/);
+  await expect(page.getByText(name)).toBeVisible();
+});
