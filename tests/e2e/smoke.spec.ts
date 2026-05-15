@@ -118,3 +118,23 @@ test("seed owner can create an admin album draft", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/content\/album$/);
   await expect(page.getByText(title)).toBeVisible();
 });
+
+test("seed owner can create an admin checklist draft", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const title = `端到端清单 ${suffix}`;
+
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/content/checklist");
+  await expect(page.getByRole("heading", { name: "清单管理" })).toBeVisible();
+  await page.getByRole("link", { name: "新建清单" }).click();
+  await page.getByLabel("标题").fill(title);
+  await page.getByLabel("说明").fill("这是一条端到端创建的清单草稿。");
+  await page.getByRole("button", { name: "保存清单" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/checklist$/);
+  await expect(page.getByText(title)).toBeVisible();
+});
