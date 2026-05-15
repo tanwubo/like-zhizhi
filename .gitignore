@@ -31,3 +31,27 @@ http-client.env.json
 
 .superpowers/
 .worktrees/
+
+# node
+node_modules/
+.pnpm-store/
+
+# next
+.next/
+out/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# prisma
+prisma/dev.db
+
+# tests
+coverage/
+test-results/
+playwright-report/
+
+# uploads
+uploads/
