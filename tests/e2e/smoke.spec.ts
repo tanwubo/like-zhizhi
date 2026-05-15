@@ -62,3 +62,14 @@ test("seed owner can login to admin dashboard", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin$/);
   await expect(page.getByRole("heading", { name: "管理概览" })).toBeVisible();
 });
+
+test("seed owner can open message moderation", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  await page.goto("/admin/content/messages");
+  await expect(page.getByRole("heading", { name: "留言审核" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /通过|隐藏/ }).first()).toBeVisible();
+});
