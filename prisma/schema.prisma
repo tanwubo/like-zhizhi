@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  PARTNER
+  MODERATOR
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+}
+
+enum MessageStatus {
+  PENDING
+  APPROVED
+  HIDDEN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         UserRole  @default(PARTNER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+  notes        Note[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PersonProfile {
+  id          String    @id @default(cuid())
+  slot        Int       @unique
+  displayName String
+  avatarUrl   String?
+  birthday    DateTime?
+  location    String?
+  bio         String    @default("")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model SiteSetting {
+  id           String   @id @default("site")
+  title        String
+  slogan       String
+  description  String
+  togetherDate DateTime
+  footerText   String
+  icpText      String?
+  policeText   String?
+  seoKeywords  String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ThemeSetting {
+  id                  String   @id @default("theme")
+  primaryColor        String   @default("#f45d7a")
+  backgroundImageUrl  String?
+  backgroundVideoUrl  String?
+  enableGlassEffect   Boolean  @default(true)
+  enablePageAnimation Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ModuleSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  label       String
+  enabled     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MediaAsset {
+  id          String      @id @default(cuid())
+  type        MediaType
+  bucket      String
+  objectKey   String
+  publicUrl   String
+  filename    String
+  contentType String
+  sizeBytes   Int
+  width       Int?
+  height      Int?
+  createdAt   DateTime    @default(now())
+  noteMedia   NoteMedia[]
+  albumItems  AlbumItem[]
+}
+
+model Note {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  excerpt     String
+  content     String
+  status      PublishStatus  @default(DRAFT)
+  mood        String?
+  weather     String?
+  location    String?
+  authorId    String?
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  author      User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  media       NoteMedia[]
+  reactions   NoteReaction[]
+
+  @@index([status, publishedAt])
+}
+
+model NoteMedia {
+  id        String     @id @default(cuid())
+  noteId    String
+  mediaId   String
+  sortOrder Int        @default(0)
+  note      Note       @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  media     MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, mediaId])
+}
+
+model NoteReaction {
+  id        String   @id @default(cuid())
+  noteId    String
+  type      String
+  visitorId String?
+  createdAt DateTime @default(now())
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@index([noteId, type])
+}
+
+model Message {
+  id          String         @id @default(cuid())
+  nickname    String
+  content     String
+  status      MessageStatus  @default(PENDING)
+  ipHash      String?
+  userAgent   String?
+  location    String?
+  deviceLabel String?
+  createdAt   DateTime       @default(now())
+  replies     MessageReply[]
+
+  @@index([status, createdAt])
+}
+
+model MessageReply {
+  id        String   @id @default(cuid())
+  messageId String
+  authorId  String?
+  content   String
+  createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model AlbumItem {
+  id          String        @id @default(cuid())
+  mediaId     String
+  title       String
+  caption     String
+  status      PublishStatus @default(PUBLISHED)
+  takenAt     DateTime?
+  location    String?
+  authorLabel String?
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  media       MediaAsset    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([status, sortOrder])
+}
+
+model ChecklistItem {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  status      PublishStatus @default(PUBLISHED)
+  completed   Boolean       @default(false)
+  completedAt DateTime?
+  targetDate  DateTime?
+  location    String?
+  imageUrl    String?
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model FootprintPlace {
+  id          String           @id @default(cuid())
+  name        String
+  description String
+  latitude    Decimal          @db.Decimal(10, 7)
+  longitude   Decimal          @db.Decimal(10, 7)
+  coverUrl    String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  visits      FootprintVisit[]
+}
+
+model FootprintVisit {
+  id          String         @id @default(cuid())
+  placeId     String
+  visitedAt   DateTime
+  title       String
+  description String
+  place       FootprintPlace @relation(fields: [placeId], references: [id], onDelete: Cascade)
+}
+
+model LoveDayEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  date        DateTime
+  yearly      Boolean  @default(false)
+  lunar       Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MusicTrack {
+  id         String   @id @default(cuid())
+  title      String
+  artist     String
+  coverUrl   String?
+  sourceUrl  String
+  sourceType String   @default("url")
+  enabled    Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model VisitEvent {
+  id        String   @id @default(cuid())
+  path      String
+  ipHash    String?
+  userAgent String?
+  referrer  String?
+  createdAt DateTime @default(now())
+
+  @@index([path, createdAt])
+}
+
+model DailyStat {
+  id             String   @id @default(cuid())
+  date           DateTime @unique
+  visits         Int      @default(0)
+  uniqueVisitors Int      @default(0)
+  messages       Int      @default(0)
+  notes          Int      @default(0)
+}
