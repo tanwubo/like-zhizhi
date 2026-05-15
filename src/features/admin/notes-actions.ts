@@ -1,5 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { normalizeNoteSlug } from "@/features/admin/notes-data";
@@ -125,6 +126,7 @@ export async function createNote(formData: FormData): Promise<void> {
   });
 
   revalidateNotePaths(input.slug);
+  redirect("/admin/content/notes");
 }
 
 export async function updateNote(formData: FormData): Promise<void> {
@@ -151,6 +153,7 @@ export async function updateNote(formData: FormData): Promise<void> {
   });
 
   revalidateNotePaths(input.slug);
+  redirect("/admin/content/notes");
 }
 
 export async function deleteNote(formData: FormData): Promise<void> {
@@ -163,4 +166,5 @@ export async function deleteNote(formData: FormData): Promise<void> {
 
   await prisma.note.delete({ where: { id: parsed.data.id } });
   revalidateNotePaths();
+  redirect("/admin/content/notes");
 }

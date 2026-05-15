@@ -73,3 +73,24 @@ test("seed owner can open message moderation", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "留言审核" })).toBeVisible();
   await expect(page.getByRole("button", { name: /通过|隐藏/ }).first()).toBeVisible();
 });
+
+test("seed owner can create an admin note draft", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const title = `端到端点滴 ${suffix}`;
+
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/content/notes");
+  await expect(page.getByRole("heading", { name: "点滴管理" })).toBeVisible();
+  await page.getByRole("link", { name: "新建点滴" }).click();
+  await page.getByLabel("标题").fill(title);
+  await page.getByLabel("摘要").fill("这是一条端到端创建的点滴摘要。");
+  await page.getByLabel("正文").fill("这是一条端到端创建的点滴正文，用来验证后台点滴管理流程。");
+  await page.getByRole("button", { name: "保存点滴" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/notes$/);
+  await expect(page.getByText(title)).toBeVisible();
+});

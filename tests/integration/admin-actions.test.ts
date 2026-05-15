@@ -24,6 +24,10 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn()
 }));
 
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn()
+}));
+
 beforeEach(() => {
   updateSite.mockClear();
   createNoteRecord.mockClear();
