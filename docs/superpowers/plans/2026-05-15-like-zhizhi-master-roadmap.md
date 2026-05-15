@@ -21,6 +21,7 @@
 - Phase 3 notes plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-notes-admin.md`
 - Phase 3 album plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-album-admin.md`
 - Phase 3 checklist plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-checklist-admin.md`
+- Phase 3 footprint plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-footprint-admin.md`
 
 ## Progress Snapshot
 
@@ -35,7 +36,7 @@ Last updated: 2026-05-15
 | Notes management | Done | Admin notes list, create, edit, delete, validation, public preview path. |
 | Album management | Done | Admin album list, create, edit, delete, external media registration, public image/video rendering. |
 | Checklist management | Done | Admin checklist list, create, edit, delete, validation, completion state, target date, optional image URL. |
-| Footprint management | Not started | Places and visits CRUD. |
+| Footprint management | Done | Admin footprint list, create, edit, delete, coordinate validation, cover URL, paired visit create/update/delete. |
 | Love Day management | Not started | Event CRUD and recurrence flags. |
 | Music management | Not started | Track CRUD and public player data. |
 | Theme settings | Not started | Theme editor and public theme application. |
@@ -94,6 +95,8 @@ Every future batch should follow this loop:
 - Full verification passes.
 
 ### Batch 2: Footprint Management
+
+**Status:** Done on 2026-05-15.
 
 **Goal:** Make map/footprint places and visit records manageable.
 
@@ -304,12 +307,12 @@ When a task batch is completed:
 
 ### 2026-05-15
 
-Latest verified state after checklist management:
+Latest verified state after footprint management:
 
 - `pnpm lint`: passed.
-- `pnpm test`: passed, 9 test files and 30 tests.
-- `pnpm build`: passed, including `/admin/content/checklist`, `/admin/content/checklist/new`, and `/admin/content/checklist/[id]/edit`.
-- `pnpm test:e2e`: passed, 10 Playwright tests.
+- `pnpm test`: passed, 9 test files and 38 tests.
+- `pnpm build`: passed, including `/admin/content/footprints`, `/admin/content/footprints/new`, and `/admin/content/footprints/[id]/edit`.
+- `pnpm test:e2e`: passed, 11 Playwright tests.
 
 Known non-blocking log output:
 
