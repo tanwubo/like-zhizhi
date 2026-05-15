@@ -61,7 +61,8 @@ async function main() {
     ["footprints", "轨迹", 30],
     ["album", "相册", 40],
     ["checklist", "清单", 50],
-    ["about", "关于", 60]
+    ["love-days", "纪念日", 60],
+    ["about", "关于", 70]
   ] as const;
 
   for (const [key, label, sortOrder] of modules) {
@@ -123,6 +124,71 @@ async function main() {
       date: new Date("2024-05-20T00:00:00+08:00"),
       yearly: true,
       sortOrder: 1
+    }
+  });
+
+  const sunsetMedia = await prisma.mediaAsset.upsert({
+    where: { id: "seed-media-sunset" },
+    update: {
+      publicUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+      filename: "sunset.jpg",
+      contentType: "image/jpeg",
+      sizeBytes: 128000
+    },
+    create: {
+      id: "seed-media-sunset",
+      type: "IMAGE",
+      bucket: "like-zhizhi",
+      objectKey: "seed/sunset.jpg",
+      publicUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+      filename: "sunset.jpg",
+      contentType: "image/jpeg",
+      sizeBytes: 128000,
+      width: 1600,
+      height: 1067
+    }
+  });
+
+  await prisma.albumItem.upsert({
+    where: { id: "seed-album-sunset" },
+    update: {},
+    create: {
+      id: "seed-album-sunset",
+      mediaId: sunsetMedia.id,
+      title: "海边日落",
+      caption: "把傍晚的风和光一起收藏。",
+      location: "舟山",
+      authorLabel: "知知",
+      sortOrder: 1,
+      takenAt: new Date("2025-08-16T18:30:00+08:00")
+    }
+  });
+
+  await prisma.footprintPlace.upsert({
+    where: { id: "seed-place-bund" },
+    update: {
+      name: "外滩",
+      description: "一起走过江边，看灯光慢慢亮起来。"
+    },
+    create: {
+      id: "seed-place-bund",
+      name: "外滩",
+      description: "一起走过江边，看灯光慢慢亮起来。",
+      latitude: 31.2400000,
+      longitude: 121.4900000,
+      coverUrl: "https://images.unsplash.com/photo-1548919973-5cef591cdbc9"
+    }
+  });
+
+  await prisma.footprintVisit.upsert({
+    where: { id: "seed-visit-bund" },
+    update: {},
+    create: {
+      id: "seed-visit-bund",
+      placeId: "seed-place-bund",
+      visitedAt: new Date("2025-09-03T20:00:00+08:00"),
+      title: "夜游外滩",
+      description: "那天风很轻，适合慢慢走。"
     }
   });
 

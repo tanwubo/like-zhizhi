@@ -24,6 +24,22 @@ test("public module routes render", async ({ page }) => {
   }
 });
 
+test("public pages render representative seed content", async ({ page }) => {
+  const expectations = [
+    ["/notes", "第一条点滴"],
+    ["/messages", "祝你们一直热爱生活。"],
+    ["/checklist", "一起看一次海"],
+    ["/love-days", "在一起"],
+    ["/album", "海边日落"],
+    ["/footprints", "外滩"]
+  ] as const;
+
+  for (const [route, text] of expectations) {
+    await page.goto(route);
+    await expect(page.getByText(text)).toBeVisible();
+  }
+});
+
 test("visitor can submit a pending message", async ({ page }) => {
   await page.goto("/messages");
   await page.getByLabel("昵称").fill("端到端访客");
