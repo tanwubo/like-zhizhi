@@ -168,9 +168,11 @@ export async function updateFootprintPlace(formData: FormData): Promise<void> {
     return;
   }
 
+  const placeId = input.id;
+
   await prisma.$transaction(async (tx) => {
     await tx.footprintPlace.update({
-      where: { id: input.id },
+      where: { id: placeId },
       data: input.place
     });
 
@@ -186,7 +188,7 @@ export async function updateFootprintPlace(formData: FormData): Promise<void> {
     } else if (input.visit) {
       await tx.footprintVisit.create({
         data: {
-          placeId: input.id,
+          placeId,
           title: input.visit.title,
           description: input.visit.description,
           visitedAt: input.visit.visitedAt
