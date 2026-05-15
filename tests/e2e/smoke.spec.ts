@@ -7,6 +7,23 @@ test("public home renders seeded site", async ({ page }) => {
   await expect(page.getByText("最新点滴")).toBeVisible();
 });
 
+test("public module routes render", async ({ page }) => {
+  const routes = [
+    ["/notes", "点滴"],
+    ["/messages", "留言"],
+    ["/footprints", "轨迹"],
+    ["/album", "相册"],
+    ["/checklist", "清单"],
+    ["/love-days", "纪念日"],
+    ["/about", "关于"]
+  ] as const;
+
+  for (const [route, heading] of routes) {
+    await page.goto(route);
+    await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+  }
+});
+
 test("login page renders seed account hint", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: "后台登录" })).toBeVisible();

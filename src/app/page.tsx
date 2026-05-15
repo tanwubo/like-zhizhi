@@ -1,14 +1,15 @@
 import { PublicShell } from "@/components/layout/public-shell";
 import { Card } from "@/components/ui/card";
 import { getHomeData } from "@/features/home/home-data";
+import { getPublicNavigation } from "@/features/public/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const data = await getHomeData();
+  const [data, navigation] = await Promise.all([getHomeData(), getPublicNavigation()]);
 
   return (
-    <PublicShell title={data.site.title} modules={data.modules}>
+    <PublicShell title={data.site.title} footerText={data.site.footerText} modules={navigation}>
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-[1.2fr_0.8fr] md:py-20">
         <div>
           <p className="mb-3 text-sm font-medium text-blush-700">{data.site.slogan}</p>

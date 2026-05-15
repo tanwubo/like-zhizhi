@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { PublicNav } from "@/components/public/public-nav";
+
 type ModuleLink = {
   key: string;
   label: string;
@@ -35,13 +37,12 @@ export function PublicShell({
         <Link href="/" className="text-lg font-semibold text-ink">
           {title}
         </Link>
-        <nav className="hidden items-center gap-5 text-sm text-ink/70 md:flex">
-          {modules.map((module) => (
-            <Link key={module.key} href={module.href ?? hrefByKey[module.key] ?? "/"}>
-              {module.label}
-            </Link>
-          ))}
-        </nav>
+        <PublicNav
+          items={modules.map((module) => ({
+            ...module,
+            href: module.href ?? hrefByKey[module.key] ?? "/"
+          }))}
+        />
       </header>
       <main>{children}</main>
       <footer className="mx-auto max-w-6xl px-4 py-10 text-center text-sm text-ink/50">
