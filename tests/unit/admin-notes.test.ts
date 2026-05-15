@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { validateAlbumInput } from "@/features/admin/album-actions";
+import { validateChecklistInput } from "@/features/admin/checklist-actions";
 import { validateNoteInput } from "@/features/admin/notes-actions";
 import { normalizeNoteSlug } from "@/features/admin/notes-data";
 
@@ -53,5 +54,40 @@ describe("admin album validation", () => {
     formData.set("mediaType", "IMAGE");
 
     expect(validateAlbumInput(formData)).toEqual({ ok: true });
+  });
+});
+
+describe("admin checklist validation", () => {
+  it("rejects missing checklist titles", () => {
+    const result = validateChecklistInput(new FormData());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.title).toContain("标题不能为空");
+    }
+  });
+
+  it("rejects invalid checklist dates and image URLs", () => {
+    const formData = new FormData();
+
+    formData.set("title", "一起看展");
+    formData.set("targetDate", "not-a-date");
+    formData.set("imageUrl", "not-a-url");
+
+    const result = validateChecklistInput(formData);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.targetDate).toContain("目标日期必须是有效日期");
+      expect(result.errors.imageUrl).toContain("图片地址必须是有效 URL");
+    }
+  });
+
+  it("accepts a minimal valid checklist form", () => {
+    const formData = new FormData();
+
+    formData.set("title", "一起看展");
+
+    expect(validateChecklistInput(formData)).toEqual({ ok: true });
   });
 });
