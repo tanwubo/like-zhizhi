@@ -10,9 +10,7 @@ export default async function AdminPage() {
     <div className="grid gap-6">
       <div>
         <h1 className="text-2xl font-semibold text-ink">管理概览</h1>
-        <p className="mt-2 text-sm text-ink/60">
-          Phase 1 展示基础数据，完整 CRUD 在 Phase 3 实现。
-        </p>
+        <p className="mt-2 text-sm text-ink/60">管理公开内容、站点配置和访客互动。</p>
       </div>
       <div className="grid gap-4 md:grid-cols-4">
         {Object.entries(data.totals).map(([key, value]) => (
