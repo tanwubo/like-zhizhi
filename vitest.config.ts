@@ -7,7 +7,12 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["@testing-library/jest-dom/vitest"],
-    include: ["tests/**/*.{test,spec}.ts", "tests/**/*.{test,spec}.tsx"],
+    include: [
+      "tests/unit/**/*.{test,spec}.ts",
+      "tests/unit/**/*.{test,spec}.tsx",
+      "tests/integration/**/*.{test,spec}.ts",
+      "tests/integration/**/*.{test,spec}.tsx"
+    ],
     env: {
       DATABASE_URL: "postgresql://test:test@localhost:5432/test",
       APP_URL: "http://localhost:3000",
