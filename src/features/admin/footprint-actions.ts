@@ -1,4 +1,8 @@
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
+
+import { prisma } from "@/server/db/prisma";
 
 export type FootprintActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
 
@@ -57,6 +61,10 @@ const footprintSchema = z.object({
   visitedAt: optionalDateField
 });
 
+const idSchema = z.object({
+  id: z.string().trim().min(1)
+});
+
 function resultFromError(error: z.ZodError): FootprintActionResult {
   const errors = Object.fromEntries(
     Object.entries(error.flatten().fieldErrors).filter(
@@ -75,4 +83,144 @@ export function validateFootprintInput(formData: FormData): FootprintActionResul
   }
 
   return { ok: true };
+}
+
+function optionalDate(value?: string) {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseFootprintInput(formData: FormData) {
+  const parsed = footprintSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  const latitude = String(parsed.data.latitude);
+  const longitude = String(parsed.data.longitude);
+  const visitDate = optionalDate(parsed.data.visitedAt);
+  const hasVisit = Boolean(parsed.data.visitTitle && parsed.data.visitDescription && visitDate);
+
+  return {
+    id: parsed.data.id,
+    place: {
+      name: parsed.data.name,
+      description: parsed.data.description,
+      latitude,
+      longitude,
+      coverUrl: parsed.data.coverUrl || null
+    },
+    visit: hasVisit
+      ? {
+          id: parsed.data.visitId,
+          title: parsed.data.visitTitle || "",
+          description: parsed.data.visitDescription || "",
+          visitedAt: visitDate as Date
+        }
+      : null
+  };
+}
+
+function revalidateFootprintPaths() {
+  revalidatePath("/");
+  revalidatePath("/footprints");
+  revalidatePath("/admin");
+  revalidatePath("/admin/content/footprints");
+}
+
+export async function createFootprintPlace(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseFootprintInput(formData);
+  if (!input) {
+    return;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const place = await tx.footprintPlace.create({ data: input.place });
+
+    if (input.visit) {
+      await tx.footprintVisit.create({
+        data: {
+          placeId: place.id,
+          title: input.visit.title,
+          description: input.visit.description,
+          visitedAt: input.visit.visitedAt
+        }
+      });
+    }
+  });
+
+  revalidateFootprintPaths();
+  redirect("/admin/content/footprints");
+}
+
+export async function updateFootprintPlace(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseFootprintInput(formData);
+  if (!input?.id) {
+    return;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.footprintPlace.update({
+      where: { id: input.id },
+      data: input.place
+    });
+
+    if (input.visit?.id) {
+      await tx.footprintVisit.update({
+        where: { id: input.visit.id },
+        data: {
+          title: input.visit.title,
+          description: input.visit.description,
+          visitedAt: input.visit.visitedAt
+        }
+      });
+    } else if (input.visit) {
+      await tx.footprintVisit.create({
+        data: {
+          placeId: input.id,
+          title: input.visit.title,
+          description: input.visit.description,
+          visitedAt: input.visit.visitedAt
+        }
+      });
+    }
+  });
+
+  revalidateFootprintPaths();
+  redirect("/admin/content/footprints");
+}
+
+export async function deleteFootprintPlace(formData: FormData): Promise<void> {
+  "use server";
+
+  const parsed = idSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return;
+  }
+
+  await prisma.footprintPlace.delete({ where: { id: parsed.data.id } });
+  revalidateFootprintPaths();
+  redirect("/admin/content/footprints");
+}
+
+export async function deleteFootprintVisit(formData: FormData): Promise<void> {
+  "use server";
+
+  const parsed = idSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return;
+  }
+
+  await prisma.footprintVisit.delete({ where: { id: parsed.data.id } });
+  revalidateFootprintPaths();
+  redirect("/admin/content/footprints");
 }

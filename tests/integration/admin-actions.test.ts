@@ -13,11 +13,25 @@ const deleteAlbumRecord = vi.fn(async () => ({ id: "album_1" }));
 const createChecklistRecord = vi.fn(async () => ({ id: "checklist_1" }));
 const updateChecklistRecord = vi.fn(async () => ({ id: "checklist_1" }));
 const deleteChecklistRecord = vi.fn(async () => ({ id: "checklist_1" }));
+const createFootprintPlaceRecord = vi.fn(async () => ({ id: "place_1" }));
+const updateFootprintPlaceRecord = vi.fn(async () => ({ id: "place_1" }));
+const deleteFootprintPlaceRecord = vi.fn(async () => ({ id: "place_1" }));
+const createFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
+const updateFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
+const deleteFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
 
 const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
   callback({
     mediaAsset: { create: createMediaAsset, update: updateMediaAsset },
-    albumItem: { create: createAlbumRecord, update: updateAlbumRecord }
+    albumItem: { create: createAlbumRecord, update: updateAlbumRecord },
+    footprintPlace: {
+      create: createFootprintPlaceRecord,
+      update: updateFootprintPlaceRecord
+    },
+    footprintVisit: {
+      create: createFootprintVisitRecord,
+      update: updateFootprintVisitRecord
+    }
   })
 );
 
@@ -39,6 +53,16 @@ vi.mock("@/server/db/prisma", () => ({
       create: createChecklistRecord,
       update: updateChecklistRecord,
       delete: deleteChecklistRecord
+    },
+    footprintPlace: {
+      create: createFootprintPlaceRecord,
+      update: updateFootprintPlaceRecord,
+      delete: deleteFootprintPlaceRecord
+    },
+    footprintVisit: {
+      create: createFootprintVisitRecord,
+      update: updateFootprintVisitRecord,
+      delete: deleteFootprintVisitRecord
     }
   }
 }));
@@ -66,6 +90,12 @@ beforeEach(() => {
   createChecklistRecord.mockClear();
   updateChecklistRecord.mockClear();
   deleteChecklistRecord.mockClear();
+  createFootprintPlaceRecord.mockClear();
+  updateFootprintPlaceRecord.mockClear();
+  deleteFootprintPlaceRecord.mockClear();
+  createFootprintVisitRecord.mockClear();
+  updateFootprintVisitRecord.mockClear();
+  deleteFootprintVisitRecord.mockClear();
   transactionMock.mockClear();
 });
 
@@ -198,6 +228,121 @@ describe("admin note actions", () => {
     await createNote(formData);
 
     expect(createNoteRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe("admin footprint actions", () => {
+  it("creates a footprint place and first visit", async () => {
+    const { createFootprintPlace } = await import("@/features/admin/footprint-actions");
+    const formData = new FormData();
+
+    formData.set("name", "The Bund");
+    formData.set("description", "A riverside walk.");
+    formData.set("latitude", "31.2397");
+    formData.set("longitude", "121.4998");
+    formData.set("coverUrl", "https://example.com/bund.jpg");
+    formData.set("visitTitle", "Evening walk");
+    formData.set("visitDescription", "Watched the lights.");
+    formData.set("visitedAt", "2026-05-10");
+
+    await createFootprintPlace(formData);
+
+    expect(createFootprintPlaceRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: "The Bund",
+          description: "A riverside walk.",
+          latitude: "31.2397",
+          longitude: "121.4998",
+          coverUrl: "https://example.com/bund.jpg"
+        })
+      })
+    );
+    expect(createFootprintVisitRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          placeId: "place_1",
+          title: "Evening walk",
+          description: "Watched the lights.",
+          visitedAt: expect.any(Date)
+        })
+      })
+    );
+  });
+
+  it("updates a footprint place and existing visit", async () => {
+    const { updateFootprintPlace } = await import("@/features/admin/footprint-actions");
+    const formData = new FormData();
+
+    formData.set("id", "place_1");
+    formData.set("visitId", "visit_1");
+    formData.set("name", "Updated place");
+    formData.set("description", "Updated description.");
+    formData.set("latitude", "30.0001");
+    formData.set("longitude", "120.0001");
+    formData.set("visitTitle", "Updated visit");
+    formData.set("visitDescription", "Updated visit description.");
+    formData.set("visitedAt", "2026-05-11");
+
+    await updateFootprintPlace(formData);
+
+    expect(updateFootprintPlaceRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "place_1" },
+        data: expect.objectContaining({
+          name: "Updated place",
+          latitude: "30.0001",
+          longitude: "120.0001"
+        })
+      })
+    );
+    expect(updateFootprintVisitRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "visit_1" },
+        data: expect.objectContaining({
+          title: "Updated visit",
+          description: "Updated visit description.",
+          visitedAt: expect.any(Date)
+        })
+      })
+    );
+  });
+
+  it("deletes a footprint place", async () => {
+    const { deleteFootprintPlace } = await import("@/features/admin/footprint-actions");
+    const formData = new FormData();
+
+    formData.set("id", "place_1");
+
+    await deleteFootprintPlace(formData);
+
+    expect(deleteFootprintPlaceRecord).toHaveBeenCalledWith({ where: { id: "place_1" } });
+  });
+
+  it("deletes a footprint visit", async () => {
+    const { deleteFootprintVisit } = await import("@/features/admin/footprint-actions");
+    const formData = new FormData();
+
+    formData.set("id", "visit_1");
+
+    await deleteFootprintVisit(formData);
+
+    expect(deleteFootprintVisitRecord).toHaveBeenCalledWith({ where: { id: "visit_1" } });
+  });
+
+  it("does not create footprint records for invalid coordinates", async () => {
+    const { createFootprintPlace } = await import("@/features/admin/footprint-actions");
+    const formData = new FormData();
+
+    formData.set("name", "Broken place");
+    formData.set("description", "Broken description.");
+    formData.set("latitude", "999");
+    formData.set("longitude", "121.4998");
+
+    await createFootprintPlace(formData);
+
+    expect(createFootprintPlaceRecord).not.toHaveBeenCalled();
+    expect(createFootprintVisitRecord).not.toHaveBeenCalled();
   });
 });
 
