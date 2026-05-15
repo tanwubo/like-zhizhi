@@ -1,7 +1,9 @@
 import { PublishStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { normalizeNoteSlug } from "@/features/admin/notes-data";
+import { prisma } from "@/server/db/prisma";
 
 export type NoteActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
 
@@ -24,6 +26,10 @@ const noteSchema = z.object({
   mood: z.string().trim().optional(),
   weather: z.string().trim().optional(),
   location: z.string().trim().optional()
+});
+
+const idSchema = z.object({
+  id: z.string().trim().min(1)
 });
 
 function resultFromError(error: z.ZodError): NoteActionResult {
@@ -49,4 +55,112 @@ export function validateNoteInput(formData: FormData): NoteActionResult {
   }
 
   return { ok: true };
+}
+
+function parseNoteInput(formData: FormData) {
+  const parsed = noteSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  const slug = normalizeNoteSlug(parsed.data.slug || parsed.data.title);
+  if (!slug) {
+    return null;
+  }
+
+  return {
+    id: parsed.data.id,
+    title: parsed.data.title,
+    slug,
+    excerpt: parsed.data.excerpt,
+    content: parsed.data.content,
+    status: parsed.data.status,
+    mood: parsed.data.mood || null,
+    weather: parsed.data.weather || null,
+    location: parsed.data.location || null,
+    publishedAt: parsed.data.status === PublishStatus.PUBLISHED ? new Date() : null
+  };
+}
+
+async function slugExists(slug: string, currentId?: string) {
+  const existing = await prisma.note.findFirst({
+    where: currentId ? { slug, NOT: { id: currentId } } : { slug },
+    select: { id: true }
+  });
+
+  return Boolean(existing);
+}
+
+function revalidateNotePaths(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/notes");
+  if (slug) {
+    revalidatePath(`/notes/${slug}`);
+  }
+  revalidatePath("/admin");
+  revalidatePath("/admin/content/notes");
+}
+
+export async function createNote(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseNoteInput(formData);
+  if (!input || (await slugExists(input.slug))) {
+    return;
+  }
+
+  await prisma.note.create({
+    data: {
+      title: input.title,
+      slug: input.slug,
+      excerpt: input.excerpt,
+      content: input.content,
+      status: input.status,
+      mood: input.mood,
+      weather: input.weather,
+      location: input.location,
+      publishedAt: input.publishedAt
+    }
+  });
+
+  revalidateNotePaths(input.slug);
+}
+
+export async function updateNote(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseNoteInput(formData);
+  if (!input?.id || (await slugExists(input.slug, input.id))) {
+    return;
+  }
+
+  await prisma.note.update({
+    where: { id: input.id },
+    data: {
+      title: input.title,
+      slug: input.slug,
+      excerpt: input.excerpt,
+      content: input.content,
+      status: input.status,
+      mood: input.mood,
+      weather: input.weather,
+      location: input.location,
+      publishedAt: input.publishedAt
+    }
+  });
+
+  revalidateNotePaths(input.slug);
+}
+
+export async function deleteNote(formData: FormData): Promise<void> {
+  "use server";
+
+  const parsed = idSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return;
+  }
+
+  await prisma.note.delete({ where: { id: parsed.data.id } });
+  revalidateNotePaths();
 }
