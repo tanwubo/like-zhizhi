@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { validateAlbumInput } from "@/features/admin/album-actions";
 import { validateChecklistInput } from "@/features/admin/checklist-actions";
+import { validateFootprintInput } from "@/features/admin/footprint-actions";
 import { validateNoteInput } from "@/features/admin/notes-actions";
 import { normalizeNoteSlug } from "@/features/admin/notes-data";
 
@@ -89,5 +90,53 @@ describe("admin checklist validation", () => {
     formData.set("title", "一起看展");
 
     expect(validateChecklistInput(formData)).toEqual({ ok: true });
+  });
+});
+
+describe("admin footprint validation", () => {
+  it("rejects missing footprint place fields", () => {
+    const result = validateFootprintInput(new FormData());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.name).toContain("地点名称不能为空");
+      expect(result.errors.description).toContain("地点说明不能为空");
+      expect(result.errors.latitude).toContain("纬度不能为空");
+      expect(result.errors.longitude).toContain("经度不能为空");
+    }
+  });
+
+  it("rejects invalid footprint coordinates, cover URLs, and visit dates", () => {
+    const formData = new FormData();
+
+    formData.set("name", "外滩");
+    formData.set("description", "一起散步的地方。");
+    formData.set("latitude", "91");
+    formData.set("longitude", "-181");
+    formData.set("coverUrl", "not-a-url");
+    formData.set("visitTitle", "夜景散步");
+    formData.set("visitDescription", "看灯光。");
+    formData.set("visitedAt", "bad-date");
+
+    const result = validateFootprintInput(formData);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.latitude).toContain("纬度必须在 -90 到 90 之间");
+      expect(result.errors.longitude).toContain("经度必须在 -180 到 180 之间");
+      expect(result.errors.coverUrl).toContain("封面地址必须是有效 URL");
+      expect(result.errors.visitedAt).toContain("访问日期必须是有效日期");
+    }
+  });
+
+  it("accepts a valid minimal footprint place form", () => {
+    const formData = new FormData();
+
+    formData.set("name", "外滩");
+    formData.set("description", "一起散步的地方。");
+    formData.set("latitude", "31.2397");
+    formData.set("longitude", "121.4998");
+
+    expect(validateFootprintInput(formData)).toEqual({ ok: true });
   });
 });
