@@ -20,6 +20,7 @@
 - Phase 3 admin settings/message plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-admin-console.md`
 - Phase 3 notes plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-notes-admin.md`
 - Phase 3 album plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-album-admin.md`
+- Phase 3 checklist plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-checklist-admin.md`
 
 ## Progress Snapshot
 
@@ -33,7 +34,7 @@ Last updated: 2026-05-15
 | Message moderation | Done | Admin moderation page and approve/hide actions. |
 | Notes management | Done | Admin notes list, create, edit, delete, validation, public preview path. |
 | Album management | Done | Admin album list, create, edit, delete, external media registration, public image/video rendering. |
-| Checklist management | Not started | Next recommended batch. |
+| Checklist management | Done | Admin checklist list, create, edit, delete, validation, completion state, target date, optional image URL. |
 | Footprint management | Not started | Places and visits CRUD. |
 | Love Day management | Not started | Event CRUD and recurrence flags. |
 | Music management | Not started | Track CRUD and public player data. |
@@ -65,6 +66,8 @@ Every future batch should follow this loop:
 ## Remaining Phase Plan
 
 ### Batch 1: Checklist Management
+
+**Status:** Done on 2026-05-15.
 
 **Goal:** Make the public checklist fully manageable from the admin console.
 
@@ -301,12 +304,12 @@ When a task batch is completed:
 
 ### 2026-05-15
 
-Latest verified state after album management:
+Latest verified state after checklist management:
 
 - `pnpm lint`: passed.
-- `pnpm test`: passed, 9 test files and 23 tests.
-- `pnpm build`: passed.
-- `pnpm test:e2e`: passed, 9 Playwright tests.
+- `pnpm test`: passed, 9 test files and 30 tests.
+- `pnpm build`: passed, including `/admin/content/checklist`, `/admin/content/checklist/new`, and `/admin/content/checklist/[id]/edit`.
+- `pnpm test:e2e`: passed, 10 Playwright tests.
 
 Known non-blocking log output:
 
