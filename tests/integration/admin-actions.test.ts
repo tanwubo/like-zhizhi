@@ -10,6 +10,9 @@ const updateMediaAsset = vi.fn(async () => ({ id: "media_1" }));
 const createAlbumRecord = vi.fn(async () => ({ id: "album_1" }));
 const updateAlbumRecord = vi.fn(async () => ({ id: "album_1" }));
 const deleteAlbumRecord = vi.fn(async () => ({ id: "album_1" }));
+const createChecklistRecord = vi.fn(async () => ({ id: "checklist_1" }));
+const updateChecklistRecord = vi.fn(async () => ({ id: "checklist_1" }));
+const deleteChecklistRecord = vi.fn(async () => ({ id: "checklist_1" }));
 
 const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
   callback({
@@ -31,7 +34,12 @@ vi.mock("@/server/db/prisma", () => ({
       findFirst: findNoteBySlug
     },
     mediaAsset: { create: createMediaAsset, update: updateMediaAsset },
-    albumItem: { create: createAlbumRecord, update: updateAlbumRecord, delete: deleteAlbumRecord }
+    albumItem: { create: createAlbumRecord, update: updateAlbumRecord, delete: deleteAlbumRecord },
+    checklistItem: {
+      create: createChecklistRecord,
+      update: updateChecklistRecord,
+      delete: deleteChecklistRecord
+    }
   }
 }));
 
@@ -55,6 +63,9 @@ beforeEach(() => {
   createAlbumRecord.mockClear();
   updateAlbumRecord.mockClear();
   deleteAlbumRecord.mockClear();
+  createChecklistRecord.mockClear();
+  updateChecklistRecord.mockClear();
+  deleteChecklistRecord.mockClear();
   transactionMock.mockClear();
 });
 
@@ -66,6 +77,87 @@ describe("admin settings actions", () => {
     expect(result.ok).toBe(false);
     await updateSiteSettings(new FormData());
     expect(updateSite).not.toHaveBeenCalled();
+  });
+});
+
+describe("admin checklist actions", () => {
+  it("creates a checklist item with completion and planning fields", async () => {
+    const { createChecklistItem } = await import("@/features/admin/checklist-actions");
+    const formData = new FormData();
+
+    formData.set("title", "Watch the sunrise");
+    formData.set("description", "Leave before dawn.");
+    formData.set("status", "PUBLISHED");
+    formData.set("completed", "on");
+    formData.set("completedAt", "2026-05-10");
+    formData.set("targetDate", "2026-05-20");
+    formData.set("location", "Qingdao");
+    formData.set("imageUrl", "https://example.com/sunrise.jpg");
+    formData.set("sortOrder", "7");
+
+    await createChecklistItem(formData);
+
+    expect(createChecklistRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: "Watch the sunrise",
+          description: "Leave before dawn.",
+          status: "PUBLISHED",
+          completed: true,
+          completedAt: expect.any(Date),
+          targetDate: expect.any(Date),
+          location: "Qingdao",
+          imageUrl: "https://example.com/sunrise.jpg",
+          sortOrder: 7
+        })
+      })
+    );
+  });
+
+  it("updates a checklist item", async () => {
+    const { updateChecklistItem } = await import("@/features/admin/checklist-actions");
+    const formData = new FormData();
+
+    formData.set("id", "checklist_1");
+    formData.set("title", "Updated plan");
+    formData.set("description", "Updated details.");
+    formData.set("status", "DRAFT");
+
+    await updateChecklistItem(formData);
+
+    expect(updateChecklistRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "checklist_1" },
+        data: expect.objectContaining({
+          title: "Updated plan",
+          description: "Updated details.",
+          status: "DRAFT"
+        })
+      })
+    );
+  });
+
+  it("deletes a checklist item", async () => {
+    const { deleteChecklistItem } = await import("@/features/admin/checklist-actions");
+    const formData = new FormData();
+
+    formData.set("id", "checklist_1");
+
+    await deleteChecklistItem(formData);
+
+    expect(deleteChecklistRecord).toHaveBeenCalledWith({ where: { id: "checklist_1" } });
+  });
+
+  it("does not create checklist records for invalid image URLs", async () => {
+    const { createChecklistItem } = await import("@/features/admin/checklist-actions");
+    const formData = new FormData();
+
+    formData.set("title", "Broken checklist");
+    formData.set("imageUrl", "broken");
+
+    await createChecklistItem(formData);
+
+    expect(createChecklistRecord).not.toHaveBeenCalled();
   });
 });
 

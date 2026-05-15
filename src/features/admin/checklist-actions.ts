@@ -1,5 +1,9 @@
 import { PublishStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
+
+import { prisma } from "@/server/db/prisma";
 
 export type ChecklistActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
 
@@ -60,6 +64,10 @@ const checklistSchema = z.object({
   sortOrder: optionalInt.default(0)
 });
 
+const idSchema = z.object({
+  id: z.string().trim().min(1)
+});
+
 function resultFromError(error: z.ZodError): ChecklistActionResult {
   const errors = Object.fromEntries(
     Object.entries(error.flatten().fieldErrors).filter(
@@ -78,4 +86,85 @@ export function validateChecklistInput(formData: FormData): ChecklistActionResul
   }
 
   return { ok: true };
+}
+
+function optionalDate(value?: string) {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseChecklistInput(formData: FormData) {
+  const parsed = checklistSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  return {
+    id: parsed.data.id,
+    data: {
+      title: parsed.data.title,
+      description: parsed.data.description || "",
+      status: parsed.data.status,
+      completed: parsed.data.completed,
+      completedAt: parsed.data.completed ? optionalDate(parsed.data.completedAt) : null,
+      targetDate: optionalDate(parsed.data.targetDate),
+      location: parsed.data.location || null,
+      imageUrl: parsed.data.imageUrl || null,
+      sortOrder: parsed.data.sortOrder
+    }
+  };
+}
+
+function revalidateChecklistPaths() {
+  revalidatePath("/");
+  revalidatePath("/checklist");
+  revalidatePath("/admin");
+  revalidatePath("/admin/content/checklist");
+}
+
+export async function createChecklistItem(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseChecklistInput(formData);
+  if (!input) {
+    return;
+  }
+
+  await prisma.checklistItem.create({ data: input.data });
+  revalidateChecklistPaths();
+  redirect("/admin/content/checklist");
+}
+
+export async function updateChecklistItem(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseChecklistInput(formData);
+  if (!input?.id) {
+    return;
+  }
+
+  await prisma.checklistItem.update({
+    where: { id: input.id },
+    data: input.data
+  });
+  revalidateChecklistPaths();
+  redirect("/admin/content/checklist");
+}
+
+export async function deleteChecklistItem(formData: FormData): Promise<void> {
+  "use server";
+
+  const parsed = idSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return;
+  }
+
+  await prisma.checklistItem.delete({ where: { id: parsed.data.id } });
+  revalidateChecklistPaths();
+  redirect("/admin/content/checklist");
 }
