@@ -7,13 +7,11 @@ export const visitorMessageSchema = z.object({
   content: z.string().trim().min(5, "留言至少 5 个字符").max(500, "留言最多 500 个字符")
 });
 
-export type VisitorMessageInput = z.input<typeof visitorMessageSchema>;
-
 export type VisitorMessageResult =
   | { ok: true; id: string }
   | { ok: false; errors: Record<string, string[]> };
 
-export async function createVisitorMessage(input: VisitorMessageInput): Promise<VisitorMessageResult> {
+export async function createVisitorMessage(input: unknown): Promise<VisitorMessageResult> {
   const parsed = visitorMessageSchema.safeParse(input);
 
   if (!parsed.success) {
