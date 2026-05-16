@@ -163,3 +163,24 @@ test("seed owner can create an admin footprint place", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/content\/footprints$/);
   await expect(page.getByText(name)).toBeVisible();
 });
+
+test("seed owner can create an admin love-day event", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const title = `端到端纪念日 ${suffix}`;
+
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/content/love-days");
+  await expect(page.getByRole("heading", { name: "纪念日管理" })).toBeVisible();
+  await page.getByRole("link", { name: "新建纪念日" }).click();
+  await page.getByLabel("标题").fill(title);
+  await page.getByLabel("说明").fill("这是一条端到端创建的纪念日。");
+  await page.getByLabel("日期").fill("2026-05-16");
+  await page.getByRole("button", { name: "保存纪念日" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/love-days$/);
+  await expect(page.getByText(title)).toBeVisible();
+});
