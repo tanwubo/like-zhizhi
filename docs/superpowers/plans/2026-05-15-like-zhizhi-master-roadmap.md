@@ -27,6 +27,7 @@
 - Phase 3 theme settings plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-theme-settings.md`
 - Phase 3 media center plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-media-center.md`
 - Phase 3 integrations plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-integrations.md`
+- Phase 3 users and roles plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-users-roles.md`
 
 ## Progress Snapshot
 
@@ -47,7 +48,7 @@ Last updated: 2026-05-16
 | Theme settings | Done | Theme editor, validation, public CSS-variable theme application, background media, glass and animation flags. |
 | Media center upload | Done | Admin media center, external media registration, storage upload action, metadata helpers, and reusable admin media selector. |
 | Integrations | Done | Admin integration settings, encrypted secret storage, object-storage environment status, and graceful disabled-provider defaults. |
-| Users and roles | Not started | User CRUD and role-based admin navigation refinement. |
+| Users and roles | Done | Owner-only user CRUD, password replacement, disable/enable flow, role-filtered navigation, and server-side mutation permission guards. |
 | Analytics and polish | Not started | Visit stats, SEO, sitemap, empty/error/loading states, deployment docs. |
 
 ## Standard Execution Loop
@@ -267,6 +268,8 @@ Every future batch should follow this loop:
 
 ### Batch 8: Users And Roles
 
+**Status:** Done on 2026-05-16.
+
 **Goal:** Make admin access manageable inside the product.
 
 **Routes:**
@@ -290,6 +293,11 @@ Every future batch should follow this loop:
 - User access can be managed without seed scripts.
 - Role restrictions are enforced server-side.
 - Full verification passes.
+
+**Notes:**
+- Disabled users are blocked at both login and session read time; disabling an account clears its active sessions.
+- User deletion is intentionally represented as disable/enable to avoid orphaning authored content while still removing access.
+- Server-side admin mutations now use role capability guards: owners manage users/integrations, owners and partners manage content/settings, and moderators can only moderate messages.
 
 ### Batch 9: Analytics, SEO, And Product Polish
 
@@ -329,7 +337,14 @@ When a task batch is completed:
 
 ### 2026-05-16
 
-Latest verified state after integrations:
+Latest verified state after users and roles:
+
+- `pnpm lint`: passed.
+- `pnpm test`: passed, 11 test files and 86 tests.
+- `pnpm build`: passed, including `/admin/users`, `/admin/users/new`, and `/admin/users/[id]/edit`.
+- `pnpm test:e2e`: passed, 17 Playwright tests.
+
+Previous verified state after integrations:
 
 - `pnpm lint`: passed.
 - `pnpm test`: passed, 11 test files and 70 tests.
