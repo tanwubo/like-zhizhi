@@ -1,3 +1,4 @@
+import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 type FootprintFormValue = {
@@ -24,10 +25,12 @@ function dateValue(date?: Date | null) {
 
 export function FootprintForm({
   action,
-  place
+  place,
+  mediaAssets = []
 }: {
   action: (formData: FormData) => void | Promise<void>;
   place?: FootprintFormValue;
+  mediaAssets?: MediaSelectorAsset[];
 }) {
   const visit = place?.visits?.[0];
 
@@ -51,6 +54,7 @@ export function FootprintForm({
           />
         </label>
       </div>
+      <MediaSelector assets={mediaAssets} targetName="coverUrl" />
       <label className="text-sm font-medium text-ink">
         地点说明
         <textarea

@@ -631,3 +631,85 @@ describe("admin music actions", () => {
     expect(createMusicTrackRecord).not.toHaveBeenCalled();
   });
 });
+
+describe("admin media actions", () => {
+  it("registers an external media asset", async () => {
+    const { registerExternalMedia } = await import("@/features/admin/media-actions");
+    const formData = new FormData();
+
+    formData.set("publicUrl", "https://example.com/media/photo.png");
+    formData.set("sizeBytes", "3000");
+    formData.set("width", "640");
+    formData.set("height", "480");
+
+    await registerExternalMedia(formData);
+
+    expect(createMediaAsset).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: "IMAGE",
+          bucket: "external",
+          objectKey: "/media/photo.png",
+          publicUrl: "https://example.com/media/photo.png",
+          filename: "photo.png",
+          contentType: "image/png",
+          sizeBytes: 3000,
+          width: 640,
+          height: 480
+        })
+      })
+    );
+  });
+
+  it("does not register invalid external media URLs", async () => {
+    const { registerExternalMedia } = await import("@/features/admin/media-actions");
+    const formData = new FormData();
+
+    formData.set("publicUrl", "broken");
+
+    await registerExternalMedia(formData);
+
+    expect(createMediaAsset).not.toHaveBeenCalled();
+  });
+
+  it("uploads media with a storage adapter and stores returned object metadata", async () => {
+    const { uploadMediaAsset } = await import("@/features/admin/media-actions");
+    const formData = new FormData();
+    const adapter = {
+      putObject: vi.fn(async () => ({
+        bucket: "like-zhizhi",
+        key: "media/2026/05/16/test-image.png",
+        publicUrl: "https://cdn.example.com/media/2026/05/16/test-image.png"
+      }))
+    };
+
+    formData.set(
+      "file",
+      new File([Buffer.from("89504e470d0a1a0a0000000d494844520000000a000000140806000000", "hex")], "Test Image.PNG", {
+        type: "image/png"
+      })
+    );
+
+    await uploadMediaAsset(formData, adapter);
+
+    expect(adapter.putObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: expect.stringMatching(/^media\/\d{4}\/\d{2}\/\d{2}\/\d{6}-test-image\.png$/),
+        contentType: "image/png"
+      })
+    );
+    expect(createMediaAsset).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: "IMAGE",
+          bucket: "like-zhizhi",
+          publicUrl: "https://cdn.example.com/media/2026/05/16/test-image.png",
+          filename: "Test Image.PNG",
+          contentType: "image/png",
+          width: 10,
+          height: 20
+        })
+      })
+    );
+  });
+});

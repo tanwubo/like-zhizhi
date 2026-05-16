@@ -225,3 +225,21 @@ test("seed owner can update theme settings", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/settings\/theme$/);
   await expect(page.getByLabel("主色")).toHaveValue("#2f80ed");
 });
+
+test("seed owner can register media in admin media center", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const mediaUrl = `https://example.com/e2e-media-${suffix}.jpg`;
+
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/media");
+  await expect(page.getByRole("heading", { name: "媒体中心" })).toBeVisible();
+  await page.getByLabel("外部媒体地址").fill(mediaUrl);
+  await page.getByRole("button", { name: "登记外部媒体" }).click();
+  await expect(page).toHaveURL(/\/admin\/media$/);
+  await expect(page.getByRole("link", { name: `e2e-media-${suffix}.jpg` })).toBeVisible();
+});

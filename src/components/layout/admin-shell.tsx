@@ -10,6 +10,7 @@ const navGroups = [
   {
     label: "内容管理",
     items: [
+      ["媒体中心", "/admin/media"],
       ["点滴", "/admin/content/notes"],
       ["留言审核", "/admin/content/messages"],
       ["足迹", "/admin/content/footprints"],

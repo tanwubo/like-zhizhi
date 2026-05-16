@@ -1,5 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 
+import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 type ChecklistFormValue = {
@@ -24,10 +25,12 @@ function dateValue(date?: Date | null) {
 
 export function ChecklistForm({
   action,
-  item
+  item,
+  mediaAssets = []
 }: {
   action: (formData: FormData) => void | Promise<void>;
   item?: ChecklistFormValue;
+  mediaAssets?: MediaSelectorAsset[];
 }) {
   return (
     <form action={action} className="grid gap-4">
@@ -48,6 +51,7 @@ export function ChecklistForm({
           />
         </label>
       </div>
+      <MediaSelector assets={mediaAssets} targetName="imageUrl" />
       <label className="text-sm font-medium text-ink">
         说明
         <textarea

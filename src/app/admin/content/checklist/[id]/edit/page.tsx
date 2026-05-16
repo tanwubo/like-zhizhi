@@ -5,10 +5,11 @@ import { AdminSection } from "@/components/admin/admin-section";
 import { ChecklistForm } from "@/components/admin/checklist-form";
 import { updateChecklistItem } from "@/features/admin/checklist-actions";
 import { getAdminChecklistItem } from "@/features/admin/checklist-data";
+import { getAdminMediaAssets } from "@/features/admin/media-data";
 
 export default async function EditChecklistItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = await getAdminChecklistItem(id);
+  const [item, mediaAssets] = await Promise.all([getAdminChecklistItem(id), getAdminMediaAssets()]);
 
   if (!item) {
     notFound();
@@ -23,7 +24,7 @@ export default async function EditChecklistItemPage({ params }: { params: Promis
         <h1 className="mt-3 text-2xl font-semibold text-ink">编辑清单</h1>
       </div>
       <AdminSection title="清单内容">
-        <ChecklistForm action={updateChecklistItem} item={item} />
+        <ChecklistForm action={updateChecklistItem} item={item} mediaAssets={mediaAssets} />
       </AdminSection>
     </div>
   );

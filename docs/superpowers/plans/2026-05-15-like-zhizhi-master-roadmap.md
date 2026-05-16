@@ -25,6 +25,7 @@
 - Phase 3 love days plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-love-days-admin.md`
 - Phase 3 music plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-music-admin.md`
 - Phase 3 theme settings plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-theme-settings.md`
+- Phase 3 media center plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-media-center.md`
 
 ## Progress Snapshot
 
@@ -43,7 +44,7 @@ Last updated: 2026-05-16
 | Love Day management | Done | Admin love-day list, create, edit, delete, date validation, yearly/lunar flags, sort order. |
 | Music management | Done | Track CRUD, admin list/create/edit/delete, and enabled public player data read model. |
 | Theme settings | Done | Theme editor, validation, public CSS-variable theme application, background media, glass and animation flags. |
-| Media center upload | Not started | Real object-storage upload and reusable media picker. |
+| Media center upload | Done | Admin media center, external media registration, storage upload action, metadata helpers, and reusable admin media selector. |
 | Integrations | Not started | Map, weather, email, object storage, optional music provider settings. |
 | Users and roles | Not started | User CRUD and role-based admin navigation refinement. |
 | Analytics and polish | Not started | Visit stats, SEO, sitemap, empty/error/loading states, deployment docs. |
@@ -205,6 +206,8 @@ Every future batch should follow this loop:
 
 ### Batch 6: Media Center And Real Uploads
 
+**Status:** Done on 2026-05-16.
+
 **Goal:** Replace external-media-only workflows with a reusable media center and object-storage upload path.
 
 **Routes:**
@@ -226,6 +229,9 @@ Every future batch should follow this loop:
 - Admin can create media assets without manual database edits.
 - Object-storage upload works in configured environments.
 - Full verification passes in local direct-db mode without requiring Docker.
+
+**Notes:**
+- Local e2e covers the external media registration path. Binary upload is covered through unit/integration tests with a mocked storage adapter so local direct-db verification does not require object storage.
 
 ### Batch 7: Integrations
 
@@ -315,6 +321,13 @@ When a task batch is completed:
 ## Verification Log
 
 ### 2026-05-16
+
+Latest verified state after media center:
+
+- `pnpm lint`: passed.
+- `pnpm test`: passed, 10 test files and 62 tests.
+- `pnpm build`: passed, including `/admin/media`.
+- `pnpm test:e2e`: passed, 15 Playwright tests.
 
 Latest verified state after theme settings:
 

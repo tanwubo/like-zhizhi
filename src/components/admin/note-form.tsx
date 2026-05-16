@@ -1,5 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 
+import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 type NoteFormValue = {
@@ -19,10 +20,12 @@ const fieldClass =
 
 export function NoteForm({
   action,
-  note
+  note,
+  mediaAssets = []
 }: {
   action: (formData: FormData) => void | Promise<void>;
   note?: NoteFormValue;
+  mediaAssets?: MediaSelectorAsset[];
 }) {
   return (
     <form action={action} className="grid gap-4">
@@ -56,6 +59,7 @@ export function NoteForm({
         正文
         <textarea className={fieldClass} name="content" defaultValue={note?.content ?? ""} rows={10} required />
       </label>
+      <MediaSelector assets={mediaAssets} targetName="content" label="从媒体中心插入到正文" mode="appendMarkdown" />
       <div className="grid gap-4 md:grid-cols-4">
         <label className="text-sm font-medium text-ink">
           状态

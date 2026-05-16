@@ -3,8 +3,11 @@ import Link from "next/link";
 import { AdminSection } from "@/components/admin/admin-section";
 import { ChecklistForm } from "@/components/admin/checklist-form";
 import { createChecklistItem } from "@/features/admin/checklist-actions";
+import { getAdminMediaAssets } from "@/features/admin/media-data";
 
-export default function NewChecklistItemPage() {
+export default async function NewChecklistItemPage() {
+  const mediaAssets = await getAdminMediaAssets();
+
   return (
     <div className="grid gap-5">
       <div>
@@ -14,7 +17,7 @@ export default function NewChecklistItemPage() {
         <h1 className="mt-3 text-2xl font-semibold text-ink">新建清单</h1>
       </div>
       <AdminSection title="清单内容">
-        <ChecklistForm action={createChecklistItem} />
+        <ChecklistForm action={createChecklistItem} mediaAssets={mediaAssets} />
       </AdminSection>
     </div>
   );

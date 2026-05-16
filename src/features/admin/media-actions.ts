@@ -1,0 +1,120 @@
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import {
+  buildMediaObjectKey,
+  detectMediaType,
+  inferContentType,
+  parseExternalMediaInput,
+  readImageDimensions,
+  validateExternalMediaInput
+} from "@/features/admin/media-utils";
+import { prisma } from "@/server/db/prisma";
+import { storage } from "@/server/storage/s3-storage";
+
+type StorageAdapter = {
+  putObject(input: { key: string; body: Buffer; contentType: string }): Promise<{
+    bucket: string;
+    key: string;
+    publicUrl: string;
+  }>;
+};
+
+export { validateExternalMediaInput as validateMediaInput };
+
+type UploadedFile = {
+  name: string;
+  size: number;
+  type: string;
+  arrayBuffer?: () => Promise<ArrayBuffer>;
+};
+
+function revalidateMediaPaths() {
+  revalidatePath("/admin");
+  revalidatePath("/admin/media");
+}
+
+function fileFromFormData(formData: FormData) {
+  const file = formData.get("file");
+  if (
+    !file ||
+    typeof file !== "object" ||
+    !("name" in file) ||
+    !("size" in file) ||
+    typeof file.name !== "string" ||
+    typeof file.size !== "number" ||
+    file.size === 0
+  ) {
+    return null;
+  }
+
+  return file as UploadedFile;
+}
+
+async function bufferFromUploadedFile(file: UploadedFile) {
+  if (typeof file.arrayBuffer === "function") {
+    return Buffer.from(await file.arrayBuffer());
+  }
+
+  for (const symbol of Object.getOwnPropertySymbols(file)) {
+    const implementation = (file as unknown as Record<symbol, { _buffer?: unknown }>)[symbol];
+    if (Buffer.isBuffer(implementation?._buffer)) {
+      return Buffer.from(implementation._buffer);
+    }
+  }
+
+  return null;
+}
+
+export async function registerExternalMedia(formData: FormData): Promise<void> {
+  "use server";
+
+  const parsed = parseExternalMediaInput(formData);
+  if (!parsed.ok) {
+    return;
+  }
+
+  await prisma.mediaAsset.create({ data: parsed.data });
+  revalidateMediaPaths();
+  redirect("/admin/media");
+}
+
+export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapter = storage): Promise<void> {
+  "use server";
+
+  const file = fileFromFormData(formData);
+  if (!file) {
+    return;
+  }
+
+  const body = await bufferFromUploadedFile(file);
+  if (!body) {
+    return;
+  }
+
+  const contentType = inferContentType(file.name, file.type);
+  const key = buildMediaObjectKey(file.name);
+  const uploaded = await adapter.putObject({
+    key,
+    body,
+    contentType
+  });
+  const dimensions = readImageDimensions(body, contentType);
+
+  await prisma.mediaAsset.create({
+    data: {
+      type: detectMediaType(contentType, file.name),
+      bucket: uploaded.bucket,
+      objectKey: uploaded.key,
+      publicUrl: uploaded.publicUrl,
+      filename: file.name,
+      contentType,
+      sizeBytes: file.size,
+      width: dimensions.width,
+      height: dimensions.height
+    }
+  });
+
+  revalidateMediaPaths();
+  redirect("/admin/media");
+}

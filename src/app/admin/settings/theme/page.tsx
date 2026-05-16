@@ -1,12 +1,14 @@
 import { AdminSection } from "@/components/admin/admin-section";
+import { MediaSelector } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { getAdminMediaAssets } from "@/features/admin/media-data";
 import { updateThemeSettings } from "@/features/admin/settings-actions";
 import { getAdminSettingsData } from "@/features/admin/settings-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminThemeSettingsPage() {
-  const { theme } = await getAdminSettingsData();
+  const [{ theme }, mediaAssets] = await Promise.all([getAdminSettingsData(), getAdminMediaAssets()]);
 
   return (
     <div className="grid gap-6">
@@ -34,6 +36,9 @@ export default async function AdminThemeSettingsPage() {
               className="rounded-md border border-blush-100 px-3 py-2"
             />
           </label>
+          <div className="md:col-span-2">
+            <MediaSelector assets={mediaAssets} targetName="backgroundImageUrl" />
+          </div>
           <label className="grid gap-2 text-sm text-ink/70 md:col-span-2">
             背景视频地址
             <input
@@ -43,6 +48,9 @@ export default async function AdminThemeSettingsPage() {
               className="rounded-md border border-blush-100 px-3 py-2"
             />
           </label>
+          <div className="md:col-span-2">
+            <MediaSelector assets={mediaAssets} targetName="backgroundVideoUrl" />
+          </div>
           <label className="flex items-center justify-between rounded-md bg-blush-50 px-4 py-3 text-sm text-ink">
             <span>
               <span className="font-medium">玻璃效果</span>

@@ -5,10 +5,11 @@ import { AdminSection } from "@/components/admin/admin-section";
 import { FootprintForm } from "@/components/admin/footprint-form";
 import { updateFootprintPlace } from "@/features/admin/footprint-actions";
 import { getAdminFootprintPlace } from "@/features/admin/footprint-data";
+import { getAdminMediaAssets } from "@/features/admin/media-data";
 
 export default async function EditFootprintPlacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const place = await getAdminFootprintPlace(id);
+  const [place, mediaAssets] = await Promise.all([getAdminFootprintPlace(id), getAdminMediaAssets()]);
 
   if (!place) {
     notFound();
@@ -23,7 +24,7 @@ export default async function EditFootprintPlacePage({ params }: { params: Promi
         <h1 className="mt-3 text-2xl font-semibold text-ink">编辑足迹</h1>
       </div>
       <AdminSection title="足迹内容">
-        <FootprintForm action={updateFootprintPlace} place={place} />
+        <FootprintForm action={updateFootprintPlace} place={place} mediaAssets={mediaAssets} />
       </AdminSection>
     </div>
   );
