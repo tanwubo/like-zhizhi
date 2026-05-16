@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { validateAlbumInput } from "@/features/admin/album-actions";
 import { validateChecklistInput } from "@/features/admin/checklist-actions";
 import { validateFootprintInput } from "@/features/admin/footprint-actions";
+import { validateLoveDayInput } from "@/features/admin/love-days-actions";
 import { validateNoteInput } from "@/features/admin/notes-actions";
 import { normalizeNoteSlug } from "@/features/admin/notes-data";
 
@@ -138,5 +139,45 @@ describe("admin footprint validation", () => {
     formData.set("longitude", "121.4998");
 
     expect(validateFootprintInput(formData)).toEqual({ ok: true });
+  });
+});
+
+describe("admin love-day validation", () => {
+  it("rejects missing love-day fields", () => {
+    const result = validateLoveDayInput(new FormData());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.title).toContain("标题不能为空");
+      expect(result.errors.description).toContain("说明不能为空");
+      expect(result.errors.date).toContain("日期不能为空");
+    }
+  });
+
+  it("rejects invalid love-day dates and sort order", () => {
+    const formData = new FormData();
+
+    formData.set("title", "第一次旅行");
+    formData.set("description", "一起出发。");
+    formData.set("date", "bad-date");
+    formData.set("sortOrder", "1.5");
+
+    const result = validateLoveDayInput(formData);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.date).toContain("日期必须是有效日期");
+      expect(result.errors.sortOrder).toContain("排序必须是整数");
+    }
+  });
+
+  it("accepts a valid minimal love-day form", () => {
+    const formData = new FormData();
+
+    formData.set("title", "第一次旅行");
+    formData.set("description", "一起出发。");
+    formData.set("date", "2026-05-16");
+
+    expect(validateLoveDayInput(formData)).toEqual({ ok: true });
   });
 });
