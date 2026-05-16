@@ -1,4 +1,8 @@
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
+
+import { prisma } from "@/server/db/prisma";
 
 export type LoveDayActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
 
@@ -39,6 +43,10 @@ const loveDaySchema = z.object({
   sortOrder: optionalInt.default(0)
 });
 
+const idSchema = z.object({
+  id: z.string().trim().min(1)
+});
+
 function resultFromError(error: z.ZodError): LoveDayActionResult {
   const errors = Object.fromEntries(
     Object.entries(error.flatten().fieldErrors).filter(
@@ -57,4 +65,83 @@ export function validateLoveDayInput(formData: FormData): LoveDayActionResult {
   }
 
   return { ok: true };
+}
+
+function parseDate(value: string) {
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseLoveDayInput(formData: FormData) {
+  const parsed = loveDaySchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  const date = parseDate(parsed.data.date);
+  if (!date) {
+    return null;
+  }
+
+  return {
+    id: parsed.data.id,
+    data: {
+      title: parsed.data.title,
+      description: parsed.data.description,
+      date,
+      yearly: parsed.data.yearly,
+      lunar: parsed.data.lunar,
+      sortOrder: parsed.data.sortOrder
+    }
+  };
+}
+
+function revalidateLoveDayPaths() {
+  revalidatePath("/");
+  revalidatePath("/love-days");
+  revalidatePath("/admin");
+  revalidatePath("/admin/content/love-days");
+}
+
+export async function createLoveDayEvent(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseLoveDayInput(formData);
+  if (!input) {
+    return;
+  }
+
+  await prisma.loveDayEvent.create({ data: input.data });
+  revalidateLoveDayPaths();
+  redirect("/admin/content/love-days");
+}
+
+export async function updateLoveDayEvent(formData: FormData): Promise<void> {
+  "use server";
+
+  const input = parseLoveDayInput(formData);
+  if (!input?.id) {
+    return;
+  }
+
+  await prisma.loveDayEvent.update({
+    where: { id: input.id },
+    data: input.data
+  });
+  revalidateLoveDayPaths();
+  redirect("/admin/content/love-days");
+}
+
+export async function deleteLoveDayEvent(formData: FormData): Promise<void> {
+  "use server";
+
+  const parsed = idSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return;
+  }
+
+  await prisma.loveDayEvent.delete({ where: { id: parsed.data.id } });
+  revalidateLoveDayPaths();
+  redirect("/admin/content/love-days");
 }

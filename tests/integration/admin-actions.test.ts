@@ -19,6 +19,9 @@ const deleteFootprintPlaceRecord = vi.fn(async () => ({ id: "place_1" }));
 const createFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
 const updateFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
 const deleteFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
+const createLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
+const updateLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
+const deleteLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
 
 const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
   callback({
@@ -63,6 +66,11 @@ vi.mock("@/server/db/prisma", () => ({
       create: createFootprintVisitRecord,
       update: updateFootprintVisitRecord,
       delete: deleteFootprintVisitRecord
+    },
+    loveDayEvent: {
+      create: createLoveDayRecord,
+      update: updateLoveDayRecord,
+      delete: deleteLoveDayRecord
     }
   }
 }));
@@ -96,6 +104,9 @@ beforeEach(() => {
   createFootprintVisitRecord.mockClear();
   updateFootprintVisitRecord.mockClear();
   deleteFootprintVisitRecord.mockClear();
+  createLoveDayRecord.mockClear();
+  updateLoveDayRecord.mockClear();
+  deleteLoveDayRecord.mockClear();
   transactionMock.mockClear();
 });
 
@@ -343,6 +354,86 @@ describe("admin footprint actions", () => {
 
     expect(createFootprintPlaceRecord).not.toHaveBeenCalled();
     expect(createFootprintVisitRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe("admin love-day actions", () => {
+  it("creates a love-day event with recurrence flags", async () => {
+    const { createLoveDayEvent } = await import("@/features/admin/love-days-actions");
+    const formData = new FormData();
+
+    formData.set("title", "First trip");
+    formData.set("description", "We travelled together.");
+    formData.set("date", "2026-05-16");
+    formData.set("yearly", "on");
+    formData.set("lunar", "on");
+    formData.set("sortOrder", "3");
+
+    await createLoveDayEvent(formData);
+
+    expect(createLoveDayRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: "First trip",
+          description: "We travelled together.",
+          date: expect.any(Date),
+          yearly: true,
+          lunar: true,
+          sortOrder: 3
+        })
+      })
+    );
+  });
+
+  it("updates a love-day event", async () => {
+    const { updateLoveDayEvent } = await import("@/features/admin/love-days-actions");
+    const formData = new FormData();
+
+    formData.set("id", "love_day_1");
+    formData.set("title", "Updated event");
+    formData.set("description", "Updated description.");
+    formData.set("date", "2026-05-17");
+    formData.set("sortOrder", "5");
+
+    await updateLoveDayEvent(formData);
+
+    expect(updateLoveDayRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "love_day_1" },
+        data: expect.objectContaining({
+          title: "Updated event",
+          description: "Updated description.",
+          date: expect.any(Date),
+          yearly: false,
+          lunar: false,
+          sortOrder: 5
+        })
+      })
+    );
+  });
+
+  it("deletes a love-day event", async () => {
+    const { deleteLoveDayEvent } = await import("@/features/admin/love-days-actions");
+    const formData = new FormData();
+
+    formData.set("id", "love_day_1");
+
+    await deleteLoveDayEvent(formData);
+
+    expect(deleteLoveDayRecord).toHaveBeenCalledWith({ where: { id: "love_day_1" } });
+  });
+
+  it("does not create love-day records for invalid dates", async () => {
+    const { createLoveDayEvent } = await import("@/features/admin/love-days-actions");
+    const formData = new FormData();
+
+    formData.set("title", "Broken event");
+    formData.set("description", "Broken description.");
+    formData.set("date", "broken");
+
+    await createLoveDayEvent(formData);
+
+    expect(createLoveDayRecord).not.toHaveBeenCalled();
   });
 });
 
