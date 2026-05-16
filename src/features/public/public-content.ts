@@ -122,3 +122,18 @@ export async function getLoveDayEvents(now = new Date()) {
     counter: formatLoveDay(event.date, now)
   }));
 }
+
+export async function getEnabledMusicTracks() {
+  return prisma.musicTrack.findMany({
+    where: { enabled: true },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    select: {
+      id: true,
+      title: true,
+      artist: true,
+      coverUrl: true,
+      sourceUrl: true,
+      sourceType: true
+    }
+  });
+}

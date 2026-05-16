@@ -22,6 +22,9 @@ const deleteFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
 const createLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
 const updateLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
 const deleteLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
+const createMusicTrackRecord = vi.fn(async () => ({ id: "music_1" }));
+const updateMusicTrackRecord = vi.fn(async () => ({ id: "music_1" }));
+const deleteMusicTrackRecord = vi.fn(async () => ({ id: "music_1" }));
 
 const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
   callback({
@@ -71,6 +74,11 @@ vi.mock("@/server/db/prisma", () => ({
       create: createLoveDayRecord,
       update: updateLoveDayRecord,
       delete: deleteLoveDayRecord
+    },
+    musicTrack: {
+      create: createMusicTrackRecord,
+      update: updateMusicTrackRecord,
+      delete: deleteMusicTrackRecord
     }
   }
 }));
@@ -107,6 +115,9 @@ beforeEach(() => {
   createLoveDayRecord.mockClear();
   updateLoveDayRecord.mockClear();
   deleteLoveDayRecord.mockClear();
+  createMusicTrackRecord.mockClear();
+  updateMusicTrackRecord.mockClear();
+  deleteMusicTrackRecord.mockClear();
   transactionMock.mockClear();
 });
 
@@ -485,5 +496,87 @@ describe("admin album actions", () => {
 
     expect(createMediaAsset).not.toHaveBeenCalled();
     expect(createAlbumRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe("admin music actions", () => {
+  it("creates an enabled music track", async () => {
+    const { createMusicTrack } = await import("@/features/admin/music-actions");
+    const formData = new FormData();
+
+    formData.set("title", "Warm Song");
+    formData.set("artist", "Zhizhi");
+    formData.set("coverUrl", "https://example.com/cover.jpg");
+    formData.set("sourceUrl", "https://example.com/song.mp3");
+    formData.set("sourceType", "url");
+    formData.set("enabled", "on");
+    formData.set("sortOrder", "4");
+
+    await createMusicTrack(formData);
+
+    expect(createMusicTrackRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: "Warm Song",
+          artist: "Zhizhi",
+          coverUrl: "https://example.com/cover.jpg",
+          sourceUrl: "https://example.com/song.mp3",
+          sourceType: "url",
+          enabled: true,
+          sortOrder: 4
+        })
+      })
+    );
+  });
+
+  it("updates a music track", async () => {
+    const { updateMusicTrack } = await import("@/features/admin/music-actions");
+    const formData = new FormData();
+
+    formData.set("id", "music_1");
+    formData.set("title", "Updated Song");
+    formData.set("artist", "Updated Artist");
+    formData.set("sourceUrl", "https://example.com/updated.mp3");
+    formData.set("sourceType", "url");
+    formData.set("sortOrder", "8");
+
+    await updateMusicTrack(formData);
+
+    expect(updateMusicTrackRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "music_1" },
+        data: expect.objectContaining({
+          title: "Updated Song",
+          artist: "Updated Artist",
+          sourceUrl: "https://example.com/updated.mp3",
+          enabled: false,
+          sortOrder: 8
+        })
+      })
+    );
+  });
+
+  it("deletes a music track", async () => {
+    const { deleteMusicTrack } = await import("@/features/admin/music-actions");
+    const formData = new FormData();
+
+    formData.set("id", "music_1");
+
+    await deleteMusicTrack(formData);
+
+    expect(deleteMusicTrackRecord).toHaveBeenCalledWith({ where: { id: "music_1" } });
+  });
+
+  it("does not create music records for invalid source URLs", async () => {
+    const { createMusicTrack } = await import("@/features/admin/music-actions");
+    const formData = new FormData();
+
+    formData.set("title", "Broken song");
+    formData.set("artist", "Broken artist");
+    formData.set("sourceUrl", "broken");
+
+    await createMusicTrack(formData);
+
+    expect(createMusicTrackRecord).not.toHaveBeenCalled();
   });
 });

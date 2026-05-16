@@ -184,3 +184,24 @@ test("seed owner can create an admin love-day event", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/content\/love-days$/);
   await expect(page.getByText(title)).toBeVisible();
 });
+
+test("seed owner can create an admin music track", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const title = `端到端音乐 ${suffix}`;
+
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/content/music");
+  await expect(page.getByRole("heading", { name: "音乐管理" })).toBeVisible();
+  await page.getByRole("link", { name: "新建音乐" }).click();
+  await page.getByLabel("标题").fill(title);
+  await page.getByLabel("歌手").fill("端到端歌手");
+  await page.getByLabel("音频地址").fill("https://example.com/e2e-song.mp3");
+  await page.getByRole("button", { name: "保存音乐" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/music$/);
+  await expect(page.getByText(title)).toBeVisible();
+});
