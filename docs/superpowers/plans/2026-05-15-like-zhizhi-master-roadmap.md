@@ -22,10 +22,11 @@
 - Phase 3 album plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-album-admin.md`
 - Phase 3 checklist plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-checklist-admin.md`
 - Phase 3 footprint plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-footprint-admin.md`
+- Phase 3 love days plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-love-days-admin.md`
 
 ## Progress Snapshot
 
-Last updated: 2026-05-15
+Last updated: 2026-05-16
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -37,7 +38,7 @@ Last updated: 2026-05-15
 | Album management | Done | Admin album list, create, edit, delete, external media registration, public image/video rendering. |
 | Checklist management | Done | Admin checklist list, create, edit, delete, validation, completion state, target date, optional image URL. |
 | Footprint management | Done | Admin footprint list, create, edit, delete, coordinate validation, cover URL, paired visit create/update/delete. |
-| Love Day management | Not started | Event CRUD and recurrence flags. |
+| Love Day management | Done | Admin love-day list, create, edit, delete, date validation, yearly/lunar flags, sort order. |
 | Music management | Not started | Track CRUD and public player data. |
 | Theme settings | Not started | Theme editor and public theme application. |
 | Media center upload | Not started | Real object-storage upload and reusable media picker. |
@@ -123,6 +124,8 @@ Every future batch should follow this loop:
 - Full verification passes.
 
 ### Batch 3: Love Day Management
+
+**Status:** Done on 2026-05-16.
 
 **Goal:** Make anniversary/countdown events manageable.
 
@@ -304,6 +307,15 @@ When a task batch is completed:
 6. Commit the roadmap update in the same final batch commit or a separate `docs:` commit.
 
 ## Verification Log
+
+### 2026-05-16
+
+Latest verified state after love-day management:
+
+- `pnpm lint`: passed.
+- `pnpm test`: passed, 9 test files and 45 tests.
+- `pnpm build`: passed, including `/admin/content/love-days`, `/admin/content/love-days/new`, and `/admin/content/love-days/[id]/edit`.
+- `pnpm test:e2e`: passed, 12 Playwright tests.
 
 ### 2026-05-15
 
