@@ -24,6 +24,7 @@
 - Phase 3 footprint plan: `docs/superpowers/plans/2026-05-15-like-zhizhi-phase-3-footprint-admin.md`
 - Phase 3 love days plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-love-days-admin.md`
 - Phase 3 music plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-music-admin.md`
+- Phase 3 theme settings plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-theme-settings.md`
 
 ## Progress Snapshot
 
@@ -41,7 +42,7 @@ Last updated: 2026-05-16
 | Footprint management | Done | Admin footprint list, create, edit, delete, coordinate validation, cover URL, paired visit create/update/delete. |
 | Love Day management | Done | Admin love-day list, create, edit, delete, date validation, yearly/lunar flags, sort order. |
 | Music management | Done | Track CRUD, admin list/create/edit/delete, and enabled public player data read model. |
-| Theme settings | Not started | Theme editor and public theme application. |
+| Theme settings | Done | Theme editor, validation, public CSS-variable theme application, background media, glass and animation flags. |
 | Media center upload | Not started | Real object-storage upload and reusable media picker. |
 | Integrations | Not started | Map, weather, email, object storage, optional music provider settings. |
 | Users and roles | Not started | User CRUD and role-based admin navigation refinement. |
@@ -180,6 +181,8 @@ Every future batch should follow this loop:
 
 ### Batch 5: Theme Settings
 
+**Status:** Done on 2026-05-16.
+
 **Goal:** Let admin configure the visual theme used by the public site.
 
 **Routes:**
@@ -312,6 +315,15 @@ When a task batch is completed:
 ## Verification Log
 
 ### 2026-05-16
+
+Latest verified state after theme settings:
+
+- `pnpm lint`: passed.
+- `pnpm test`: passed, 9 test files and 54 tests.
+- `pnpm build`: passed, including `/admin/settings/theme`.
+- `pnpm test:e2e`: passed, 14 Playwright tests.
+
+Note: `pnpm build` and `pnpm test:e2e` must be run sequentially because both use `.next`; running them in parallel can corrupt the generated Next.js output.
 
 Latest verified state after music management:
 

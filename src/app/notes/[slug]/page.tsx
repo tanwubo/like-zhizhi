@@ -20,6 +20,7 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ slu
       title={publicData.site.title}
       footerText={publicData.site.footerText}
       modules={publicData.navigation}
+      theme={publicData.theme}
     >
       <article className="mx-auto max-w-3xl px-4 py-12">
         <p className="text-sm font-medium text-blush-700">

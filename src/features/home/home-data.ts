@@ -1,10 +1,12 @@
 import { getTogetherDays } from "@/lib/date";
 import { prisma } from "@/server/db/prisma";
+import { normalizeThemeSetting } from "@/features/admin/settings-data";
 
 export async function getHomeData() {
-  const [site, people, modules, latestNote, messageCount, checklistCount, stats] =
+  const [site, theme, people, modules, latestNote, messageCount, checklistCount, stats] =
     await Promise.all([
       prisma.siteSetting.findUniqueOrThrow({ where: { id: "site" } }),
+      prisma.themeSetting.findUnique({ where: { id: "theme" } }),
       prisma.personProfile.findMany({ orderBy: { slot: "asc" } }),
       prisma.moduleSetting.findMany({ where: { enabled: true }, orderBy: { sortOrder: "asc" } }),
       prisma.note.findFirst({ where: { status: "PUBLISHED" }, orderBy: { publishedAt: "desc" } }),
@@ -15,6 +17,7 @@ export async function getHomeData() {
 
   return {
     site,
+    theme: normalizeThemeSetting(theme),
     people,
     modules,
     latestNote,

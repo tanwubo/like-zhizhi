@@ -1,5 +1,13 @@
 import { prisma } from "@/server/db/prisma";
 
+export type AdminThemeSetting = {
+  primaryColor: string;
+  backgroundImageUrl: string | null;
+  backgroundVideoUrl: string | null;
+  enableGlassEffect: boolean;
+  enablePageAnimation: boolean;
+};
+
 export type AdminModuleSetting = {
   id: string;
   key: string;
@@ -19,9 +27,20 @@ export function normalizeModuleSettings(modules: AdminModuleSetting[]) {
   });
 }
 
+export function normalizeThemeSetting(theme: AdminThemeSetting | null): AdminThemeSetting {
+  return {
+    primaryColor: theme?.primaryColor || "#f45d7a",
+    backgroundImageUrl: theme?.backgroundImageUrl || null,
+    backgroundVideoUrl: theme?.backgroundVideoUrl || null,
+    enableGlassEffect: theme?.enableGlassEffect ?? true,
+    enablePageAnimation: theme?.enablePageAnimation ?? true
+  };
+}
+
 export async function getAdminSettingsData() {
-  const [site, people, modules] = await Promise.all([
+  const [site, theme, people, modules] = await Promise.all([
     prisma.siteSetting.findUniqueOrThrow({ where: { id: "site" } }),
+    prisma.themeSetting.findUnique({ where: { id: "theme" } }),
     prisma.personProfile.findMany({ orderBy: { slot: "asc" } }),
     prisma.moduleSetting.findMany({
       select: {
@@ -37,6 +56,7 @@ export async function getAdminSettingsData() {
 
   return {
     site,
+    theme: normalizeThemeSetting(theme),
     people,
     modules: normalizeModuleSettings(modules)
   };

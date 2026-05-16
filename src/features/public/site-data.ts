@@ -1,5 +1,6 @@
 import { daysBetween } from "@/lib/date";
 import { prisma } from "@/server/db/prisma";
+import { normalizeThemeSetting } from "@/features/admin/settings-data";
 
 import { getPublicNavigation } from "./navigation";
 
@@ -14,7 +15,7 @@ export async function getPublicSiteData() {
 
   return {
     site,
-    theme,
+    theme: normalizeThemeSetting(theme),
     people,
     navigation,
     stats: {

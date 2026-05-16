@@ -9,7 +9,7 @@ export default async function HomePage() {
   const [data, navigation] = await Promise.all([getHomeData(), getPublicNavigation()]);
 
   return (
-    <PublicShell title={data.site.title} footerText={data.site.footerText} modules={navigation}>
+    <PublicShell title={data.site.title} footerText={data.site.footerText} modules={navigation} theme={data.theme}>
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-[1.2fr_0.8fr] md:py-20">
         <div>
           <p className="mb-3 text-sm font-medium text-blush-700">{data.site.slogan}</p>

@@ -19,6 +19,46 @@ body {
     linear-gradient(180deg, #fff6f7 0%, #ffffff 52%, #fff6f7 100%);
 }
 
+.public-theme {
+  background-position: center;
+  background-size: cover;
+}
+
+.public-theme a:focus-visible,
+.public-theme button:focus-visible,
+.public-theme input:focus-visible,
+.public-theme textarea:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+.public-theme header a:first-child,
+.public-theme .text-blush-700 {
+  color: var(--theme-primary);
+}
+
+.theme-glass header,
+.theme-glass footer {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.theme-page-animation main {
+  animation: theme-fade-in 360ms ease-out both;
+}
+
+@keyframes theme-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;

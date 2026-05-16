@@ -205,3 +205,23 @@ test("seed owner can create an admin music track", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/content\/music$/);
   await expect(page.getByText(title)).toBeVisible();
 });
+
+test("seed owner can update theme settings", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/settings/theme");
+  await expect(page.getByRole("heading", { name: "主题设置" })).toBeVisible();
+  await page.getByLabel("主色").fill("#2f80ed");
+  await page.getByLabel("背景图片地址").fill("https://example.com/theme-bg.jpg");
+  await page.getByLabel("背景视频地址").fill("");
+  await page.getByLabel("玻璃效果").check();
+  await page.getByLabel("页面动效").check();
+  await page.getByRole("button", { name: "保存主题设置" }).click();
+
+  await expect(page).toHaveURL(/\/admin\/settings\/theme$/);
+  await expect(page.getByLabel("主色")).toHaveValue("#2f80ed");
+});

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const updateSite = vi.fn(async () => ({ id: "site" }));
+const upsertTheme = vi.fn(async () => ({ id: "theme" }));
 const createNoteRecord = vi.fn(async () => ({ id: "note_1" }));
 const updateNoteRecord = vi.fn(async () => ({ id: "note_1" }));
 const deleteNoteRecord = vi.fn(async () => ({ id: "note_1" }));
@@ -45,6 +46,7 @@ vi.mock("@/server/db/prisma", () => ({
   prisma: {
     $transaction: transactionMock,
     siteSetting: { update: updateSite },
+    themeSetting: { upsert: upsertTheme },
     personProfile: { update: vi.fn(async () => ({ id: "person_1" })) },
     moduleSetting: { update: vi.fn(async () => ({ id: "module_1" })) },
     note: {
@@ -93,6 +95,7 @@ vi.mock("next/navigation", () => ({
 
 beforeEach(() => {
   updateSite.mockClear();
+  upsertTheme.mockClear();
   createNoteRecord.mockClear();
   updateNoteRecord.mockClear();
   deleteNoteRecord.mockClear();
@@ -129,6 +132,54 @@ describe("admin settings actions", () => {
     expect(result.ok).toBe(false);
     await updateSiteSettings(new FormData());
     expect(updateSite).not.toHaveBeenCalled();
+  });
+
+  it("updates theme settings with media and effect flags", async () => {
+    const { updateThemeSettings } = await import("@/features/admin/settings-actions");
+    const formData = new FormData();
+
+    formData.set("primaryColor", "#2f80ed");
+    formData.set("backgroundImageUrl", "https://example.com/bg.jpg");
+    formData.set("backgroundVideoUrl", "https://example.com/bg.mp4");
+    formData.set("enableGlassEffect", "on");
+    formData.set("enablePageAnimation", "on");
+
+    await updateThemeSettings(formData);
+
+    expect(upsertTheme).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "theme" },
+        create: expect.objectContaining({
+          id: "theme",
+          primaryColor: "#2f80ed",
+          backgroundImageUrl: "https://example.com/bg.jpg",
+          backgroundVideoUrl: "https://example.com/bg.mp4",
+          enableGlassEffect: true,
+          enablePageAnimation: true
+        }),
+        update: expect.objectContaining({
+          primaryColor: "#2f80ed",
+          backgroundImageUrl: "https://example.com/bg.jpg",
+          backgroundVideoUrl: "https://example.com/bg.mp4",
+          enableGlassEffect: true,
+          enablePageAnimation: true
+        })
+      })
+    );
+  });
+
+  it("does not update theme settings for invalid color or media URLs", async () => {
+    const { validateThemeSettings, updateThemeSettings } = await import("@/features/admin/settings-actions");
+    const formData = new FormData();
+
+    formData.set("primaryColor", "blue");
+    formData.set("backgroundImageUrl", "broken");
+
+    const result = await validateThemeSettings(formData);
+    await updateThemeSettings(formData);
+
+    expect(result.ok).toBe(false);
+    expect(upsertTheme).not.toHaveBeenCalled();
   });
 });
 
