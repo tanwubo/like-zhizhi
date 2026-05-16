@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 export type LoveDayActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -107,6 +108,8 @@ function revalidateLoveDayPaths() {
 export async function createLoveDayEvent(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const input = parseLoveDayInput(formData);
   if (!input) {
     return;
@@ -119,6 +122,8 @@ export async function createLoveDayEvent(formData: FormData): Promise<void> {
 
 export async function updateLoveDayEvent(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const input = parseLoveDayInput(formData);
   if (!input?.id) {
@@ -135,6 +140,8 @@ export async function updateLoveDayEvent(formData: FormData): Promise<void> {
 
 export async function deleteLoveDayEvent(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const parsed = idSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

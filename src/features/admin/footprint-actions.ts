@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 export type FootprintActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -136,6 +137,8 @@ function revalidateFootprintPaths() {
 export async function createFootprintPlace(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const input = parseFootprintInput(formData);
   if (!input) {
     return;
@@ -162,6 +165,8 @@ export async function createFootprintPlace(formData: FormData): Promise<void> {
 
 export async function updateFootprintPlace(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const input = parseFootprintInput(formData);
   if (!input?.id) {
@@ -204,6 +209,8 @@ export async function updateFootprintPlace(formData: FormData): Promise<void> {
 export async function deleteFootprintPlace(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const parsed = idSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
     return;
@@ -216,6 +223,8 @@ export async function deleteFootprintPlace(formData: FormData): Promise<void> {
 
 export async function deleteFootprintVisit(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const parsed = idSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

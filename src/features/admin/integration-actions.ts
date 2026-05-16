@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 
 import { extractExistingSecrets, parseIntegrationSettingsInput } from "@/features/admin/integration-utils";
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 type ActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -20,6 +21,8 @@ export async function validateIntegrationSettings(formData: FormData): Promise<A
 }
 
 export async function updateIntegrationSettings(formData: FormData): Promise<void> {
+  await requireAdminCapability("integrations");
+
   const existingRows = await prisma.integrationSetting.findMany();
   const parsed = parseIntegrationSettingsInput(formData, extractExistingSecrets(existingRows));
 

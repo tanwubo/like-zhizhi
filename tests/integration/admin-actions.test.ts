@@ -28,6 +28,17 @@ const deleteLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
 const createMusicTrackRecord = vi.fn(async () => ({ id: "music_1" }));
 const updateMusicTrackRecord = vi.fn(async () => ({ id: "music_1" }));
 const deleteMusicTrackRecord = vi.fn(async () => ({ id: "music_1" }));
+const updateMessageRecord = vi.fn(async () => ({ id: "message_1" }));
+const createUserRecord = vi.fn(async () => ({ id: "user_2" }));
+const updateUserRecord = vi.fn(async () => ({ id: "user_2" }));
+const findUserUniqueRecord = vi.fn(async () => null);
+const deleteUserSessions = vi.fn(async () => ({ count: 1 }));
+const getCurrentUserMock = vi.fn(async () => ({
+  id: "owner_1",
+  email: "owner@example.com",
+  name: "Owner",
+  role: "OWNER"
+}));
 
 const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
   callback({
@@ -84,8 +95,23 @@ vi.mock("@/server/db/prisma", () => ({
       create: createMusicTrackRecord,
       update: updateMusicTrackRecord,
       delete: deleteMusicTrackRecord
+    },
+    message: {
+      update: updateMessageRecord
+    },
+    user: {
+      create: createUserRecord,
+      update: updateUserRecord,
+      findUnique: findUserUniqueRecord
+    },
+    session: {
+      deleteMany: deleteUserSessions
     }
   }
+}));
+
+vi.mock("@/server/auth/session", () => ({
+  getCurrentUser: getCurrentUserMock
 }));
 
 vi.mock("next/cache", () => ({
@@ -127,6 +153,19 @@ beforeEach(() => {
   createMusicTrackRecord.mockClear();
   updateMusicTrackRecord.mockClear();
   deleteMusicTrackRecord.mockClear();
+  updateMessageRecord.mockClear();
+  createUserRecord.mockClear();
+  updateUserRecord.mockClear();
+  findUserUniqueRecord.mockReset();
+  findUserUniqueRecord.mockResolvedValue(null);
+  deleteUserSessions.mockClear();
+  getCurrentUserMock.mockReset();
+  getCurrentUserMock.mockResolvedValue({
+    id: "owner_1",
+    email: "owner@example.com",
+    name: "Owner",
+    role: "OWNER"
+  });
   transactionMock.mockClear();
 });
 
@@ -831,5 +870,224 @@ describe("admin media actions", () => {
         })
       })
     );
+  });
+});
+
+describe("admin user actions", () => {
+  it("creates a moderator with a normalized email and hashed password", async () => {
+    const { createUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    formData.set("email", " Moderator@Example.COM ");
+    formData.set("name", "留言管理员");
+    formData.set("role", "MODERATOR");
+    formData.set("password", "Secret123!");
+
+    await createUser(formData);
+
+    expect(createUserRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          email: "moderator@example.com",
+          name: "留言管理员",
+          role: "MODERATOR",
+          disabledAt: null,
+          passwordHash: expect.not.stringContaining("Secret123!")
+        })
+      })
+    );
+  });
+
+  it("rejects user creation when current user is not owner", async () => {
+    const { createUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    getCurrentUserMock.mockResolvedValueOnce({
+      id: "partner_1",
+      email: "partner@example.com",
+      name: "Partner",
+      role: "PARTNER"
+    });
+    formData.set("email", "moderator@example.com");
+    formData.set("name", "Moderator");
+    formData.set("role", "MODERATOR");
+    formData.set("password", "Secret123!");
+
+    await expect(createUser(formData)).rejects.toThrow("没有用户管理权限");
+    expect(createUserRecord).not.toHaveBeenCalled();
+  });
+
+  it("updates profile fields without replacing a blank password", async () => {
+    const { updateUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    formData.set("id", "user_2");
+    formData.set("email", "partner@example.com");
+    formData.set("name", "Partner");
+    formData.set("role", "PARTNER");
+    formData.set("password", "");
+
+    await updateUser(formData);
+
+    expect(updateUserRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "user_2" },
+        data: {
+          email: "partner@example.com",
+          name: "Partner",
+          role: "PARTNER"
+        }
+      })
+    );
+  });
+
+  it("replaces a password when a new value is supplied", async () => {
+    const { updateUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    formData.set("id", "user_2");
+    formData.set("email", "partner@example.com");
+    formData.set("name", "Partner");
+    formData.set("role", "PARTNER");
+    formData.set("password", "NewSecret123!");
+
+    await updateUser(formData);
+
+    expect(updateUserRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "user_2" },
+        data: expect.objectContaining({
+          passwordHash: expect.not.stringContaining("NewSecret123!")
+        })
+      })
+    );
+  });
+
+  it("disables a user and clears active sessions", async () => {
+    const { disableUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    formData.set("id", "user_2");
+
+    await disableUser(formData);
+
+    expect(updateUserRecord).toHaveBeenCalledWith({
+      where: { id: "user_2" },
+      data: { disabledAt: expect.any(Date) }
+    });
+    expect(deleteUserSessions).toHaveBeenCalledWith({ where: { userId: "user_2" } });
+  });
+
+  it("prevents disabling the current owner account", async () => {
+    const { disableUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    formData.set("id", "owner_1");
+
+    await expect(disableUser(formData)).rejects.toThrow("不能禁用当前登录用户");
+    expect(updateUserRecord).not.toHaveBeenCalled();
+  });
+
+  it("enables a disabled user", async () => {
+    const { enableUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    formData.set("id", "user_2");
+
+    await enableUser(formData);
+
+    expect(updateUserRecord).toHaveBeenCalledWith({
+      where: { id: "user_2" },
+      data: { disabledAt: null }
+    });
+  });
+
+  it("does not create users with invalid input", async () => {
+    const { validateUserInput, createUser } = await import("@/features/admin/users-actions");
+    const formData = new FormData();
+
+    formData.set("email", "bad-email");
+    formData.set("name", "");
+    formData.set("role", "OWNER");
+    formData.set("password", "short");
+
+    expect(validateUserInput(formData, { requirePassword: true }).ok).toBe(false);
+    await createUser(formData);
+    expect(createUserRecord).not.toHaveBeenCalled();
+  });
+});
+
+describe("admin permission gates", () => {
+  it("rejects content mutations for moderators", async () => {
+    const { createNote } = await import("@/features/admin/notes-actions");
+    const formData = new FormData();
+
+    getCurrentUserMock.mockResolvedValueOnce({
+      id: "moderator_1",
+      email: "moderator@example.com",
+      name: "Moderator",
+      role: "MODERATOR"
+    });
+    formData.set("title", "Blocked note");
+    formData.set("excerpt", "Blocked excerpt");
+    formData.set("content", "Blocked content");
+
+    await expect(createNote(formData)).rejects.toThrow("没有内容管理权限");
+    expect(createNoteRecord).not.toHaveBeenCalled();
+  });
+
+  it("rejects settings mutations for moderators", async () => {
+    const { updateSiteSettings } = await import("@/features/admin/settings-actions");
+    const formData = new FormData();
+
+    getCurrentUserMock.mockResolvedValueOnce({
+      id: "moderator_1",
+      email: "moderator@example.com",
+      name: "Moderator",
+      role: "MODERATOR"
+    });
+    formData.set("title", "Like Zhizhi");
+    formData.set("slogan", "Slogan");
+    formData.set("description", "Description");
+    formData.set("togetherDate", "2026-05-16");
+    formData.set("footerText", "Footer");
+
+    await expect(updateSiteSettings(formData)).rejects.toThrow("没有设置管理权限");
+    expect(updateSite).not.toHaveBeenCalled();
+  });
+
+  it("rejects integration mutations for partners", async () => {
+    const { updateIntegrationSettings } = await import("@/features/admin/integration-actions");
+    const formData = new FormData();
+
+    getCurrentUserMock.mockResolvedValueOnce({
+      id: "partner_1",
+      email: "partner@example.com",
+      name: "Partner",
+      role: "PARTNER"
+    });
+
+    await expect(updateIntegrationSettings(formData)).rejects.toThrow("没有集成管理权限");
+    expect(upsertIntegrationSetting).not.toHaveBeenCalled();
+  });
+
+  it("allows moderators to moderate messages", async () => {
+    const { approveMessage } = await import("@/features/admin/message-actions");
+    const formData = new FormData();
+
+    getCurrentUserMock.mockResolvedValueOnce({
+      id: "moderator_1",
+      email: "moderator@example.com",
+      name: "Moderator",
+      role: "MODERATOR"
+    });
+    formData.set("id", "message_1");
+
+    await approveMessage(formData);
+
+    expect(updateMessageRecord).toHaveBeenCalledWith({
+      where: { id: "message_1" },
+      data: { status: "APPROVED" }
+    });
   });
 });

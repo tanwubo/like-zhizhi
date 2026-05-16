@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 export type AlbumActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -152,6 +153,8 @@ function revalidateAlbumPaths() {
 export async function createAlbumItem(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const input = parseAlbumInput(formData);
   if (!input) {
     return;
@@ -173,6 +176,8 @@ export async function createAlbumItem(formData: FormData): Promise<void> {
 
 export async function updateAlbumItem(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const input = parseAlbumInput(formData);
   if (!input?.id || !input.mediaId) {
@@ -196,6 +201,8 @@ export async function updateAlbumItem(formData: FormData): Promise<void> {
 
 export async function deleteAlbumItem(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const parsed = idSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

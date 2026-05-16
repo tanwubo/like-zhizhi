@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 export type MusicTrackActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -100,6 +101,8 @@ function revalidateMusicPaths() {
 export async function createMusicTrack(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const input = parseMusicTrackInput(formData);
   if (!input) {
     return;
@@ -112,6 +115,8 @@ export async function createMusicTrack(formData: FormData): Promise<void> {
 
 export async function updateMusicTrack(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const input = parseMusicTrackInput(formData);
   if (!input?.id) {
@@ -128,6 +133,8 @@ export async function updateMusicTrack(formData: FormData): Promise<void> {
 
 export async function deleteMusicTrack(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const parsed = idSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

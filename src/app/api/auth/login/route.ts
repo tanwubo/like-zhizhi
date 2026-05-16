@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
 
   const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
-  if (!user) {
+  if (!user || user.disabledAt) {
     return NextResponse.json({ message: "邮箱或密码不正确" }, { status: 401 });
   }
 

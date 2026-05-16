@@ -50,7 +50,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     include: { user: true }
   });
 
-  if (!session || session.expiresAt <= new Date()) {
+  if (!session || session.expiresAt <= new Date() || session.user.disabledAt) {
     return null;
   }
 

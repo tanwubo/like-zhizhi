@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 type ActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -83,6 +84,8 @@ export async function validateSiteSettings(formData: FormData): Promise<ActionRe
 }
 
 export async function updateSiteSettings(formData: FormData): Promise<void> {
+  await requireAdminCapability("settings");
+
   const parsed = siteSchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
@@ -116,6 +119,8 @@ export async function validateThemeSettings(formData: FormData): Promise<ActionR
 }
 
 export async function updateThemeSettings(formData: FormData): Promise<void> {
+  await requireAdminCapability("settings");
+
   const parsed = themeSchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
@@ -140,6 +145,8 @@ export async function updateThemeSettings(formData: FormData): Promise<void> {
 }
 
 export async function updatePersonProfile(formData: FormData): Promise<void> {
+  await requireAdminCapability("settings");
+
   const parsed = personSchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
@@ -159,6 +166,8 @@ export async function updatePersonProfile(formData: FormData): Promise<void> {
 }
 
 export async function updateModuleSettings(formData: FormData): Promise<void> {
+  await requireAdminCapability("settings");
+
   const ids = formData.getAll("moduleId").map(String);
   const enabledIds = new Set(formData.getAll("enabled").map(String));
 

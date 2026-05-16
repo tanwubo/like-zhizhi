@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 export type ChecklistActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -130,6 +131,8 @@ function revalidateChecklistPaths() {
 export async function createChecklistItem(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const input = parseChecklistInput(formData);
   if (!input) {
     return;
@@ -142,6 +145,8 @@ export async function createChecklistItem(formData: FormData): Promise<void> {
 
 export async function updateChecklistItem(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const input = parseChecklistInput(formData);
   if (!input?.id) {
@@ -158,6 +163,8 @@ export async function updateChecklistItem(formData: FormData): Promise<void> {
 
 export async function deleteChecklistItem(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const parsed = idSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

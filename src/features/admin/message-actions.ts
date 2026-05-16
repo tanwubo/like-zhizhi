@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 function getMessageId(formData: FormData) {
@@ -10,6 +11,8 @@ function getMessageId(formData: FormData) {
 }
 
 async function updateMessageStatus(formData: FormData, status: "APPROVED" | "HIDDEN") {
+  await requireAdminCapability("moderation");
+
   const id = getMessageId(formData);
 
   if (!id) {

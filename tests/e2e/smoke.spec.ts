@@ -271,3 +271,28 @@ test("seed owner can save integration settings", async ({ page }) => {
   await expect(page.getByText("配置已保存")).toBeVisible();
   await expect(page.getByLabel("地图服务 URL")).toHaveValue("https://restapi.amap.com");
 });
+
+test("seed owner can create a moderator", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const email = `moderator-${suffix}@example.com`;
+  const name = `端到端管理员 ${suffix}`;
+
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/users");
+  await expect(page.getByRole("heading", { name: "用户管理" })).toBeVisible();
+  await page.getByRole("link", { name: "新建用户" }).click();
+  await page.getByLabel("邮箱").fill(email);
+  await page.getByLabel("显示名称").fill(name);
+  await page.getByLabel("角色").selectOption("MODERATOR");
+  await page.getByLabel("登录密码").fill("Secret123!");
+  await page.getByRole("button", { name: "保存用户" }).click();
+
+  await expect(page).toHaveURL(/\/admin\/users$/);
+  await expect(page.getByText(name)).toBeVisible();
+  await expect(page.getByText(email)).toBeVisible();
+});

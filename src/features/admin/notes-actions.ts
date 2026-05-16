@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { normalizeNoteSlug } from "@/features/admin/notes-data";
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
 export type NoteActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
@@ -106,6 +107,8 @@ function revalidateNotePaths(slug?: string) {
 export async function createNote(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const input = parseNoteInput(formData);
   if (!input || (await slugExists(input.slug))) {
     return;
@@ -131,6 +134,8 @@ export async function createNote(formData: FormData): Promise<void> {
 
 export async function updateNote(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const input = parseNoteInput(formData);
   if (!input?.id || (await slugExists(input.slug, input.id))) {
@@ -158,6 +163,8 @@ export async function updateNote(formData: FormData): Promise<void> {
 
 export async function deleteNote(formData: FormData): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const parsed = idSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

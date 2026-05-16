@@ -9,6 +9,7 @@ import {
   readImageDimensions,
   validateExternalMediaInput
 } from "@/features/admin/media-utils";
+import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 import { storage } from "@/server/storage/s3-storage";
 
@@ -69,6 +70,8 @@ async function bufferFromUploadedFile(file: UploadedFile) {
 export async function registerExternalMedia(formData: FormData): Promise<void> {
   "use server";
 
+  await requireAdminCapability("content");
+
   const parsed = parseExternalMediaInput(formData);
   if (!parsed.ok) {
     return;
@@ -81,6 +84,8 @@ export async function registerExternalMedia(formData: FormData): Promise<void> {
 
 export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapter = storage): Promise<void> {
   "use server";
+
+  await requireAdminCapability("content");
 
   const file = fileFromFormData(formData);
   if (!file) {
