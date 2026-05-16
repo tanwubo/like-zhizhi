@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const updateSite = vi.fn(async () => ({ id: "site" }));
 const upsertTheme = vi.fn(async () => ({ id: "theme" }));
+const upsertIntegrationSetting = vi.fn(async () => ({ id: "integration_1" }));
+const findIntegrationSettings = vi.fn(async () => []);
 const createNoteRecord = vi.fn(async () => ({ id: "note_1" }));
 const updateNoteRecord = vi.fn(async () => ({ id: "note_1" }));
 const deleteNoteRecord = vi.fn(async () => ({ id: "note_1" }));
@@ -47,6 +49,7 @@ vi.mock("@/server/db/prisma", () => ({
     $transaction: transactionMock,
     siteSetting: { update: updateSite },
     themeSetting: { upsert: upsertTheme },
+    integrationSetting: { findMany: findIntegrationSettings, upsert: upsertIntegrationSetting },
     personProfile: { update: vi.fn(async () => ({ id: "person_1" })) },
     moduleSetting: { update: vi.fn(async () => ({ id: "module_1" })) },
     note: {
@@ -96,6 +99,9 @@ vi.mock("next/navigation", () => ({
 beforeEach(() => {
   updateSite.mockClear();
   upsertTheme.mockClear();
+  upsertIntegrationSetting.mockClear();
+  findIntegrationSettings.mockReset();
+  findIntegrationSettings.mockResolvedValue([]);
   createNoteRecord.mockClear();
   updateNoteRecord.mockClear();
   deleteNoteRecord.mockClear();
@@ -180,6 +186,120 @@ describe("admin settings actions", () => {
 
     expect(result.ok).toBe(false);
     expect(upsertTheme).not.toHaveBeenCalled();
+  });
+});
+
+describe("admin integration actions", () => {
+  it("saves enabled provider settings and encrypted secret-like fields", async () => {
+    const { updateIntegrationSettings } = await import("@/features/admin/integration-actions");
+    const formData = new FormData();
+
+    formData.set("mapEnabled", "on");
+    formData.set("mapProvider", "amap");
+    formData.set("mapApiBaseUrl", "https://restapi.amap.com");
+    formData.set("mapPublicKey", "public-map-key");
+    formData.set("mapSecretKey", "private-map-key");
+    formData.set("weatherEnabled", "on");
+    formData.set("weatherProvider", "openweather");
+    formData.set("weatherApiBaseUrl", "https://api.openweathermap.org");
+    formData.set("weatherApiKey", "weather-key");
+    formData.set("emailEnabled", "on");
+    formData.set("emailProvider", "smtp");
+    formData.set("emailHost", "smtp.example.com");
+    formData.set("emailPort", "465");
+    formData.set("emailFromEmail", "hello@example.com");
+    formData.set("emailUsername", "mailer");
+    formData.set("emailSmtpPassword", "smtp-secret");
+    formData.set("musicEnabled", "on");
+    formData.set("musicProvider", "netease");
+    formData.set("musicApiBaseUrl", "https://music.example.com");
+
+    await updateIntegrationSettings(formData);
+
+    expect(upsertIntegrationSetting).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { key: "map" },
+        create: expect.objectContaining({
+          key: "map",
+          enabled: true,
+          provider: "amap",
+          config: expect.objectContaining({
+            apiBaseUrl: "https://restapi.amap.com",
+            publicKey: "public-map-key"
+          }),
+          secrets: expect.objectContaining({
+            secretKey: expect.any(String)
+          })
+        })
+      })
+    );
+    expect(upsertIntegrationSetting).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { key: "email" },
+        update: expect.objectContaining({
+          enabled: true,
+          provider: "smtp",
+          config: expect.objectContaining({
+            host: "smtp.example.com",
+            port: 465,
+            fromEmail: "hello@example.com",
+            username: "mailer"
+          }),
+          secrets: expect.objectContaining({
+            smtpPassword: expect.any(String)
+          })
+        })
+      })
+    );
+    expect(JSON.stringify(upsertIntegrationSetting.mock.calls)).not.toContain("smtp-secret");
+    expect(JSON.stringify(upsertIntegrationSetting.mock.calls)).not.toContain("private-map-key");
+  });
+
+  it("preserves existing encrypted secrets when secret fields are blank", async () => {
+    const { encryptIntegrationSecret } = await import("@/features/admin/integration-utils");
+    const { updateIntegrationSettings } = await import("@/features/admin/integration-actions");
+    const existingSecret = encryptIntegrationSecret("already-stored");
+    const formData = new FormData();
+
+    findIntegrationSettings.mockResolvedValueOnce([
+      {
+        key: "weather",
+        enabled: true,
+        provider: "openweather",
+        config: {},
+        secrets: { apiKey: existingSecret }
+      }
+    ]);
+    formData.set("weatherEnabled", "on");
+    formData.set("weatherProvider", "openweather");
+    formData.set("weatherApiBaseUrl", "https://api.openweathermap.org");
+    formData.set("weatherApiKey", "");
+
+    await updateIntegrationSettings(formData);
+
+    expect(upsertIntegrationSetting).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { key: "weather" },
+        update: expect.objectContaining({
+          secrets: { apiKey: existingSecret }
+        })
+      })
+    );
+  });
+
+  it("does not save invalid provider URLs", async () => {
+    const { validateIntegrationSettings, updateIntegrationSettings } = await import("@/features/admin/integration-actions");
+    const formData = new FormData();
+
+    formData.set("mapEnabled", "on");
+    formData.set("mapProvider", "amap");
+    formData.set("mapApiBaseUrl", "broken");
+
+    const result = await validateIntegrationSettings(formData);
+    await updateIntegrationSettings(formData);
+
+    expect(result.ok).toBe(false);
+    expect(upsertIntegrationSetting).not.toHaveBeenCalled();
   });
 });
 

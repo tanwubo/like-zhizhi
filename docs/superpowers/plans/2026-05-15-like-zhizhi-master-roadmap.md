@@ -26,6 +26,7 @@
 - Phase 3 music plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-music-admin.md`
 - Phase 3 theme settings plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-theme-settings.md`
 - Phase 3 media center plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-media-center.md`
+- Phase 3 integrations plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-integrations.md`
 
 ## Progress Snapshot
 
@@ -45,7 +46,7 @@ Last updated: 2026-05-16
 | Music management | Done | Track CRUD, admin list/create/edit/delete, and enabled public player data read model. |
 | Theme settings | Done | Theme editor, validation, public CSS-variable theme application, background media, glass and animation flags. |
 | Media center upload | Done | Admin media center, external media registration, storage upload action, metadata helpers, and reusable admin media selector. |
-| Integrations | Not started | Map, weather, email, object storage, optional music provider settings. |
+| Integrations | Done | Admin integration settings, encrypted secret storage, object-storage environment status, and graceful disabled-provider defaults. |
 | Users and roles | Not started | User CRUD and role-based admin navigation refinement. |
 | Analytics and polish | Not started | Visit stats, SEO, sitemap, empty/error/loading states, deployment docs. |
 
@@ -235,6 +236,8 @@ Every future batch should follow this loop:
 
 ### Batch 7: Integrations
 
+**Status:** Done on 2026-05-16.
+
 **Goal:** Add configurable third-party integration settings with graceful fallback.
 
 **Routes:**
@@ -257,6 +260,10 @@ Every future batch should follow this loop:
 - Disabled or unconfigured integrations do not break public pages.
 - Configured integrations have clear admin feedback.
 - Full verification passes.
+
+**Notes:**
+- Object storage secrets remain environment-driven; the admin page displays configuration health without persisting S3 credentials in the database.
+- Provider secrets are encrypted before persistence and admin read models expose only configured/not-configured status.
 
 ### Batch 8: Users And Roles
 
@@ -322,7 +329,14 @@ When a task batch is completed:
 
 ### 2026-05-16
 
-Latest verified state after media center:
+Latest verified state after integrations:
+
+- `pnpm lint`: passed.
+- `pnpm test`: passed, 11 test files and 70 tests.
+- `pnpm build`: passed, including `/admin/integrations`.
+- `pnpm test:e2e`: passed, 16 Playwright tests.
+
+Previous verified state after media center:
 
 - `pnpm lint`: passed.
 - `pnpm test`: passed, 10 test files and 62 tests.
@@ -364,4 +378,5 @@ Latest verified state after footprint management:
 Known non-blocking log output:
 
 - Next.js dev server may print a future `allowedDevOrigins` warning during e2e.
+- Playwright dev-server shutdown may print a non-blocking `ECONNRESET aborted` line after all e2e tests pass.
 - A transient remote PostgreSQL connection error can appear in dev-server output when using the direct remote database, but the latest full e2e command exited 0 with all tests passing.

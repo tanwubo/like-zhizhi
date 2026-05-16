@@ -243,3 +243,31 @@ test("seed owner can register media in admin media center", async ({ page }) => 
   await expect(page).toHaveURL(/\/admin\/media$/);
   await expect(page.getByRole("link", { name: `e2e-media-${suffix}.jpg` })).toBeVisible();
 });
+
+test("seed owner can save integration settings", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/integrations");
+  await expect(page.getByRole("heading", { name: "集成配置" })).toBeVisible();
+  await page.getByLabel("启用地图服务").check();
+  await page.getByLabel("地图服务商").selectOption("amap");
+  await page.getByLabel("地图服务 URL").fill("https://restapi.amap.com");
+  await page.getByLabel("地图公开 Key").fill("e2e-public-map-key");
+  await page.getByLabel("启用天气服务").check();
+  await page.getByLabel("天气服务商").selectOption("openweather");
+  await page.getByLabel("天气服务 URL").fill("https://api.openweathermap.org");
+  await page.getByLabel("启用邮件通知").check();
+  await page.getByLabel("邮件服务商").selectOption("smtp");
+  await page.getByLabel("SMTP 主机").fill("smtp.example.com");
+  await page.getByLabel("SMTP 端口").fill("465");
+  await page.getByLabel("发件邮箱").fill("hello@example.com");
+  await page.getByRole("button", { name: "保存集成配置" }).click();
+
+  await expect(page).toHaveURL(/\/admin\/integrations$/);
+  await expect(page.getByText("配置已保存")).toBeVisible();
+  await expect(page.getByLabel("地图服务 URL")).toHaveValue("https://restapi.amap.com");
+});

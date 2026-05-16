@@ -104,6 +104,17 @@ model ModuleSetting {
   updatedAt   DateTime @updatedAt
 }
 
+model IntegrationSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  enabled   Boolean  @default(false)
+  provider  String   @default("none")
+  config    Json     @default("{}")
+  secrets   Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model MediaAsset {
   id          String      @id @default(cuid())
   type        MediaType
