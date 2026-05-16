@@ -5,6 +5,18 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const data = await getDashboardData();
+  const totalCards = [
+    ["点滴", data.totals.notes],
+    ["留言", data.totals.messages],
+    ["清单", data.totals.checklist],
+    ["相册", data.totals.album]
+  ] as const;
+  const analyticsCards = [
+    ["访问量", data.analytics.visits],
+    ["独立访客", data.analytics.uniqueVisitors],
+    ["今日留言", data.analytics.messages],
+    ["今日点滴", data.analytics.notes]
+  ] as const;
 
   return (
     <div className="grid gap-6">
@@ -13,9 +25,17 @@ export default async function AdminPage() {
         <p className="mt-2 text-sm text-ink/60">管理公开内容、站点配置和访客互动。</p>
       </div>
       <div className="grid gap-4 md:grid-cols-4">
-        {Object.entries(data.totals).map(([key, value]) => (
-          <Card key={key}>
-            <p className="text-sm text-ink/55">{key}</p>
+        {totalCards.map(([label, value]) => (
+          <Card key={label}>
+            <p className="text-sm text-ink/55">{label}</p>
+            <p className="mt-2 text-3xl font-semibold text-blush-700">{value}</p>
+          </Card>
+        ))}
+      </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        {analyticsCards.map(([label, value]) => (
+          <Card key={label}>
+            <p className="text-sm text-ink/55">{label}</p>
             <p className="mt-2 text-3xl font-semibold text-blush-700">{value}</p>
           </Card>
         ))}

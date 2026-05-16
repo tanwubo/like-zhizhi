@@ -66,6 +66,39 @@ test("seed owner can login to admin dashboard", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "管理概览" })).toBeVisible();
 });
 
+test("seed owner sees analytics cards on admin dashboard", async ({ page }) => {
+  await page.goto("/");
+  await page.goto("/notes");
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page.getByText("访问量")).toBeVisible();
+  await expect(page.getByText("独立访客")).toBeVisible();
+});
+
+test("admin delete confirmation asks before submitting", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("邮箱").fill("owner@example.com");
+  await page.getByLabel("密码").fill("ChangeMe123!");
+  await page.getByRole("button", { name: "登录" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+
+  await page.goto("/admin/content/notes");
+  await expect(page.getByRole("heading", { name: "点滴管理" })).toBeVisible();
+
+  page.on("dialog", async (dialog) => {
+    expect(dialog.type()).toBe("confirm");
+    expect(dialog.message()).toContain("确认删除");
+    await dialog.dismiss();
+  });
+
+  await page.getByRole("button", { name: "删除" }).first().click();
+  await expect(page).toHaveURL(/\/admin\/content\/notes$/);
+});
+
 test("seed owner can open message moderation", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("邮箱").fill("owner@example.com");

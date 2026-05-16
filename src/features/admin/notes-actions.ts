@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { normalizeNoteSlug } from "@/features/admin/notes-data";
+import { incrementDailyStat } from "@/server/analytics/visits";
 import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
@@ -127,6 +128,10 @@ export async function createNote(formData: FormData): Promise<void> {
       publishedAt: input.publishedAt
     }
   });
+
+  if (input.status === PublishStatus.PUBLISHED) {
+    await incrementDailyStat("notes");
+  }
 
   revalidateNotePaths(input.slug);
   redirect("/admin/content/notes");

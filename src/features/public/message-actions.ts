@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { incrementDailyStat } from "@/server/analytics/visits";
 import { prisma } from "@/server/db/prisma";
 
 export const visitorMessageSchema = z.object({
@@ -29,6 +30,8 @@ export async function createVisitorMessage(input: unknown): Promise<VisitorMessa
     },
     select: { id: true }
   });
+
+  await incrementDailyStat("messages");
 
   return { ok: true, id: message.id };
 }

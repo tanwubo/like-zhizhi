@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AdminSection } from "@/components/admin/admin-section";
+import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteFootprintPlace, deleteFootprintVisit } from "@/features/admin/footprint-actions";
 import { getAdminFootprintPlaces } from "@/features/admin/footprint-data";
 import { formatDateLabel } from "@/lib/date";
@@ -61,9 +62,9 @@ export default async function AdminFootprintsPage() {
                                 <p className="line-clamp-1 text-xs text-ink/50">{visit.description}</p>
                                 <form action={deleteFootprintVisit}>
                                   <input type="hidden" name="id" value={visit.id} />
-                                  <button className="text-xs text-ink/45 hover:text-blush-700" type="submit">
+                                  <DeleteButton className="text-xs text-ink/45 hover:text-blush-700">
                                     删除记录
-                                  </button>
+                                  </DeleteButton>
                                 </form>
                               </div>
                             </div>
@@ -84,9 +85,9 @@ export default async function AdminFootprintsPage() {
                         </Link>
                         <form action={deleteFootprintPlace}>
                           <input type="hidden" name="id" value={place.id} />
-                          <button className="text-ink/45 hover:text-blush-700" type="submit">
+                          <DeleteButton className="text-ink/45 hover:text-blush-700">
                             删除
-                          </button>
+                          </DeleteButton>
                         </form>
                       </div>
                     </td>

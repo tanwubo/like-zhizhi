@@ -2,6 +2,7 @@ import { MediaType, PublishStatus } from "@prisma/client";
 import Link from "next/link";
 
 import { AdminSection } from "@/components/admin/admin-section";
+import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteAlbumItem } from "@/features/admin/album-actions";
 import { getAdminAlbumItems } from "@/features/admin/album-data";
 import { formatDateLabel } from "@/lib/date";
@@ -72,9 +73,9 @@ export default async function AdminAlbumPage() {
                         </Link>
                         <form action={deleteAlbumItem}>
                           <input type="hidden" name="id" value={item.id} />
-                          <button className="text-ink/45 hover:text-blush-700" type="submit">
+                          <DeleteButton className="text-ink/45 hover:text-blush-700">
                             删除
-                          </button>
+                          </DeleteButton>
                         </form>
                       </div>
                     </td>

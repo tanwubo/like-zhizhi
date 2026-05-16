@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AdminSection } from "@/components/admin/admin-section";
+import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteMusicTrack } from "@/features/admin/music-actions";
 import { getAdminMusicTracks } from "@/features/admin/music-data";
 import { formatDateLabel } from "@/lib/date";
@@ -62,9 +63,9 @@ export default async function AdminMusicPage() {
                         </Link>
                         <form action={deleteMusicTrack}>
                           <input type="hidden" name="id" value={track.id} />
-                          <button className="text-ink/45 hover:text-blush-700" type="submit">
+                          <DeleteButton className="text-ink/45 hover:text-blush-700">
                             删除
-                          </button>
+                          </DeleteButton>
                         </form>
                       </div>
                     </td>

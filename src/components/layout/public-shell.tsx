@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
 import { PublicNav } from "@/components/public/public-nav";
+import { VisitTracker } from "@/components/public/visit-tracker";
 import type { AdminThemeSetting } from "@/features/admin/settings-data";
 
 type ModuleLink = {
@@ -46,6 +47,7 @@ export function PublicShell({
       className={theme?.enablePageAnimation === false ? "public-theme min-h-screen" : "public-theme theme-page-animation min-h-screen"}
       style={shellStyle}
     >
+      <VisitTracker />
       {theme?.backgroundVideoUrl ? (
         <video
           aria-hidden="true"

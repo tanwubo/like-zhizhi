@@ -28,6 +28,7 @@
 - Phase 3 media center plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-media-center.md`
 - Phase 3 integrations plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-integrations.md`
 - Phase 3 users and roles plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-3-users-roles.md`
+- Phase 4 analytics, SEO, and polish plan: `docs/superpowers/plans/2026-05-16-like-zhizhi-phase-4-analytics-seo-polish.md`
 
 ## Progress Snapshot
 
@@ -49,7 +50,7 @@ Last updated: 2026-05-16
 | Media center upload | Done | Admin media center, external media registration, storage upload action, metadata helpers, and reusable admin media selector. |
 | Integrations | Done | Admin integration settings, encrypted secret storage, object-storage environment status, and graceful disabled-provider defaults. |
 | Users and roles | Done | Owner-only user CRUD, password replacement, disable/enable flow, role-filtered navigation, and server-side mutation permission guards. |
-| Analytics and polish | Not started | Visit stats, SEO, sitemap, empty/error/loading states, deployment docs. |
+| Analytics and polish | Done | Visit beacon/API, daily stats, dashboard analytics cards, SEO metadata, sitemap, robots, delete confirmations, loading/error states, deployment docs. |
 
 ## Standard Execution Loop
 
@@ -301,6 +302,8 @@ Every future batch should follow this loop:
 
 ### Batch 9: Analytics, SEO, And Product Polish
 
+**Status:** Done on 2026-05-16.
+
 **Goal:** Complete the product experience and production readiness.
 
 **Scope:**
@@ -322,6 +325,12 @@ Every future batch should follow this loop:
 - Production deployment instructions are repeatable.
 - Full verification passes.
 
+**Notes:**
+- Public pages now send a non-blocking visit beacon to `/api/visits`; admin, API, framework asset, sitemap, and robots paths are ignored.
+- `VisitEvent` stores raw visits and `DailyStat` tracks daily visit, unique visitor, message, and note counters.
+- SEO metadata is generated from site settings; sitemap and robots use `APP_URL`.
+- Admin content deletes now require browser confirmation before submitting.
+
 ## Roadmap Maintenance Rules
 
 When a task batch is completed:
@@ -336,6 +345,13 @@ When a task batch is completed:
 ## Verification Log
 
 ### 2026-05-16
+
+Latest verified state after analytics, SEO, and product polish:
+
+- `pnpm lint`: passed.
+- `pnpm test`: passed, 14 test files and 96 tests.
+- `pnpm build`: passed, including `/api/visits`, `/robots.txt`, and `/sitemap.xml`.
+- `pnpm test:e2e`: passed, 19 Playwright tests.
 
 Latest verified state after users and roles:
 

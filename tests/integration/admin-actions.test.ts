@@ -33,6 +33,7 @@ const createUserRecord = vi.fn(async () => ({ id: "user_2" }));
 const updateUserRecord = vi.fn(async () => ({ id: "user_2" }));
 const findUserUniqueRecord = vi.fn(async () => null);
 const deleteUserSessions = vi.fn(async () => ({ count: 1 }));
+const upsertDailyStatRecord = vi.fn(async () => ({ id: "stat_1" }));
 const getCurrentUserMock = vi.fn(async () => ({
   id: "owner_1",
   email: "owner@example.com",
@@ -106,6 +107,9 @@ vi.mock("@/server/db/prisma", () => ({
     },
     session: {
       deleteMany: deleteUserSessions
+    },
+    dailyStat: {
+      upsert: upsertDailyStatRecord
     }
   }
 }));
@@ -159,6 +163,7 @@ beforeEach(() => {
   findUserUniqueRecord.mockReset();
   findUserUniqueRecord.mockResolvedValue(null);
   deleteUserSessions.mockClear();
+  upsertDailyStatRecord.mockClear();
   getCurrentUserMock.mockReset();
   getCurrentUserMock.mockResolvedValue({
     id: "owner_1",
