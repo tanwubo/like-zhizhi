@@ -10,6 +10,12 @@ The app needs:
 
 Use the ignored project-local `.env` for direct PostgreSQL and storage connection details. Docker Compose is available for disposable local services, but local development and e2e verification do not require Docker when `.env` points to reachable services.
 
+Related docs:
+
+- `docs/development/aliyun-oss-local-test.md`
+- `docs/development/production-deployment.md`
+- `docs/development/production-deployment.zh-CN.md`
+
 ## Commands
 
 ```powershell
