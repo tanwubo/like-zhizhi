@@ -1,11 +1,13 @@
 import { MediaType } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
+import Wave from "react-wavify";
 import type { CSSProperties, ReactNode } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { HomeAnimations } from "@/components/public/home-animations";
 import { HomeHeroCarousel } from "@/components/public/home-hero-carousel";
+import { AvatarMotionFrame, HeartPulse } from "@/components/public/home-motion";
 import { getHomeData } from "@/features/home/home-data";
 import { buildHomeHeroSlides } from "@/features/home/hero-slides";
 import { getPublicNavigation } from "@/features/public/navigation";
@@ -47,13 +49,13 @@ export default async function HomePage() {
     >
       <HomeAnimations />
       <div className="home-page min-h-[calc(100vh-60px)] bg-white text-[#243047]">
-        <section className="relative isolate min-h-[520px] overflow-hidden bg-[#dcefd5]">
+        <section className="relative isolate min-h-[676px] overflow-hidden bg-[#dcefd5]">
           <HomeHeroCarousel slides={heroSlides} />
-          <div className="mx-auto flex min-h-[450px] max-w-[1180px] flex-col items-center justify-center px-4 pb-24 pt-16 md:px-6">
+          <div className="mx-auto flex min-h-[585px] max-w-[1180px] flex-col items-center justify-center px-4 pb-32 pt-20 md:px-6">
             <p className="rounded-full bg-white/45 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#557247] shadow-sm backdrop-blur-md">
               {data.site.title}
             </p>
-            <div className="mt-10 grid w-full items-center gap-8 md:grid-cols-[1fr_auto_1fr]">
+            <div className="mt-10 grid w-full items-center gap-8 md:gap-[70px] md:grid-cols-[1fr_auto_1fr]">
               <div className="flex justify-center md:justify-end">
                 {people[0] ? <HeroPerson person={people[0]} align="right" /> : <EmptyHeroPerson label="主角 A" slot={1} />}
               </div>
@@ -61,9 +63,7 @@ export default async function HomePage() {
                 <div className="rounded-full bg-white/75 px-4 py-2 text-xs font-semibold text-[#557247] shadow-[0_12px_34px_rgba(61,86,54,0.16)] backdrop-blur-md">
                   相伴 {data.togetherDays.toLocaleString("zh-CN")} 天
                 </div>
-                <div className="grid size-16 place-items-center rounded-full bg-[#ff5f86] text-3xl text-white shadow-[0_16px_40px_rgba(255,95,134,0.32)]">
-                  ♥
-                </div>
+                <HeartPulse />
                 <p className="rounded-full bg-white/70 px-3 py-1 text-xs text-[#557247] backdrop-blur-md">From {togetherDate}</p>
               </div>
               <div className="flex justify-center md:justify-start">
@@ -71,7 +71,35 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-white [clip-path:ellipse(76%_70%_at_50%_100%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-[67px] overflow-hidden">
+            <Wave
+              fill="#fff"
+              className="absolute inset-0 opacity-100"
+              options={{
+                speed: 0.2,
+                amplitude: 50,
+                points: 3
+              }}
+            />
+            <Wave
+              fill="#fff"
+              className="absolute inset-0 opacity-50"
+              options={{
+                speed: 0.21,
+                amplitude: 49,
+                points: 4
+              }}
+            />
+            <Wave
+              fill="#fff"
+              className="absolute inset-0 opacity-30"
+              options={{
+                speed: 0.19,
+                amplitude: 51,
+                points: 5
+              }}
+            />
+          </div>
         </section>
 
         <section className="mx-auto max-w-[980px] px-4 pb-10 pt-10 text-center md:px-6">
@@ -289,11 +317,13 @@ function HeroPerson({ person, align }: { person: Partner; align: "left" | "right
 
   return (
     <div className={["home-hero-person flex flex-col items-center", align === "left" ? "from-right" : "from-left"].join(" ")}>
-      <div className="relative grid size-32 place-items-center rounded-full border-[8px] border-white/80 bg-white/75 shadow-[0_18px_50px_rgba(61,86,54,0.18)] backdrop-blur-sm md:size-40">
+      <AvatarMotionFrame>
+        <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#ff9a9e,#fad0c4,#fad0c4,#ff9a9e)] opacity-75 blur-[2px]" />
+        <div className="absolute inset-[4px] rounded-full bg-white/80" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={avatarSrc} alt={person.displayName} className="size-full rounded-full object-cover" />
-        <span className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.36),transparent_48%,rgba(255,255,255,0.18))]" />
-      </div>
+        <img src={avatarSrc} alt={person.displayName} className="absolute inset-[8px] z-10 size-[calc(100%-16px)] rounded-full object-cover" />
+        <span className="pointer-events-none absolute inset-[8px] z-20 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.36),transparent_48%,rgba(255,255,255,0.18))]" />
+      </AvatarMotionFrame>
       <div className="mt-3 rounded-full border border-white/55 bg-white/24 px-5 py-1.5 text-sm font-bold text-white shadow-[0_14px_34px_rgba(61,86,54,0.2),inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-xl">
         {person.displayName}
       </div>
