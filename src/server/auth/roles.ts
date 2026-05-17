@@ -20,6 +20,7 @@ const adminNavGroups: AdminNavGroup[] = [
     label: "内容管理",
     items: [
       { label: "媒体中心", href: "/admin/media", capability: "content" },
+      { label: "轮播图", href: "/admin/content/carousel", capability: "content" },
       { label: "点滴", href: "/admin/content/notes", capability: "content" },
       { label: "留言审核", href: "/admin/content/messages", capability: "moderation" },
       { label: "足迹", href: "/admin/content/footprints", capability: "content" },

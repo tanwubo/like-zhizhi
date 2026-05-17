@@ -15,6 +15,7 @@ export async function getHomeData() {
     latestMessages,
     checklistPreview,
     albumPreview,
+    carouselSlides,
     footprintPreview,
     loveDayPreview,
     messageCount,
@@ -74,6 +75,19 @@ export async function getHomeData() {
         take: 3,
         include: { media: true }
       }),
+      prisma.carouselSlide.findMany({
+        where: { enabled: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        take: 4,
+        select: {
+          id: true,
+          title: true,
+          imageUrl: true,
+          linkUrl: true,
+          description: true,
+          sortOrder: true
+        }
+      }),
       prisma.footprintPlace.findMany({
         orderBy: { createdAt: "desc" },
         take: 4,
@@ -113,6 +127,7 @@ export async function getHomeData() {
     latestMessages,
     checklistPreview,
     albumPreview,
+    carouselSlides,
     footprintPreview,
     loveDayPreview,
     messageCount,

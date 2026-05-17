@@ -44,6 +44,7 @@ describe("role permissions", () => {
     const moderatorLinks = getVisibleAdminNavGroups("MODERATOR").flatMap((group) => group.items.map((item) => item.href));
 
     expect(ownerLinks).toContain("/admin/users");
+    expect(ownerLinks).toContain("/admin/content/carousel");
     expect(ownerLinks).toContain("/admin/settings/site");
     expect(ownerLinks).toContain("/admin/content/messages");
     expect(moderatorLinks).toContain("/admin/content/messages");

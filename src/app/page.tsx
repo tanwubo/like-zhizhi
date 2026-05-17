@@ -6,6 +6,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { PublicShell } from "@/components/layout/public-shell";
 import { HomeAnimations } from "@/components/public/home-animations";
 import { getHomeData } from "@/features/home/home-data";
+import { buildHomeHeroSlides } from "@/features/home/hero-slides";
 import { getPublicNavigation } from "@/features/public/navigation";
 import { formatDateLabel } from "@/lib/date";
 
@@ -19,11 +20,12 @@ export default async function HomePage() {
   const [data, navigation] = await Promise.all([getHomeData(), getPublicNavigation()]);
   const people = data.people.slice(0, 2);
   const togetherDate = formatDateLabel(data.site.togetherDate);
-  const heroStyle = data.theme.backgroundImageUrl
-    ? ({
-        backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.2)), url("${data.theme.backgroundImageUrl}")`
-      } as CSSProperties)
-    : undefined;
+  const heroSlides = buildHomeHeroSlides({
+    carouselSlides: data.carouselSlides,
+    backgroundImageUrl: data.theme.backgroundImageUrl,
+    albumItems: data.albumPreview,
+    limit: 4
+  });
 
   const statCards = [
     { label: "相伴", value: data.togetherDays, suffix: "days", tone: "blue" },
@@ -44,8 +46,8 @@ export default async function HomePage() {
     >
       <HomeAnimations />
       <div className="home-page min-h-[calc(100vh-60px)] bg-white text-[#243047]">
-        <section className="relative isolate min-h-[520px] overflow-hidden bg-[#dcefd5] bg-cover bg-center" style={heroStyle}>
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(255,249,219,0.55)_0%,rgba(255,255,255,0.08)_45%,rgba(79,126,75,0.3)_100%),radial-gradient(circle_at_50%_22%,rgba(255,255,255,0.7),transparent_30%)]" />
+        <section className="relative isolate min-h-[520px] overflow-hidden bg-[#dcefd5]">
+          <HeroCarouselBackground slides={heroSlides} />
           <div className="mx-auto flex min-h-[450px] max-w-[1180px] flex-col items-center justify-center px-4 pb-24 pt-16 md:px-6">
             <p className="rounded-full bg-white/45 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#557247] shadow-sm backdrop-blur-md">
               {data.site.title}
@@ -246,6 +248,34 @@ export default async function HomePage() {
         </section>
       </div>
     </PublicShell>
+  );
+}
+
+function HeroCarouselBackground({ slides }: { slides: string[] }) {
+  return (
+    <div className={["absolute inset-0 -z-10 overflow-hidden", `home-hero-slides-${slides.length}`].join(" ")}>
+      {slides.length ? (
+        slides.map((slide, index) => (
+          <div
+            key={slide}
+            className={[
+              "home-hero-slide absolute inset-0 bg-cover bg-center",
+              slides.length > 1 ? "home-hero-slide-animated" : ""
+            ].join(" ")}
+            style={
+              {
+                backgroundImage: `url("${slide}")`,
+                "--home-slide-index": index,
+                "--home-slide-count": slides.length
+              } as CSSProperties
+            }
+          />
+        ))
+      ) : (
+        <div className="absolute inset-0 bg-[#dcefd5]" />
+      )}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,249,219,0.55)_0%,rgba(255,255,255,0.08)_45%,rgba(79,126,75,0.3)_100%),radial-gradient(circle_at_50%_22%,rgba(255,255,255,0.7),transparent_30%)]" />
+    </div>
   );
 }
 
