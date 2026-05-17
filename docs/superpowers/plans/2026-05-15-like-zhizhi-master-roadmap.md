@@ -1,5 +1,7 @@
 # Like Zhizhi Master Roadmap
 
+中文版本：`docs/superpowers/plans/2026-05-15-like-zhizhi-master-roadmap.zh-CN.md`
+
 > This is the project-level control document. Update it whenever a phase or major task batch is completed, deferred, or re-scoped.
 
 **Goal:** Track the full rebuild of the Like Zhizhi Pro-like product from foundation to production polish.
