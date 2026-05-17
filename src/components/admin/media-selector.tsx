@@ -11,11 +11,13 @@ export type MediaSelectorAsset = {
 export function MediaSelector({
   assets,
   targetName,
+  targetId,
   label = "从媒体中心选择",
   mode = "replace"
 }: {
   assets: MediaSelectorAsset[];
   targetName: string;
+  targetId?: string;
   label?: string;
   mode?: "replace" | "appendMarkdown";
 }) {
@@ -24,7 +26,10 @@ export function MediaSelector({
   }
 
   function applyAsset(asset: MediaSelectorAsset) {
-    const field = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${targetName}"]`);
+    const field = (
+      (targetId ? document.getElementById(targetId) : null) ??
+      document.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${targetName}"]`)
+    ) as HTMLInputElement | HTMLTextAreaElement | null;
     if (!field) {
       return;
     }

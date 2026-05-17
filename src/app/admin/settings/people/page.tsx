@@ -1,12 +1,14 @@
 import { AdminSection } from "@/components/admin/admin-section";
+import { MediaSelector } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { getAdminMediaAssets } from "@/features/admin/media-data";
 import { updatePersonProfile } from "@/features/admin/settings-actions";
 import { getAdminSettingsData } from "@/features/admin/settings-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPeopleSettingsPage() {
-  const { people } = await getAdminSettingsData();
+  const [{ people }, mediaAssets] = await Promise.all([getAdminSettingsData(), getAdminMediaAssets()]);
 
   return (
     <div className="grid gap-6">
@@ -27,6 +29,23 @@ export default async function AdminPeopleSettingsPage() {
                 所在地
                 <input name="location" defaultValue={person.location ?? ""} className="rounded-md border border-blush-100 px-3 py-2" />
               </label>
+              <label className="grid gap-2 text-sm text-ink/70">
+                头像地址
+                <input
+                  id={`avatarUrl-${person.id}`}
+                  name="avatarUrl"
+                  defaultValue={person.avatarUrl ?? ""}
+                  placeholder="https://example.com/avatar.jpg"
+                  className="rounded-md border border-blush-100 px-3 py-2"
+                  type="url"
+                />
+              </label>
+              <MediaSelector
+                assets={mediaAssets}
+                targetId={`avatarUrl-${person.id}`}
+                targetName="avatarUrl"
+                label="从媒体中心选择头像"
+              />
               <label className="grid gap-2 text-sm text-ink/70">
                 简介
                 <textarea name="bio" defaultValue={person.bio} className="min-h-24 rounded-md border border-blush-100 px-3 py-2" />

@@ -38,6 +38,7 @@ const themeSchema = z.object({
 const personSchema = z.object({
   id: z.string().min(1),
   displayName: z.string().trim().min(1, "名称不能为空").max(40, "名称最多 40 个字符"),
+  avatarUrl: optionalUrl,
   location: z.string().trim().optional(),
   bio: z.string().trim().max(300, "简介最多 300 个字符")
 });
@@ -54,6 +55,7 @@ function resultFromError(error: z.ZodError): ActionResult {
 
 function refreshAdminAndPublic() {
   revalidatePath("/");
+  revalidatePath("/about");
   revalidatePath("/admin");
   revalidatePath("/admin/settings/site");
   revalidatePath("/admin/settings/people");
@@ -157,6 +159,7 @@ export async function updatePersonProfile(formData: FormData): Promise<void> {
     where: { id: parsed.data.id },
     data: {
       displayName: parsed.data.displayName,
+      avatarUrl: parsed.data.avatarUrl || null,
       location: parsed.data.location || null,
       bio: parsed.data.bio
     }
