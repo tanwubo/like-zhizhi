@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const optionalUrl = z.preprocess((value) => (value === "" ? undefined : value), z.string().url().optional());
+
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   APP_URL: z.string().url().default("http://localhost:3000"),
@@ -11,7 +13,13 @@ const envSchema = z.object({
   S3_ACCESS_KEY_ID: z.string().default("like_zhizhi"),
   S3_SECRET_ACCESS_KEY: z.string().default("like_zhizhi_secret"),
   S3_FORCE_PATH_STYLE: z.coerce.boolean().default(true),
-  NEXT_PUBLIC_STORAGE_PUBLIC_URL: z.string().url().default("http://localhost:9000/like-zhizhi")
+  NEXT_PUBLIC_STORAGE_PUBLIC_URL: optionalUrl
 });
 
-export const env = envSchema.parse(process.env);
+const parsedEnv = envSchema.parse(process.env);
+
+export const env = {
+  ...parsedEnv,
+  NEXT_PUBLIC_STORAGE_PUBLIC_URL:
+    parsedEnv.NEXT_PUBLIC_STORAGE_PUBLIC_URL ?? `${parsedEnv.APP_URL.replace(/\/+$/, "")}/api/media`
+};

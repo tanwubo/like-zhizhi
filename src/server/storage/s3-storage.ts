@@ -1,9 +1,9 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { joinPublicUrl } from "@/lib/public-url";
 import { env } from "@/server/config/env";
 
 type SendableClient = {
-  send(command: PutObjectCommand): Promise<unknown>;
+  send(command: GetObjectCommand | PutObjectCommand): Promise<unknown>;
 };
 
 export type PutObjectInput = {
@@ -11,6 +11,16 @@ export type PutObjectInput = {
   body: Buffer | Uint8Array | string;
   contentType: string;
 };
+
+export function resolveStoragePublicBaseUrl({
+  appUrl,
+  publicBaseUrl
+}: {
+  appUrl: string;
+  publicBaseUrl?: string;
+}) {
+  return publicBaseUrl?.replace(/\/+$/, "") || joinPublicUrl(appUrl, "/api/media");
+}
 
 export function createS3Client() {
   return new S3Client({
@@ -49,6 +59,24 @@ export function createStorageAdapter({
         key: input.key,
         publicUrl: joinPublicUrl(publicBaseUrl, input.key)
       };
+    },
+    async getObject(key: string) {
+      const result = (await client.send(
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: key
+        })
+      )) as {
+        Body?: unknown;
+        ContentType?: string;
+        ContentLength?: number;
+      };
+
+      return {
+        body: result.Body,
+        contentType: result.ContentType,
+        contentLength: result.ContentLength
+      };
     }
   };
 }
@@ -56,5 +84,8 @@ export function createStorageAdapter({
 export const storage = createStorageAdapter({
   client: createS3Client(),
   bucket: env.S3_BUCKET,
-  publicBaseUrl: env.NEXT_PUBLIC_STORAGE_PUBLIC_URL
+  publicBaseUrl: resolveStoragePublicBaseUrl({
+    appUrl: env.APP_URL,
+    publicBaseUrl: env.NEXT_PUBLIC_STORAGE_PUBLIC_URL
+  })
 });

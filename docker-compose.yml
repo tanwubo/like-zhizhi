@@ -45,7 +45,7 @@ services:
       S3_ACCESS_KEY_ID: like_zhizhi
       S3_SECRET_ACCESS_KEY: like_zhizhi_secret
       S3_FORCE_PATH_STYLE: "true"
-      NEXT_PUBLIC_STORAGE_PUBLIC_URL: http://localhost:9000/like-zhizhi
+      NEXT_PUBLIC_STORAGE_PUBLIC_URL: ${NEXT_PUBLIC_STORAGE_PUBLIC_URL:-}
       SEED_OWNER_EMAIL: owner@example.com
       SEED_OWNER_PASSWORD: ChangeMe123!
     ports:
