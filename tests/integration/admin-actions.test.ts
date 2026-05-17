@@ -184,6 +184,46 @@ describe("admin settings actions", () => {
     expect(updateSite).not.toHaveBeenCalled();
   });
 
+  it("updates the public together date from site settings", async () => {
+    const { updateSiteSettings } = await import("@/features/admin/settings-actions");
+    const formData = new FormData();
+
+    formData.set("title", "Like Zhizhi");
+    formData.set("slogan", "Slogan");
+    formData.set("description", "Description");
+    formData.set("togetherDate", "2026-05-16");
+    formData.set("footerText", "Footer");
+    formData.set("seoKeywords", "like,zhizhi");
+
+    await updateSiteSettings(formData);
+
+    expect(updateSite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "site" },
+        data: expect.objectContaining({
+          togetherDate: new Date("2026-05-16T00:00:00+08:00")
+        })
+      })
+    );
+  });
+
+  it("does not update site settings for invalid together dates", async () => {
+    const { validateSiteSettings, updateSiteSettings } = await import("@/features/admin/settings-actions");
+    const formData = new FormData();
+
+    formData.set("title", "Like Zhizhi");
+    formData.set("slogan", "Slogan");
+    formData.set("description", "Description");
+    formData.set("togetherDate", "2026-02-31");
+    formData.set("footerText", "Footer");
+
+    const result = await validateSiteSettings(formData);
+
+    expect(result.ok).toBe(false);
+    await updateSiteSettings(formData);
+    expect(updateSite).not.toHaveBeenCalled();
+  });
+
   it("updates theme settings with media and effect flags", async () => {
     const { updateThemeSettings } = await import("@/features/admin/settings-actions");
     const formData = new FormData();

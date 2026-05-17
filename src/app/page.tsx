@@ -102,7 +102,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-[980px] px-4 pb-10 pt-10 text-center md:px-6">
+        <section className="mx-auto max-w-[1372px] px-4 pb-10 pt-10 text-center md:px-6">
           <div className="mx-auto mb-8 flex w-fit items-center gap-3 rounded-full bg-[#fff2f5] px-5 py-2 text-xs font-semibold text-[#ff5f86]">
             <span className="size-2 rounded-full bg-[#ff5f86]" />
             收好我们的日常
@@ -130,7 +130,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-[980px] gap-3 px-4 pb-12 sm:grid-cols-2 md:px-6 lg:grid-cols-3">
+        <section className="mx-auto grid max-w-[1372px] gap-3 px-4 pb-12 sm:grid-cols-2 md:px-6 lg:grid-cols-3">
           {statCards.map((item, index) => (
             <Link
               key={item.label}
@@ -368,7 +368,7 @@ function HomeSection({
   children: ReactNode;
 }) {
   return (
-    <section className="home-reveal mx-auto max-w-[980px] px-4 pb-14 md:px-6">
+    <section className="home-reveal mx-auto max-w-[1372px] px-4 pb-14 md:px-6">
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="grid size-6 place-items-center rounded-full bg-[#ffeff3] text-xs font-bold text-[#ff5f86]">+</span>

@@ -1,35 +1,104 @@
 "use client";
 
-import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState, type ReactNode } from "react";
+
+const heartParticles = [
+  { x: -92, y: -84, rotate: -24, delay: 0 },
+  { x: -36, y: -116, rotate: -8, delay: 0.03 },
+  { x: 36, y: -116, rotate: 8, delay: 0.06 },
+  { x: 92, y: -84, rotate: 24, delay: 0.09 },
+  { x: -108, y: 0, rotate: -18, delay: 0.05 },
+  { x: 108, y: 0, rotate: 18, delay: 0.08 },
+  { x: -56, y: 76, rotate: -12, delay: 0.1 },
+  { x: 56, y: 76, rotate: 12, delay: 0.13 }
+];
 
 export function HeartPulse() {
+  const [burstId, setBurstId] = useState(0);
+
+  useEffect(() => {
+    if (!burstId) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setBurstId(0);
+    }, 1400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [burstId]);
+
   return (
-    <motion.div
-      className="grid size-16 cursor-pointer place-items-center rounded-full bg-[#ff5f86] text-3xl text-white shadow-[0_16px_40px_rgba(255,95,134,0.32)]"
-      animate={{
-        scale: [1, 1.08, 1],
-        boxShadow: [
-          "0 16px 40px rgba(255,95,134,0.32)",
-          "0 20px 50px rgba(255,95,134,0.5)",
-          "0 16px 40px rgba(255,95,134,0.32)"
-        ]
-      }}
-      transition={{
-        duration: 2.5,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-      whileTap={{
-        scale: 0.9,
-        transition: { duration: 0.15 }
-      }}
-      onClick={() => {
-        console.log("Heart clicked");
-      }}
-    >
-      ♥
-    </motion.div>
+    <div className="relative grid place-items-center">
+      <AnimatePresence>
+        {burstId ? (
+          <motion.div
+            key={burstId}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-0 grid place-items-center"
+            data-testid="heart-burst"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {heartParticles.map((particle, index) => (
+              <motion.span
+                key={`${burstId}-${index}`}
+                className="absolute text-[28px] text-[#ff5f86]"
+                data-testid="heart-particle"
+                initial={{ opacity: 0, scale: 0.2, x: 0, y: 0, rotate: 0 }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  scale: [0.2, 1.35, 0.75],
+                  x: particle.x,
+                  y: particle.y,
+                  rotate: particle.rotate
+                }}
+                transition={{
+                  delay: particle.delay,
+                  duration: 1.15,
+                  ease: "easeOut"
+                }}
+              >
+                {"\u2665"}
+              </motion.span>
+            ))}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      <motion.button
+        type="button"
+        aria-label="heart animation"
+        className="relative z-10 grid size-[38px] cursor-pointer place-items-center rounded-full border-0 bg-[#ff5f86] text-[18px] text-white shadow-[0_10px_28px_rgba(255,95,134,0.34)] outline-none ring-[#ff9ab3]/90 transition focus-visible:ring-8"
+        animate={{
+          scale: [1, 1.16, 1],
+          boxShadow: [
+            "0 10px 28px rgba(255,95,134,0.34)",
+            "0 22px 78px rgba(255,95,134,0.84)",
+            "0 10px 28px rgba(255,95,134,0.34)"
+          ]
+        }}
+        transition={{
+          duration: 1.65,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        whileHover={{
+          scale: 1.28,
+          boxShadow: "0 28px 92px rgba(255,95,134,0.9)"
+        }}
+        whileTap={{
+          scale: 0.82,
+          transition: { duration: 0.12 }
+        }}
+        onClick={() => {
+          setBurstId((current) => current + 1);
+        }}
+      >
+        {"\u2665"}
+      </motion.button>
+    </div>
   );
 }
 

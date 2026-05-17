@@ -8,7 +8,35 @@ import { prisma } from "@/server/db/prisma";
 
 type ActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
 
+function isValidDateInput(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return date.getUTCFullYear() === year && date.getUTCMonth() + 1 === month && date.getUTCDate() === day;
+}
+
+const dateInputSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid together date")
+  .refine(isValidDateInput, "Invalid together date")
+  .transform((value, context) => {
+    const date = new Date(`${value}T00:00:00+08:00`);
+
+    if (Number.isNaN(date.getTime())) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid together date"
+      });
+
+      return z.NEVER;
+    }
+
+    return date;
+  });
+
 const siteSchema = z.object({
+  togetherDate: dateInputSchema,
   title: z.string().trim().min(1, "站点名称不能为空").max(80, "站点名称最多 80 个字符"),
   slogan: z.string().trim().min(1, "标语不能为空").max(120, "标语最多 120 个字符"),
   description: z.string().trim().min(1, "描述不能为空").max(500, "描述最多 500 个字符"),
@@ -100,6 +128,7 @@ export async function updateSiteSettings(formData: FormData): Promise<void> {
       title: parsed.data.title,
       slogan: parsed.data.slogan,
       description: parsed.data.description,
+      togetherDate: parsed.data.togetherDate,
       footerText: parsed.data.footerText,
       icpText: parsed.data.icpText || null,
       policeText: parsed.data.policeText || null,
