@@ -17,11 +17,17 @@ body {
   background:
     radial-gradient(circle at top left, rgba(244, 93, 122, 0.16), transparent 34rem),
     linear-gradient(180deg, #fff6f7 0%, #ffffff 52%, #fff6f7 100%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .public-theme {
   background-position: center;
   background-size: cover;
+}
+
+.home-public-shell {
+  background: #f5f5f7;
 }
 
 .public-theme a:focus-visible,

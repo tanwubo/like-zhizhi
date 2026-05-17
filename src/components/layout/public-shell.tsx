@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { PublicNav } from "@/components/public/public-nav";
 import { VisitTracker } from "@/components/public/visit-tracker";
 import type { AdminThemeSetting } from "@/features/admin/settings-data";
+import { cn } from "@/lib/cn";
 
 type ModuleLink = {
   key: string;
@@ -27,12 +28,14 @@ export function PublicShell({
   footerText,
   modules,
   theme,
+  variant = "default",
   children
 }: {
   title: string;
   footerText?: string;
   modules: ModuleLink[];
   theme?: AdminThemeSetting;
+  variant?: "default" | "home";
   children: ReactNode;
 }) {
   const shellStyle = {
@@ -44,7 +47,11 @@ export function PublicShell({
 
   return (
     <div
-      className={theme?.enablePageAnimation === false ? "public-theme min-h-screen" : "public-theme theme-page-animation min-h-screen"}
+      className={cn(
+        "public-theme min-h-screen",
+        theme?.enablePageAnimation === false ? "" : "theme-page-animation",
+        variant === "home" ? "home-public-shell" : ""
+      )}
       style={shellStyle}
     >
       <VisitTracker />
@@ -61,12 +68,33 @@ export function PublicShell({
           <track kind="captions" />
         </video>
       ) : null}
-      <div className={theme?.enableGlassEffect === false ? "" : "theme-glass"}>
-        <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-          <Link href="/" className="text-lg font-semibold text-ink">
-            {title}
+      <div className={theme?.enableGlassEffect === false || variant === "home" ? "" : "theme-glass"}>
+        <header
+          className={cn(
+            "mx-auto flex items-center justify-between",
+            variant === "home"
+              ? "sticky top-0 z-50 h-[60px] max-w-none border-b border-[#d2d2d7]/80 bg-[#f5f5f7]/75 px-4 backdrop-blur-xl md:px-6"
+              : "max-w-6xl px-4 py-5"
+          )}
+        >
+          <Link
+            href="/"
+            className={cn(
+              "font-semibold",
+              variant === "home"
+                ? "flex items-center gap-2 text-[17px] text-[#1d1d1f]"
+                : "text-lg text-ink"
+            )}
+          >
+            {variant === "home" ? (
+              <span className="grid size-8 place-items-center rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] text-xs font-bold text-white">
+                LZ
+              </span>
+            ) : null}
+            <span>{title}</span>
           </Link>
           <PublicNav
+            variant={variant}
             items={modules.map((module) => ({
               ...module,
               href: module.href ?? hrefByKey[module.key] ?? "/"
@@ -74,7 +102,12 @@ export function PublicShell({
           />
         </header>
         <main>{children}</main>
-        <footer className="mx-auto max-w-6xl px-4 py-10 text-center text-sm text-ink/50">
+        <footer
+          className={cn(
+            "mx-auto px-4 py-10 text-center text-sm",
+            variant === "home" ? "max-w-[1200px] text-[#86868b]" : "max-w-6xl text-ink/50"
+          )}
+        >
           {footerText ?? title}
         </footer>
       </div>
