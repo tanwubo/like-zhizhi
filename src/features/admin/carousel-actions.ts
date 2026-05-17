@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { resolveCarouselSlideMoveOrder } from "@/features/admin/carousel-order";
 import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
 
@@ -34,6 +35,10 @@ const carouselSchema = z.object({
 
 const idSchema = z.object({
   id: z.string().trim().min(1)
+});
+
+const moveSchema = idSchema.extend({
+  direction: z.enum(["up", "down"])
 });
 
 function resultFromError(error: z.ZodError): CarouselActionResult {
@@ -126,6 +131,38 @@ export async function deleteCarouselSlide(formData: FormData): Promise<void> {
   }
 
   await prisma.carouselSlide.delete({ where: { id: parsed.data.id } });
+  revalidateCarouselPaths();
+  redirect("/admin/content/carousel");
+}
+
+export async function moveCarouselSlide(formData: FormData): Promise<void> {
+  "use server";
+
+  await requireAdminCapability("content");
+
+  const parsed = moveSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return;
+  }
+
+  const slides = await prisma.carouselSlide.findMany({
+    select: { id: true, sortOrder: true, updatedAt: true },
+    orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }]
+  });
+  const updates = resolveCarouselSlideMoveOrder(slides, parsed.data.id, parsed.data.direction);
+
+  if (!updates.length) {
+    return;
+  }
+
+  await prisma.$transaction(
+    updates.map((slide) =>
+      prisma.carouselSlide.update({
+        where: { id: slide.id },
+        data: { sortOrder: slide.sortOrder }
+      })
+    )
+  );
   revalidateCarouselPaths();
   redirect("/admin/content/carousel");
 }

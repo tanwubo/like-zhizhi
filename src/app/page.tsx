@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { HomeAnimations } from "@/components/public/home-animations";
+import { HomeHeroCarousel } from "@/components/public/home-hero-carousel";
 import { getHomeData } from "@/features/home/home-data";
 import { buildHomeHeroSlides } from "@/features/home/hero-slides";
 import { getPublicNavigation } from "@/features/public/navigation";
@@ -47,7 +48,7 @@ export default async function HomePage() {
       <HomeAnimations />
       <div className="home-page min-h-[calc(100vh-60px)] bg-white text-[#243047]">
         <section className="relative isolate min-h-[520px] overflow-hidden bg-[#dcefd5]">
-          <HeroCarouselBackground slides={heroSlides} />
+          <HomeHeroCarousel slides={heroSlides} />
           <div className="mx-auto flex min-h-[450px] max-w-[1180px] flex-col items-center justify-center px-4 pb-24 pt-16 md:px-6">
             <p className="rounded-full bg-white/45 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#557247] shadow-sm backdrop-blur-md">
               {data.site.title}
@@ -58,7 +59,7 @@ export default async function HomePage() {
               </div>
               <div className="home-heart flex flex-col items-center gap-3">
                 <div className="rounded-full bg-white/75 px-4 py-2 text-xs font-semibold text-[#557247] shadow-[0_12px_34px_rgba(61,86,54,0.16)] backdrop-blur-md">
-                  相伴 {data.togetherDays.toLocaleString("zh-CN")} km
+                  相伴 {data.togetherDays.toLocaleString("zh-CN")} 天
                 </div>
                 <div className="grid size-16 place-items-center rounded-full bg-[#ff5f86] text-3xl text-white shadow-[0_16px_40px_rgba(255,95,134,0.32)]">
                   ♥
@@ -101,7 +102,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-[980px] gap-3 px-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 md:px-6">
+        <section className="mx-auto grid max-w-[980px] gap-3 px-4 pb-12 sm:grid-cols-2 md:px-6 lg:grid-cols-3">
           {statCards.map((item, index) => (
             <Link
               key={item.label}
@@ -130,7 +131,7 @@ export default async function HomePage() {
                 style={revealDelay(index)}
                 className={[
                   "home-reveal rounded-[14px] p-5 text-white shadow-[0_14px_34px_rgba(36,48,71,0.1)] transition hover:-translate-y-1",
-                  index === 0 ? "md:col-span-2 bg-[#142037]" : "bg-[#1f2d49]"
+                  index === 0 ? "bg-[#142037] md:col-span-2" : "bg-[#1f2d49]"
                 ].join(" ")}
               >
                 <p className="text-xs text-white/60">{note!.mood ?? note!.location ?? "日常"}</p>
@@ -251,35 +252,7 @@ export default async function HomePage() {
   );
 }
 
-function HeroCarouselBackground({ slides }: { slides: string[] }) {
-  return (
-    <div className={["absolute inset-0 -z-10 overflow-hidden", `home-hero-slides-${slides.length}`].join(" ")}>
-      {slides.length ? (
-        slides.map((slide, index) => (
-          <div
-            key={slide}
-            className={[
-              "home-hero-slide absolute inset-0 bg-cover bg-center",
-              slides.length > 1 ? "home-hero-slide-animated" : ""
-            ].join(" ")}
-            style={
-              {
-                backgroundImage: `url("${slide}")`,
-                "--home-slide-index": index,
-                "--home-slide-count": slides.length
-              } as CSSProperties
-            }
-          />
-        ))
-      ) : (
-        <div className="absolute inset-0 bg-[#dcefd5]" />
-      )}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,249,219,0.55)_0%,rgba(255,255,255,0.08)_45%,rgba(79,126,75,0.3)_100%),radial-gradient(circle_at_50%_22%,rgba(255,255,255,0.7),transparent_30%)]" />
-    </div>
-  );
-}
-
-const statHref: Record<string, string> = {
+const statHref = {
   相伴: "/love-days",
   日常: "/notes",
   留言: "/messages",
@@ -374,7 +347,7 @@ function HomeSection({
             <h2 className="mt-1 text-xl font-bold text-[#243047]">{title}</h2>
           </div>
         </div>
-        <Link href={href} className="grid size-7 place-items-center rounded-full bg-[#fff0f4] text-sm font-bold text-[#ff5f86]">
+        <Link href={href} className="grid size-7 place-items-center rounded-full bg-[#fff0f4] text-sm font-bold text-[#ff5f86]" aria-label={`查看${title}`}>
           →
         </Link>
       </div>
