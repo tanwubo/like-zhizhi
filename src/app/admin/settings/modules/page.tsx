@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { updateModuleSettings } from "@/features/admin/settings-actions";
@@ -15,7 +16,7 @@ export default async function AdminModuleSettingsPage() {
         <p className="mt-2 text-sm text-ink/60">控制公开导航和模块可见性。</p>
       </div>
       <AdminSection title="公开模块">
-        <form action={updateModuleSettings} className="grid gap-3">
+        <AdminActionForm action={updateModuleSettings} className="grid gap-3">
           {modules.map((module) => (
             <label key={module.id} className="flex items-center justify-between rounded-md bg-blush-50 px-4 py-3 text-sm text-ink">
               <span>
@@ -27,7 +28,7 @@ export default async function AdminModuleSettingsPage() {
             </label>
           ))}
           <SubmitButton>保存模块开关</SubmitButton>
-        </form>
+        </AdminActionForm>
       </AdminSection>
     </div>
   );

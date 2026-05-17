@@ -1,5 +1,6 @@
 import type { UserRole } from "@prisma/client";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 type UserFormValue = {
@@ -22,7 +23,7 @@ export function UserForm({
   const isEdit = Boolean(user?.id);
 
   return (
-    <form action={action} className="grid gap-4">
+    <AdminActionForm action={action} className="grid gap-4">
       {user?.id ? <input type="hidden" name="id" value={user.id} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
         <label className="text-sm font-medium text-ink">
@@ -63,6 +64,6 @@ export function UserForm({
       <div>
         <SubmitButton>保存用户</SubmitButton>
       </div>
-    </form>
+    </AdminActionForm>
   );
 }

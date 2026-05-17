@@ -1,5 +1,6 @@
 import { MediaType, PublishStatus } from "@prisma/client";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
 
@@ -41,7 +42,7 @@ export function AlbumForm({
   mediaAssets?: MediaSelectorAsset[];
 }) {
   return (
-    <form action={action} className="grid gap-4">
+    <AdminActionForm action={action} className="grid gap-4">
       {item?.id ? <input type="hidden" name="id" value={item.id} /> : null}
       {item?.mediaId ? <input type="hidden" name="mediaId" value={item.mediaId} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
@@ -132,6 +133,6 @@ export function AlbumForm({
       <div>
         <SubmitButton>保存相册</SubmitButton>
       </div>
-    </form>
+    </AdminActionForm>
   );
 }

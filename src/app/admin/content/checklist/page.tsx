@@ -1,6 +1,7 @@
 import { PublishStatus } from "@prisma/client";
 import Link from "next/link";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteChecklistItem } from "@/features/admin/checklist-actions";
@@ -75,12 +76,12 @@ export default async function AdminChecklistPage() {
                         <Link className="text-blush-700" href={`/admin/content/checklist/${item.id}/edit`}>
                           编辑
                         </Link>
-                        <form action={deleteChecklistItem}>
+                        <AdminActionForm action={deleteChecklistItem}>
                           <input type="hidden" name="id" value={item.id} />
                           <DeleteButton className="text-ink/45 hover:text-blush-700">
                             删除
                           </DeleteButton>
-                        </form>
+                        </AdminActionForm>
                       </div>
                     </td>
                   </tr>

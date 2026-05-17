@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 type MusicFormValue = {
@@ -22,7 +23,7 @@ export function MusicForm({
   track?: MusicFormValue;
 }) {
   return (
-    <form action={action} className="grid gap-4">
+    <AdminActionForm action={action} className="grid gap-4">
       {track?.id ? <input type="hidden" name="id" value={track.id} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
         <label className="text-sm font-medium text-ink">
@@ -61,6 +62,6 @@ export function MusicForm({
       <div>
         <SubmitButton>保存音乐</SubmitButton>
       </div>
-    </form>
+    </AdminActionForm>
   );
 }

@@ -1,5 +1,6 @@
 import { MediaType } from "@prisma/client";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { registerExternalMedia, uploadMediaAsset } from "@/features/admin/media-actions";
@@ -40,7 +41,7 @@ export default async function AdminMediaPage() {
       </div>
       <div className="grid gap-5 lg:grid-cols-2">
         <AdminSection title="上传文件" description="使用已配置的 S3 兼容对象存储。未配置对象存储时，可先使用外部媒体登记。">
-          <form action={uploadMediaAsset} className="grid gap-4">
+          <AdminActionForm action={uploadMediaAsset} className="grid gap-4" errorTitle="上传失败">
             <label className="text-sm font-medium text-ink">
               本地文件
               <input className={fieldClass} name="file" type="file" />
@@ -48,10 +49,10 @@ export default async function AdminMediaPage() {
             <div>
               <SubmitButton>上传媒体</SubmitButton>
             </div>
-          </form>
+          </AdminActionForm>
         </AdminSection>
         <AdminSection title="登记外部媒体" description="保留外部 URL 作为本地直连环境和历史素材的逃生通道。">
-          <form action={registerExternalMedia} className="grid gap-4">
+          <AdminActionForm action={registerExternalMedia} className="grid gap-4" errorTitle="登记失败">
             <label className="text-sm font-medium text-ink">
               外部媒体地址
               <input className={fieldClass} name="publicUrl" placeholder="https://example.com/media.jpg" type="url" required />
@@ -83,7 +84,7 @@ export default async function AdminMediaPage() {
             <div>
               <SubmitButton>登记外部媒体</SubmitButton>
             </div>
-          </form>
+          </AdminActionForm>
         </AdminSection>
       </div>
       <AdminSection title="媒体列表">

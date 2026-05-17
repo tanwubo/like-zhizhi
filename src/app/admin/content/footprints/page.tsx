@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteFootprintPlace, deleteFootprintVisit } from "@/features/admin/footprint-actions";
@@ -60,12 +61,12 @@ export default async function AdminFootprintsPage() {
                               </p>
                               <div className="mt-1 flex flex-wrap items-center gap-3">
                                 <p className="line-clamp-1 text-xs text-ink/50">{visit.description}</p>
-                                <form action={deleteFootprintVisit}>
+                                <AdminActionForm action={deleteFootprintVisit}>
                                   <input type="hidden" name="id" value={visit.id} />
                                   <DeleteButton className="text-xs text-ink/45 hover:text-blush-700">
                                     删除记录
                                   </DeleteButton>
-                                </form>
+                                </AdminActionForm>
                               </div>
                             </div>
                           ))}
@@ -83,12 +84,12 @@ export default async function AdminFootprintsPage() {
                         <Link className="text-blush-700" href={`/admin/content/footprints/${place.id}/edit`}>
                           编辑
                         </Link>
-                        <form action={deleteFootprintPlace}>
+                        <AdminActionForm action={deleteFootprintPlace}>
                           <input type="hidden" name="id" value={place.id} />
                           <DeleteButton className="text-ink/45 hover:text-blush-700">
                             删除
                           </DeleteButton>
-                        </form>
+                        </AdminActionForm>
                       </div>
                     </td>
                   </tr>

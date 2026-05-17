@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
 
@@ -35,7 +36,7 @@ export function FootprintForm({
   const visit = place?.visits?.[0];
 
   return (
-    <form action={action} className="grid gap-5">
+    <AdminActionForm action={action} className="grid gap-5">
       {place?.id ? <input type="hidden" name="id" value={place.id} /> : null}
       {visit?.id ? <input type="hidden" name="visitId" value={visit.id} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
@@ -117,6 +118,6 @@ export function FootprintForm({
       <div>
         <SubmitButton>保存足迹</SubmitButton>
       </div>
-    </form>
+    </AdminActionForm>
   );
 }

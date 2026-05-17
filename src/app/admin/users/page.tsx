@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { disableUser, enableUser } from "@/features/admin/users-actions";
 import { getAdminUsers, requireUserManager } from "@/features/admin/users-data";
@@ -58,19 +59,19 @@ export default async function AdminUsersPage() {
                           编辑
                         </Link>
                         {user.disabledAt ? (
-                          <form action={enableUser}>
+                          <AdminActionForm action={enableUser}>
                             <input type="hidden" name="id" value={user.id} />
                             <button className="text-blush-700" type="submit">
                               启用
                             </button>
-                          </form>
+                          </AdminActionForm>
                         ) : (
-                          <form action={disableUser}>
+                          <AdminActionForm action={disableUser}>
                             <input type="hidden" name="id" value={user.id} />
                             <button className="text-ink/45 hover:text-blush-700" type="submit">
                               停用
                             </button>
-                          </form>
+                          </AdminActionForm>
                         )}
                       </div>
                     </td>

@@ -1,6 +1,7 @@
 import { PublishStatus } from "@prisma/client";
 import Link from "next/link";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteNote } from "@/features/admin/notes-actions";
@@ -62,12 +63,12 @@ export default async function AdminNotesPage() {
                         <Link className="text-blush-700" href={`/admin/content/notes/${note.id}/edit`}>
                           编辑
                         </Link>
-                        <form action={deleteNote}>
+                        <AdminActionForm action={deleteNote}>
                           <input type="hidden" name="id" value={note.id} />
                           <DeleteButton className="text-ink/45 hover:text-blush-700">
                             删除
                           </DeleteButton>
-                        </form>
+                        </AdminActionForm>
                       </div>
                     </td>
                   </tr>

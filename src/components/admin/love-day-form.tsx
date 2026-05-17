@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 type LoveDayFormValue = {
@@ -25,7 +26,7 @@ export function LoveDayForm({
   event?: LoveDayFormValue;
 }) {
   return (
-    <form action={action} className="grid gap-4">
+    <AdminActionForm action={action} className="grid gap-4">
       {event?.id ? <input type="hidden" name="id" value={event.id} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
         <label className="text-sm font-medium text-ink">
@@ -65,6 +66,6 @@ export function LoveDayForm({
       <div>
         <SubmitButton>保存纪念日</SubmitButton>
       </div>
-    </form>
+    </AdminActionForm>
   );
 }

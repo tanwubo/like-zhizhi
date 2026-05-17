@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { approveMessage, hideMessage } from "@/features/admin/message-actions";
@@ -34,14 +35,14 @@ export default async function AdminMessagesPage() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <form action={approveMessage}>
+                  <AdminActionForm action={approveMessage}>
                     <input type="hidden" name="id" value={message.id} />
                     <SubmitButton>通过</SubmitButton>
-                  </form>
-                  <form action={hideMessage}>
+                  </AdminActionForm>
+                  <AdminActionForm action={hideMessage}>
                     <input type="hidden" name="id" value={message.id} />
                     <SubmitButton>隐藏</SubmitButton>
-                  </form>
+                  </AdminActionForm>
                 </div>
               </div>
               <p className="mt-3 text-sm leading-6 text-ink/70">{message.content}</p>

@@ -1,5 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
 
@@ -33,7 +34,7 @@ export function ChecklistForm({
   mediaAssets?: MediaSelectorAsset[];
 }) {
   return (
-    <form action={action} className="grid gap-4">
+    <AdminActionForm action={action} className="grid gap-4">
       {item?.id ? <input type="hidden" name="id" value={item.id} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
         <label className="text-sm font-medium text-ink">
@@ -97,6 +98,6 @@ export function ChecklistForm({
       <div>
         <SubmitButton>保存清单</SubmitButton>
       </div>
-    </form>
+    </AdminActionForm>
   );
 }

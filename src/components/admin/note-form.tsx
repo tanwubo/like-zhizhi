@@ -1,5 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
 
@@ -28,7 +29,7 @@ export function NoteForm({
   mediaAssets?: MediaSelectorAsset[];
 }) {
   return (
-    <form action={action} className="grid gap-4">
+    <AdminActionForm action={action} className="grid gap-4">
       {note?.id ? <input type="hidden" name="id" value={note.id} /> : null}
       <label className="text-sm font-medium text-ink">
         标题
@@ -85,6 +86,6 @@ export function NoteForm({
       <div>
         <SubmitButton>保存点滴</SubmitButton>
       </div>
-    </form>
+    </AdminActionForm>
   );
 }

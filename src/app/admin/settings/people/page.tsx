@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { MediaSelector } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
@@ -19,7 +20,7 @@ export default async function AdminPeopleSettingsPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         {people.map((person) => (
           <AdminSection key={person.id} title={`人物 ${person.slot}`}>
-            <form action={updatePersonProfile} className="grid gap-4">
+            <AdminActionForm action={updatePersonProfile} className="grid gap-4">
               <input type="hidden" name="id" value={person.id} />
               <label className="grid gap-2 text-sm text-ink/70">
                 昵称
@@ -51,7 +52,7 @@ export default async function AdminPeopleSettingsPage() {
                 <textarea name="bio" defaultValue={person.bio} className="min-h-24 rounded-md border border-blush-100 px-3 py-2" />
               </label>
               <SubmitButton>保存人物资料</SubmitButton>
-            </form>
+            </AdminActionForm>
           </AdminSection>
         ))}
       </div>

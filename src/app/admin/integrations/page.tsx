@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { updateIntegrationSettings } from "@/features/admin/integration-actions";
 import { getAdminIntegrationSettings } from "@/features/admin/integration-data";
 
@@ -36,7 +37,7 @@ export default async function AdminIntegrationsPage({
 
       {saved ? <div className="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-700">配置已保存</div> : null}
 
-      <form action={updateIntegrationSettings} className="space-y-4">
+      <AdminActionForm action={updateIntegrationSettings} className="space-y-4">
         <section className="rounded-lg border border-pink-100 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -218,7 +219,7 @@ export default async function AdminIntegrationsPage({
         <button className="rounded-full bg-pink-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-pink-600" type="submit">
           保存集成配置
         </button>
-      </form>
+      </AdminActionForm>
     </div>
   );
 }

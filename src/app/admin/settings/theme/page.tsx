@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { MediaSelector } from "@/components/admin/media-selector";
 import { SubmitButton } from "@/components/admin/submit-button";
@@ -17,7 +18,7 @@ export default async function AdminThemeSettingsPage() {
         <p className="mt-2 text-sm text-ink/60">管理公开站点的主色、背景媒体和视觉效果。</p>
       </div>
       <AdminSection title="公开主题">
-        <form action={updateThemeSettings} className="grid gap-4 md:grid-cols-2">
+        <AdminActionForm action={updateThemeSettings} className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm text-ink/70">
             主色
             <input
@@ -68,7 +69,7 @@ export default async function AdminThemeSettingsPage() {
           <div className="md:col-span-2">
             <SubmitButton>保存主题设置</SubmitButton>
           </div>
-        </form>
+        </AdminActionForm>
       </AdminSection>
     </div>
   );

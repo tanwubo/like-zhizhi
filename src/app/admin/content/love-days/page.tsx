@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteLoveDayEvent } from "@/features/admin/love-days-actions";
@@ -64,12 +65,12 @@ export default async function AdminLoveDaysPage() {
                         <Link className="text-blush-700" href={`/admin/content/love-days/${event.id}/edit`}>
                           编辑
                         </Link>
-                        <form action={deleteLoveDayEvent}>
+                        <AdminActionForm action={deleteLoveDayEvent}>
                           <input type="hidden" name="id" value={event.id} />
                           <DeleteButton className="text-ink/45 hover:text-blush-700">
                             删除
                           </DeleteButton>
-                        </form>
+                        </AdminActionForm>
                       </div>
                     </td>
                   </tr>

@@ -1,3 +1,4 @@
+import { AdminActionForm } from "@/components/admin/action-form";
 import { AdminSection } from "@/components/admin/admin-section";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { updateSiteSettings } from "@/features/admin/settings-actions";
@@ -15,7 +16,7 @@ export default async function AdminSiteSettingsPage() {
         <p className="mt-2 text-sm text-ink/60">管理公开站点标题、文案和页脚信息。</p>
       </div>
       <AdminSection title="站点信息">
-        <form action={updateSiteSettings} className="grid gap-4 md:grid-cols-2">
+        <AdminActionForm action={updateSiteSettings} className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm text-ink/70">
             站点名称
             <input name="title" defaultValue={site.title} className="rounded-md border border-blush-100 px-3 py-2" />
@@ -47,7 +48,7 @@ export default async function AdminSiteSettingsPage() {
           <div className="md:col-span-2">
             <SubmitButton>保存基础设置</SubmitButton>
           </div>
-        </form>
+        </AdminActionForm>
       </AdminSection>
     </div>
   );
