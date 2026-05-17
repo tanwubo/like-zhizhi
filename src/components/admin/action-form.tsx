@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactNode, useState, useTransition } from "react";
 
-import { formatActionErrorMessage } from "@/lib/action-error";
+import { formatActionErrorMessage, getNextRedirectTarget, isNextRedirectError } from "@/lib/action-error";
 
 type AdminActionFormProps = {
   action: (formData: FormData) => void | Promise<void>;
@@ -35,6 +35,22 @@ export function AdminActionForm({
         await action(formData);
         router.refresh();
       } catch (caught) {
+        if (isNextRedirectError(caught)) {
+          const redirect = getNextRedirectTarget(caught);
+
+          if (redirect) {
+            if (redirect.mode === "push") {
+              router.push(redirect.url);
+            } else {
+              router.replace(redirect.url);
+            }
+          } else {
+            router.refresh();
+          }
+
+          return;
+        }
+
         setError(formatActionErrorMessage(caught, fallbackError));
       }
     });
@@ -53,6 +69,7 @@ export function AdminActionForm({
             <h2 className="text-base font-semibold text-ink">{errorTitle}</h2>
             <p className="mt-2 text-sm leading-6 text-ink/70">{error}</p>
             <button
+              aria-label="关闭弹窗"
               className="mt-5 rounded-md bg-blush-600 px-4 py-2 text-sm font-medium text-white hover:bg-blush-700"
               onClick={() => setError(null)}
               type="button"
