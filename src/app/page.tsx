@@ -5,6 +5,7 @@ import Wave from "react-wavify";
 import type { CSSProperties, ReactNode } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
+import { FloatingMusicPlayer } from "@/components/public/floating-music-player";
 import { HomeAnimations } from "@/components/public/home-animations";
 import { HomeHeroCarousel } from "@/components/public/home-hero-carousel";
 import { AvatarMotionFrame, HeartPulse } from "@/components/public/home-motion";
@@ -275,6 +276,7 @@ export default async function HomePage() {
           <p className="text-lg text-[#9aa2b3]">我们在不同的风景里，确认着同一种心意。</p>
           <p className="mt-4 text-sm text-[#b4bac8]">{data.site.footerText}</p>
         </section>
+        {data.musicTracks.length ? <FloatingMusicPlayer tracks={data.musicTracks} /> : null}
       </div>
     </PublicShell>
   );

@@ -78,6 +78,73 @@ function Test-PortInUse {
     return $null -ne $connection
 }
 
+function Get-PortListener {
+    param([int]$TargetPort)
+
+    return Get-NetTCPConnection -LocalPort $TargetPort -State Listen -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+}
+
+function Get-ProcessCommandLine {
+    param([int]$ProcessId)
+
+    $processInfo = Get-CimInstance Win32_Process -Filter "ProcessId = $ProcessId" -ErrorAction SilentlyContinue
+    if ($null -eq $processInfo) {
+        return ""
+    }
+
+    return [string]$processInfo.CommandLine
+}
+
+function Test-ProjectDevServerProcess {
+    param(
+        [int]$ProcessId,
+        [string]$ProjectRoot
+    )
+
+    $commandLine = Get-ProcessCommandLine -ProcessId $ProcessId
+    if ([string]::IsNullOrWhiteSpace($commandLine)) {
+        return $false
+    }
+
+    return $commandLine.Contains($ProjectRoot) -and $commandLine.Contains("next") -and $commandLine.Contains("start-server")
+}
+
+function Stop-ExistingProjectDevServer {
+    param(
+        [int]$TargetPort,
+        [string]$ProjectRoot
+    )
+
+    $listener = Get-PortListener -TargetPort $TargetPort
+    if ($null -eq $listener) {
+        Write-Host "Port $TargetPort is available."
+        return
+    }
+
+    $processId = [int]$listener.OwningProcess
+    $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+    $processName = if ($null -ne $process) { $process.ProcessName } else { "unknown" }
+
+    if (-not (Test-ProjectDevServerProcess -ProcessId $processId -ProjectRoot $ProjectRoot)) {
+        throw "Port $TargetPort is already in use by PID $processId ($processName). Stop it or choose another port with -Port."
+    }
+
+    Write-Warn "Existing process on port $TargetPort belongs to this project. Stopping it for a clean restart."
+    Stop-Process -Id $processId -Force
+
+    $deadline = (Get-Date).AddSeconds(15)
+    while ((Get-Date) -lt $deadline) {
+        Start-Sleep -Milliseconds 500
+        if ($null -eq (Get-PortListener -TargetPort $TargetPort)) {
+            Write-Host "Stopped previous dev server on port $TargetPort."
+            return
+        }
+    }
+
+    throw "Timed out waiting for previous dev server on port $TargetPort to stop."
+}
+
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 
@@ -103,6 +170,9 @@ if ($nodeVersion -match '^v(\d+)\.') {
 $script:Pnpm = Get-PnpmCommand
 Write-Host "Package manager: $($script:Pnpm.FilePath) $($script:Pnpm.Prefix -join ' ')"
 
+Write-Step "Checking web port"
+Stop-ExistingProjectDevServer -TargetPort $Port -ProjectRoot $root
+
 if ($WithDocker) {
     Write-Step "Starting Docker dependencies"
     Assert-Command -Name "docker" -InstallHint "Install Docker Desktop or remove -WithDocker."
@@ -124,18 +194,14 @@ if (-not (Test-Path ".env")) {
     Write-Host ".env exists."
 }
 
-Write-Step "Checking dependencies"
-if ($FirstRun) {
-    Invoke-Pnpm -Arguments @("install")
-} elseif (-not (Test-Path "node_modules")) {
-    throw "node_modules is missing. Run '.\start-local.ps1 -FirstRun' first."
-} else {
-    Write-Host "node_modules exists. Skipping install for restart mode."
-}
+Write-Step "Syncing dependencies"
+Invoke-Pnpm -Arguments @("install", "--frozen-lockfile")
+
+Write-Step "Preparing Prisma client"
+Invoke-Pnpm -Arguments @("db:generate")
 
 if ($FirstRun -or $Migrate) {
-    Write-Step "Preparing database client and schema"
-    Invoke-Pnpm -Arguments @("db:generate")
+    Write-Step "Preparing database schema"
     Invoke-Pnpm -Arguments @("db:migrate")
 } else {
     Write-Step "Skipping database migration"
@@ -157,4 +223,4 @@ if (Test-PortInUse -TargetPort $Port) {
 
 Write-Step "Starting Next.js development server"
 Write-Host "Open http://localhost:$Port"
-Invoke-Pnpm -Arguments @("dev", "--", "-p", "$Port")
+Invoke-Pnpm -Arguments @("dev", "-p", "$Port")

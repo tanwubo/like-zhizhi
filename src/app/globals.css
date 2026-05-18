@@ -126,6 +126,55 @@ a {
   animation: home-reveal 900ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay) both;
 }
 
+.home-music-player {
+  animation: home-music-player-enter 420ms ease-out both;
+}
+
+.home-music-player .rhap_container {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.home-music-player .rhap_main {
+  gap: 8px;
+}
+
+.home-music-player .rhap_progress-section,
+.home-music-player .rhap_controls-section {
+  margin-top: 0;
+}
+
+.home-music-player .rhap_main-controls-button,
+.home-music-player .rhap_volume-button,
+.home-music-player .rhap_repeat-button {
+  color: #ff5f86;
+}
+
+.home-music-player .rhap_play-pause-button {
+  font-size: 38px;
+  height: 38px;
+  width: 38px;
+}
+
+.home-music-player .rhap_progress-filled,
+.home-music-player .rhap_progress-indicator,
+.home-music-player .rhap_volume-filled,
+.home-music-player .rhap_volume-indicator {
+  background: #ff5f86;
+}
+
+.home-music-player .rhap_progress-bar,
+.home-music-player .rhap_volume-bar {
+  background: #ffe1e9;
+}
+
+.home-music-player .rhap_time {
+  color: #8a93a7;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 11px;
+}
+
 @keyframes home-hero-from-left {
   from {
     opacity: 0;
@@ -178,6 +227,18 @@ a {
   }
 }
 
+@keyframes home-music-player-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(-12px, 12px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 @keyframes home-reveal {
   from {
     opacity: 0;
@@ -194,6 +255,7 @@ a {
   .home-hero-person,
   .home-heart,
   .home-heart > div:nth-child(2),
+  .home-music-player,
   .home-reveal,
   .theme-page-animation main {
     animation: none !important;

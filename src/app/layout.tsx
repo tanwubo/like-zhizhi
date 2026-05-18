@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { buildSiteMetadata } from "@/features/public/seo";
 import { prisma } from "@/server/db/prisma";
+import "react-h5-audio-player/lib/styles.css";
 import "./globals.css";
 
 const fallbackMetadata: Metadata = {

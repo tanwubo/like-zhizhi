@@ -4,7 +4,7 @@ test("public home renders seeded site", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Like Zhizhi" })).toBeVisible();
   await expect(page.getByText("把每一天都认真收藏")).toBeVisible();
-  await expect(page.getByText("最新点滴")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "点滴", exact: true })).toBeVisible();
 });
 
 test("public module routes render", async ({ page }) => {

@@ -2,6 +2,7 @@ import { MessageStatus, PublishStatus } from "@prisma/client";
 
 import { prisma } from "@/server/db/prisma";
 import { normalizeThemeSetting } from "@/features/admin/settings-data";
+import { getEnabledMusicTracks } from "@/features/public/public-content";
 import { getTogetherDays } from "@/lib/date";
 
 export async function getHomeData() {
@@ -23,6 +24,7 @@ export async function getHomeData() {
     albumCount,
     footprintCount,
     loveDayCount,
+    musicTracks,
     stats
   ] =
     await Promise.all([
@@ -114,6 +116,7 @@ export async function getHomeData() {
       prisma.albumItem.count({ where: { status: PublishStatus.PUBLISHED } }),
       prisma.footprintPlace.count(),
       prisma.loveDayEvent.count(),
+      getEnabledMusicTracks(),
       prisma.dailyStat.findFirst({ orderBy: { date: "desc" } })
     ]);
 
@@ -135,6 +138,7 @@ export async function getHomeData() {
     albumCount,
     footprintCount,
     loveDayCount,
+    musicTracks,
     visits: stats?.visits ?? 0,
     togetherDays: getTogetherDays(site.togetherDate)
   };
