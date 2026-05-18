@@ -1,5 +1,4 @@
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import {
   buildMediaObjectKey,
@@ -22,6 +21,8 @@ type StorageAdapter = {
 };
 
 export { validateExternalMediaInput as validateMediaInput };
+
+export type UploadResult = { ok: true } | { ok: false; error: string };
 
 type UploadedFile = {
   name: string;
@@ -67,34 +68,34 @@ async function bufferFromUploadedFile(file: UploadedFile) {
   return null;
 }
 
-export async function registerExternalMedia(formData: FormData): Promise<void> {
+export async function registerExternalMedia(formData: FormData): Promise<UploadResult> {
   "use server";
 
   await requireAdminCapability("content");
 
   const parsed = parseExternalMediaInput(formData);
   if (!parsed.ok) {
-    return;
+    return { ok: false, error: "外部媒体数据无效" };
   }
 
   await prisma.mediaAsset.create({ data: parsed.data });
   revalidateMediaPaths();
-  redirect("/admin/media");
+  return { ok: true };
 }
 
-export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapter = storage): Promise<void> {
+export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapter = storage): Promise<UploadResult> {
   "use server";
 
   await requireAdminCapability("content");
 
   const file = fileFromFormData(formData);
   if (!file) {
-    return;
+    return { ok: false, error: "未选择文件" };
   }
 
   const body = await bufferFromUploadedFile(file);
   if (!body) {
-    return;
+    return { ok: false, error: "文件读取失败" };
   }
 
   const contentType = inferContentType(file.name, file.type);
@@ -121,5 +122,5 @@ export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapt
   });
 
   revalidateMediaPaths();
-  redirect("/admin/media");
+  return { ok: true };
 }
