@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db/prisma";
+import { normalizeFontKey } from "./font-options";
 
 export type AdminThemeSetting = {
   primaryColor: string;
@@ -6,6 +7,10 @@ export type AdminThemeSetting = {
   backgroundVideoUrl: string | null;
   enableGlassEffect: boolean;
   enablePageAnimation: boolean;
+  bodyFontKey?: string | null;
+  displayFontKey?: string | null;
+  romanceFontKey?: string | null;
+  numberFontKey?: string | null;
 };
 
 export type AdminModuleSetting = {
@@ -33,7 +38,11 @@ export function normalizeThemeSetting(theme: AdminThemeSetting | null): AdminThe
     backgroundImageUrl: theme?.backgroundImageUrl || null,
     backgroundVideoUrl: theme?.backgroundVideoUrl || null,
     enableGlassEffect: theme?.enableGlassEffect ?? true,
-    enablePageAnimation: theme?.enablePageAnimation ?? true
+    enablePageAnimation: theme?.enablePageAnimation ?? true,
+    bodyFontKey: normalizeFontKey("body", theme?.bodyFontKey),
+    displayFontKey: normalizeFontKey("display", theme?.displayFontKey),
+    romanceFontKey: normalizeFontKey("romance", theme?.romanceFontKey),
+    numberFontKey: normalizeFontKey("number", theme?.numberFontKey)
   };
 }
 

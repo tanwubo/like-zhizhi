@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { PublicNav } from "@/components/public/public-nav";
 import { VisitTracker } from "@/components/public/visit-tracker";
+import { resolveThemeFontStacks } from "@/features/admin/font-options";
 import type { AdminThemeSetting } from "@/features/admin/settings-data";
 import { cn } from "@/lib/cn";
 
@@ -38,8 +39,13 @@ export function PublicShell({
   variant?: "default" | "home";
   children: ReactNode;
 }) {
+  const fontStacks = resolveThemeFontStacks(theme ?? {});
   const shellStyle = {
     "--theme-primary": theme?.primaryColor ?? "#f45d7a",
+    "--font-body": fontStacks.body,
+    "--font-display": fontStacks.display,
+    "--font-romance": fontStacks.romance,
+    "--font-number": fontStacks.number,
     backgroundImage: theme?.backgroundImageUrl
       ? `linear-gradient(rgba(255, 246, 247, 0.78), rgba(255, 255, 255, 0.86)), url("${theme.backgroundImageUrl}")`
       : undefined

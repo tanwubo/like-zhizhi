@@ -6,7 +6,7 @@ import { type FormEvent, type ReactNode, useState, useTransition } from "react";
 import { formatActionErrorMessage, getNextRedirectTarget, isNextRedirectError } from "@/lib/action-error";
 
 type AdminActionFormProps = {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => void | Promise<void | { ok: boolean; error?: string }>;
   children: ReactNode;
   className?: string;
   errorTitle?: string;
@@ -32,7 +32,11 @@ export function AdminActionForm({
     setError(null);
     startTransition(async () => {
       try {
-        await action(formData);
+        const result = await action(formData);
+        if (result && typeof result === "object" && "ok" in result && !result.ok) {
+          setError(result.error ?? fallbackError);
+          return;
+        }
         router.refresh();
       } catch (caught) {
         if (isNextRedirectError(caught)) {

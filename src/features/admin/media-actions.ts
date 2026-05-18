@@ -23,6 +23,7 @@ type StorageAdapter = {
 export { validateExternalMediaInput as validateMediaInput };
 
 export type UploadResult = { ok: true } | { ok: false; error: string };
+export type DeleteMediaResult = { ok: true; deletedCount: number } | { ok: false; error: string };
 
 type UploadedFile = {
   name: string;
@@ -123,4 +124,26 @@ export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapt
 
   revalidateMediaPaths();
   return { ok: true };
+}
+
+export async function deleteMediaAssets(ids: string[]): Promise<DeleteMediaResult> {
+  "use server";
+
+  await requireAdminCapability("content");
+
+  const uniqueIds = Array.from(new Set(ids.map((id) => id.trim()).filter(Boolean)));
+  if (uniqueIds.length === 0) {
+    return { ok: false, error: "未选择媒体资源" };
+  }
+
+  const result = await prisma.mediaAsset.deleteMany({
+    where: {
+      id: {
+        in: uniqueIds
+      }
+    }
+  });
+
+  revalidateMediaPaths();
+  return { ok: true, deletedCount: result.count };
 }

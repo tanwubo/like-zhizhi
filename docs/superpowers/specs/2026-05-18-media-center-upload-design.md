@@ -6,14 +6,14 @@
 
 ## 需求汇总
 
-| 项目 | 现状 | 目标 |
-|------|------|------|
-| 文件大小限制 | 10MB | 20MB |
-| 上传方式 | 单文件 `<input type="file">` | 多选 + 拖拽上传 |
-| 多选数量 | 不支持 | 最多 10 个 |
-| 上传交互 | 提交表单自动上传 | 手动点击上传按钮 |
-| 上传进度 | 无 | 不显示进度，完成后统一提示 |
-| 媒体列表 | 表格 | 网格卡片 |
+| 项目     | 现状                        | 目标            |
+| ------ | ------------------------- | ------------- |
+| 文件大小限制 | 10MB                      | 20MB          |
+| 上传方式   | 单文件 `<input type="file">` | 多选 + 拖拽上传     |
+| 多选数量   | 不支持                       | 最多 10 个       |
+| 上传交互   | 提交表单自动上传                  | 手动点击上传按钮      |
+| 上传进度   | 无                         | 不显示进度，完成后统一提示 |
+| 媒体列表   | 表格                        | 网格卡片          |
 
 ## 技术方案
 
@@ -116,14 +116,14 @@
 
 ## 涉及文件
 
-| 文件 | 变更类型 | 说明 |
-|------|----------|------|
-| `next.config.ts` | 修改 | bodySizeLimit 10mb → 20mb |
-| `src/features/admin/media-actions.ts` | 修改 | uploadMediaAsset 返回值改为 `{ ok, error? }`，移除 redirect |
-| `src/app/admin/media/page.tsx` | 修改 | 拆分为 Server + Client 混合 |
-| `src/components/admin/media-uploader.tsx` | 新增 | 拖拽多选上传客户端组件 |
-| `src/components/admin/media-grid.tsx` | 新增 | 网格卡片媒体列表客户端组件 |
-| `package.json` | 修改 | 添加 react-dropzone 依赖 |
+| 文件                                        | 变更类型 | 说明                                                  |
+| ----------------------------------------- | ---- | --------------------------------------------------- |
+| `next.config.ts`                          | 修改   | bodySizeLimit 10mb → 20mb                           |
+| `src/features/admin/media-actions.ts`     | 修改   | uploadMediaAsset 返回值改为 `{ ok, error? }`，移除 redirect |
+| `src/app/admin/media/page.tsx`            | 修改   | 拆分为 Server + Client 混合                              |
+| `src/components/admin/media-uploader.tsx` | 新增   | 拖拽多选上传客户端组件                                         |
+| `src/components/admin/media-grid.tsx`     | 新增   | 网格卡片媒体列表客户端组件                                       |
+| `package.json`                            | 修改   | 添加 react-dropzone 依赖                                |
 
 ## 新增依赖
 

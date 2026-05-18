@@ -2,7 +2,7 @@
 
 import { ChevronUp, ListMusic, Music2, Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type FocusEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type MusicTrack = {
@@ -17,6 +17,7 @@ type PlayerMode = "compact" | "bar" | "expanded";
 
 export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const playerRef = useRef<HTMLElement>(null);
   const [trackIndex, setTrackIndex] = useState(0);
   const [mode, setMode] = useState<PlayerMode>("compact");
   const [isPlaying, setIsPlaying] = useState(false);
@@ -53,6 +54,26 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
     setCurrentTime(0);
     setDuration(0);
   }, [currentTrack?.sourceUrl]);
+
+  useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+
+      if (target instanceof Node && playerRef.current?.contains(target)) {
+        return;
+      }
+
+      setMode("compact");
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [mounted]);
 
   if (!currentTrack) {
     return null;
@@ -100,6 +121,24 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
     setIsPlaying(true);
   };
 
+  const showBar = () => {
+    setMode((value) => (value === "compact" ? "bar" : value));
+  };
+
+  const hideBar = () => {
+    setMode((value) => (value === "bar" ? "compact" : value));
+  };
+
+  const handleBlur = (event: FocusEvent<HTMLElement>) => {
+    const nextFocus = event.relatedTarget;
+
+    if (nextFocus instanceof Node && event.currentTarget.contains(nextFocus)) {
+      return;
+    }
+
+    hideBar();
+  };
+
   const seek = (value: string) => {
     const audio = audioRef.current;
 
@@ -133,9 +172,14 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
 
   return createPortal(
     <aside
+      ref={playerRef}
       aria-label="首页音乐播放器"
       className={["home-music-player", `home-music-player-${mode}`].join(" ")}
       data-home-floating="true"
+      onBlur={handleBlur}
+      onFocus={showBar}
+      onMouseEnter={showBar}
+      onMouseLeave={hideBar}
     >
       <audio
         ref={audioRef}
@@ -184,6 +228,19 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
           <PlayerButton label="展开播放列表" onClick={() => setMode("expanded")}>
             <ChevronUp className="size-7" aria-hidden="true" />
           </PlayerButton>
+          <div className="home-music-bar-progress-row">
+            <input
+              aria-label="播放进度"
+              className="home-music-progress"
+              max="100"
+              min="0"
+              step="0.1"
+              style={{ "--music-progress": `${progress}%` } as CSSProperties}
+              type="range"
+              value={progress}
+              onChange={(event) => seek(event.currentTarget.value)}
+            />
+          </div>
         </div>
       ) : null}
 

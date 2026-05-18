@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
+import { normalizeFontKey } from "./font-options";
 
 type ActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };
 
@@ -60,7 +61,11 @@ const themeSchema = z.object({
   backgroundImageUrl: optionalUrl,
   backgroundVideoUrl: optionalUrl,
   enableGlassEffect: z.preprocess((value) => value === "on", z.boolean()),
-  enablePageAnimation: z.preprocess((value) => value === "on", z.boolean())
+  enablePageAnimation: z.preprocess((value) => value === "on", z.boolean()),
+  bodyFontKey: z.string().trim().optional(),
+  displayFontKey: z.string().trim().optional(),
+  romanceFontKey: z.string().trim().optional(),
+  numberFontKey: z.string().trim().optional()
 });
 
 const personSchema = z.object({
@@ -163,7 +168,11 @@ export async function updateThemeSettings(formData: FormData): Promise<void> {
     backgroundImageUrl: parsed.data.backgroundImageUrl || null,
     backgroundVideoUrl: parsed.data.backgroundVideoUrl || null,
     enableGlassEffect: parsed.data.enableGlassEffect,
-    enablePageAnimation: parsed.data.enablePageAnimation
+    enablePageAnimation: parsed.data.enablePageAnimation,
+    bodyFontKey: normalizeFontKey("body", parsed.data.bodyFontKey),
+    displayFontKey: normalizeFontKey("display", parsed.data.displayFontKey),
+    romanceFontKey: normalizeFontKey("romance", parsed.data.romanceFontKey),
+    numberFontKey: normalizeFontKey("number", parsed.data.numberFontKey)
   };
 
   await prisma.themeSetting.upsert({

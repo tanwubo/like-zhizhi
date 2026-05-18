@@ -51,4 +51,17 @@ describe("AdminActionForm", () => {
 
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
   });
+
+  it("shows returned action errors without refreshing the page", async () => {
+    render(
+      <AdminActionForm action={async () => ({ ok: false, error: "外部媒体数据无效" })} errorTitle="登记失败">
+        <button type="submit">登记外部媒体</button>
+      </AdminActionForm>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "登记外部媒体" }));
+
+    expect(await screen.findByRole("alertdialog")).toHaveTextContent("外部媒体数据无效");
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
 });

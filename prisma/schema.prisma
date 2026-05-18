@@ -90,6 +90,10 @@ model ThemeSetting {
   backgroundVideoUrl  String?
   enableGlassEffect   Boolean  @default(true)
   enablePageAnimation Boolean  @default(true)
+  bodyFontKey         String?
+  displayFontKey      String?
+  romanceFontKey      String?
+  numberFontKey       String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }

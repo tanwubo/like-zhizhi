@@ -10,6 +10,7 @@ const deleteNoteRecord = vi.fn(async () => ({ id: "note_1" }));
 const findNoteBySlug = vi.fn(async () => null);
 const createMediaAsset = vi.fn(async () => ({ id: "media_1" }));
 const updateMediaAsset = vi.fn(async () => ({ id: "media_1" }));
+const deleteManyMediaAssets = vi.fn(async () => ({ count: 2 }));
 const createAlbumRecord = vi.fn(async () => ({ id: "album_1" }));
 const updateAlbumRecord = vi.fn(async () => ({ id: "album_1" }));
 const deleteAlbumRecord = vi.fn(async () => ({ id: "album_1" }));
@@ -43,7 +44,7 @@ const getCurrentUserMock = vi.fn(async () => ({
 
 const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
   callback({
-    mediaAsset: { create: createMediaAsset, update: updateMediaAsset },
+    mediaAsset: { create: createMediaAsset, update: updateMediaAsset, deleteMany: deleteManyMediaAssets },
     albumItem: { create: createAlbumRecord, update: updateAlbumRecord },
     footprintPlace: {
       create: createFootprintPlaceRecord,
@@ -70,7 +71,7 @@ vi.mock("@/server/db/prisma", () => ({
       delete: deleteNoteRecord,
       findFirst: findNoteBySlug
     },
-    mediaAsset: { create: createMediaAsset, update: updateMediaAsset },
+    mediaAsset: { create: createMediaAsset, update: updateMediaAsset, deleteMany: deleteManyMediaAssets },
     albumItem: { create: createAlbumRecord, update: updateAlbumRecord, delete: deleteAlbumRecord },
     checklistItem: {
       create: createChecklistRecord,
@@ -139,6 +140,7 @@ beforeEach(() => {
   findNoteBySlug.mockResolvedValue(null);
   createMediaAsset.mockClear();
   updateMediaAsset.mockClear();
+  deleteManyMediaAssets.mockClear();
   createAlbumRecord.mockClear();
   updateAlbumRecord.mockClear();
   deleteAlbumRecord.mockClear();
@@ -233,6 +235,10 @@ describe("admin settings actions", () => {
     formData.set("backgroundVideoUrl", "https://example.com/bg.mp4");
     formData.set("enableGlassEffect", "on");
     formData.set("enablePageAnimation", "on");
+    formData.set("bodyFontKey", "modern-soft");
+    formData.set("displayFontKey", "serif-gentle");
+    formData.set("romanceFontKey", "wenkai");
+    formData.set("numberFontKey", "mono-classic");
 
     await updateThemeSettings(formData);
 
@@ -245,14 +251,22 @@ describe("admin settings actions", () => {
           backgroundImageUrl: "https://example.com/bg.jpg",
           backgroundVideoUrl: "https://example.com/bg.mp4",
           enableGlassEffect: true,
-          enablePageAnimation: true
+          enablePageAnimation: true,
+          bodyFontKey: "modern-soft",
+          displayFontKey: "serif-gentle",
+          romanceFontKey: "wenkai",
+          numberFontKey: "mono-classic"
         }),
         update: expect.objectContaining({
           primaryColor: "#2f80ed",
           backgroundImageUrl: "https://example.com/bg.jpg",
           backgroundVideoUrl: "https://example.com/bg.mp4",
           enableGlassEffect: true,
-          enablePageAnimation: true
+          enablePageAnimation: true,
+          bodyFontKey: "modern-soft",
+          displayFontKey: "serif-gentle",
+          romanceFontKey: "wenkai",
+          numberFontKey: "mono-classic"
         })
       })
     );
@@ -915,6 +929,30 @@ describe("admin media actions", () => {
         })
       })
     );
+  });
+
+  it("deletes selected media assets in batches", async () => {
+    const { deleteMediaAssets } = await import("@/features/admin/media-actions");
+
+    const result = await deleteMediaAssets(["media_1", "media_2", "media_1", ""]);
+
+    expect(result).toEqual({ ok: true, deletedCount: 2 });
+    expect(deleteManyMediaAssets).toHaveBeenCalledWith({
+      where: {
+        id: {
+          in: ["media_1", "media_2"]
+        }
+      }
+    });
+  });
+
+  it("rejects empty media batch deletion requests", async () => {
+    const { deleteMediaAssets } = await import("@/features/admin/media-actions");
+
+    const result = await deleteMediaAssets([]);
+
+    expect(result).toEqual({ ok: false, error: "未选择媒体资源" });
+    expect(deleteManyMediaAssets).not.toHaveBeenCalled();
   });
 });
 
