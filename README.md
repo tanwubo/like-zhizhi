@@ -4,6 +4,16 @@ Like Zhizhi is a from-scratch Next.js rebuild of a Pro-like couple website produ
 
 ## Local Development
 
+Quick local startup:
+
+```powershell
+.\start-local.ps1                 # Restart the dev server
+.\start-local.ps1 -FirstRun        # Install deps, generate Prisma client, migrate DB, then start
+.\start-local.ps1 -FirstRun -Seed  # First run plus seed data
+.\start-local.ps1 -WithDocker      # Start local PostgreSQL/MinIO before the web server
+.\start-local.ps1 -Port 3001       # Use a different dev server port
+```
+
 1. Install dependencies:
 
    ```powershell
