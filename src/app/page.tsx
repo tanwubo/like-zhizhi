@@ -48,6 +48,7 @@ export default async function HomePage() {
       title={data.site.title}
       footerText={data.site.footerText}
       modules={navigation}
+      people={people}
       theme={data.theme}
       variant="home"
     >

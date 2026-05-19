@@ -58,6 +58,10 @@ body {
   color: var(--theme-primary);
 }
 
+.home-public-shell header a:first-child {
+  color: #2d3038;
+}
+
 .theme-glass header,
 .theme-glass footer {
   backdrop-filter: blur(16px);

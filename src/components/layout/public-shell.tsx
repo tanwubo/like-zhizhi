@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
+import { Heart } from "lucide-react";
 
 import { PublicNav } from "@/components/public/public-nav";
 import { VisitTracker } from "@/components/public/visit-tracker";
@@ -11,6 +12,12 @@ type ModuleLink = {
   key: string;
   label: string;
   href?: string;
+};
+
+type ShellPerson = {
+  displayName: string;
+  avatarUrl?: string | null;
+  slot?: number;
 };
 
 const hrefByKey: Record<string, string> = {
@@ -28,6 +35,7 @@ export function PublicShell({
   title,
   footerText,
   modules,
+  people = [],
   theme,
   variant = "default",
   children
@@ -35,6 +43,7 @@ export function PublicShell({
   title: string;
   footerText?: string;
   modules: ModuleLink[];
+  people?: ShellPerson[];
   theme?: AdminThemeSetting;
   variant?: "default" | "home";
   children: ReactNode;
@@ -50,6 +59,10 @@ export function PublicShell({
       ? `linear-gradient(rgba(255, 246, 247, 0.78), rgba(255, 255, 255, 0.86)), url("${theme.backgroundImageUrl}")`
       : undefined
   } as CSSProperties;
+  const headerPeople = [
+    people[0] ?? { displayName: "Ki", avatarUrl: "/images/avatar-person-2.svg", slot: 1 },
+    people[1] ?? { displayName: "Really", avatarUrl: "/images/avatar-person-1.svg", slot: 2 }
+  ];
 
   return (
     <div
@@ -79,26 +92,27 @@ export function PublicShell({
           className={cn(
             "mx-auto flex items-center justify-between",
             variant === "home"
-              ? "sticky top-0 z-50 h-[60px] max-w-none border-b border-[#d2d2d7]/80 bg-[#f5f5f7]/75 px-4 backdrop-blur-xl md:px-6"
+              ? "sticky top-0 z-50 min-h-[70px] max-w-none gap-4 border-b border-[#ececf1] bg-white/95 px-5 py-3 shadow-[0_8px_22px_rgba(39,43,58,0.05)] backdrop-blur-xl md:h-[70px] md:px-10 md:py-0 lg:px-[88px]"
               : "max-w-6xl px-4 py-5"
           )}
         >
-          <Link
-            href="/"
-            className={cn(
-              "font-semibold",
-              variant === "home"
-                ? "flex items-center gap-2 text-[17px] text-[#1d1d1f]"
-                : "text-lg text-ink"
-            )}
-          >
-            {variant === "home" ? (
-              <span className="grid size-8 place-items-center rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] text-xs font-bold text-white">
-                LZ
-              </span>
-            ) : null}
-            <span>{title}</span>
-          </Link>
+          {variant === "home" ? (
+            <Link
+              href="/"
+              className="hidden min-w-[250px] items-center gap-4 text-[#273044] sm:flex"
+              aria-label={`${headerPeople[0].displayName} and ${headerPeople[1].displayName}`}
+            >
+              <span className="font-romance text-[20px] italic leading-none">{headerPeople[0].displayName}</span>
+              <span className="h-px w-7 bg-[#ff7a8c]" aria-hidden="true" />
+              <Heart className="size-5 fill-[#ff5f6f] text-[#ff5f6f]" aria-hidden="true" />
+              <span className="h-px w-7 bg-[#ff7a8c]" aria-hidden="true" />
+              <span className="font-romance text-[20px] italic leading-none">{headerPeople[1].displayName}</span>
+            </Link>
+          ) : (
+            <Link href="/" className="text-lg font-semibold text-ink">
+              {title}
+            </Link>
+          )}
           <PublicNav
             variant={variant}
             items={modules.map((module) => ({
@@ -106,6 +120,28 @@ export function PublicShell({
               href: module.href ?? hrefByKey[module.key] ?? "/"
             }))}
           />
+          {variant === "home" ? (
+            <div className="hidden min-w-[150px] justify-end sm:flex" aria-label="主页成员头像">
+              <span className="flex rounded-full border border-[#eef0f4] bg-white px-2.5 py-1.5 shadow-[0_7px_18px_rgba(39,43,58,0.08)]">
+                {headerPeople.map((person, index) => (
+                  <span
+                    key={`${person.displayName}-${index}`}
+                    className={cn(
+                      "relative grid size-9 overflow-hidden rounded-full border-2 border-white bg-[#f4f5f8]",
+                      index > 0 ? "-ml-2" : ""
+                    )}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={person.avatarUrl || (person.slot === 2 ? "/images/avatar-person-1.svg" : "/images/avatar-person-2.svg")}
+                      alt={person.displayName}
+                      className="h-full w-full object-cover"
+                    />
+                  </span>
+                ))}
+              </span>
+            </div>
+          ) : null}
         </header>
         <main>{children}</main>
         <footer
