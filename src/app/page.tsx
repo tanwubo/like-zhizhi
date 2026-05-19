@@ -130,7 +130,7 @@ export default async function HomePage() {
         <section className="mx-auto max-w-[1280px] px-4 pb-16 md:px-6">
           <div className="relative overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#fff2f5_0%,#fffafa_48%,#fff0f3_100%)] px-6 py-11 text-center shadow-[0_18px_50px_rgba(36,48,71,0.06)] md:px-14">
             <span className="absolute left-[18%] top-6 font-serif text-7xl leading-none text-[#ffd2dc]">
-              “
+              &ldquo;
             </span>
             <p className="font-romance relative mx-auto max-w-[760px] text-2xl font-light leading-[1.95] tracking-[0.16em] text-[#30323b] md:text-[34px]">
               {data.site.slogan || "你是我平淡生活里，最闪闪发光的那部分。"}
@@ -239,7 +239,7 @@ function AnniversaryPanel({
     <div className="grid overflow-hidden rounded-[22px] border border-[#f1edf0] bg-white px-7 py-8 shadow-[0_18px_54px_rgba(36,48,71,0.08)] md:grid-cols-[1fr_1.15fr] md:px-12 md:py-11">
       <div className="flex flex-col">
         <h2 className="font-display text-2xl font-bold text-[#2c2f37]">纪念日</h2>
-        <span className="font-display mt-8 text-5xl leading-none text-[#ffb6c4]">“</span>
+        <span className="font-display mt-8 text-5xl leading-none text-[#ffb6c4]">&ldquo;</span>
         <div className="font-romance mt-2 space-y-3 text-lg leading-9 tracking-[0.12em] text-[#343740] md:text-xl">
           {poemLines.map((line) => (
             <p key={line}>{line}</p>
@@ -527,7 +527,7 @@ function EmptyCardLine({ text }: { text: string }) {
 
 function buildPoemLines(description: string, slogan: string) {
   const source =
-    description || slogan || "遇见你之前，我没有想过结婚；遇见你之后，结婚我没有想过别人。";
+    description || slogan || "你要是丑点，我或许可以带你逛逛街看场电影……可你长得那么好看，让我只想和你恋爱。";
   const parts = source
     .replace(/([，；。])/g, "$1|")
     .split("|")
@@ -537,7 +537,7 @@ function buildPoemLines(description: string, slogan: string) {
 
   return parts.length >= 2
     ? parts
-    : ["遇见你之前，", "我没有想过结婚；", "遇见你之后，", "结婚我没有想过别人。"];
+    : ["你要是丑点", "我或许可以带你逛逛街看场电影", "可你长得那么好看", "让我只想和你恋爱。"];
 }
 
 function formatMonthDay(date: Date) {

@@ -7,7 +7,7 @@ describe("SEO helpers", () => {
     const metadata = buildSiteMetadata({
       title: "Like Zhizhi",
       description: "情侣纪念站",
-      slogan: "把每一天都认真收藏",
+      slogan: "每一个日子都普通，除了遇见你的那一天。",
       seoKeywords: "情侣,纪念,相册"
     });
 

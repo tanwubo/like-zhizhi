@@ -920,7 +920,7 @@ async function main() {
     update: {},
     create: {
       title: "Like Zhizhi",
-      slogan: "把每一天都认真收藏",
+      slogan: "每一个日子都普通，除了遇见你的那一天。",
       description: "一个从零重建的情侣纪念站。",
       togetherDate: new Date("2024-05-20T00:00:00+08:00"),
       footerText: "Like Zhizhi"
@@ -2059,7 +2059,7 @@ import { expect, test } from "@playwright/test";
 test("public home renders seeded site", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Like Zhizhi" })).toBeVisible();
-  await expect(page.getByText("把每一天都认真收藏")).toBeVisible();
+  await expect(page.getByText("每一个日子都普通，除了遇见你的那一天。")).toBeVisible();
   await expect(page.getByText("最新点滴")).toBeVisible();
 });
 

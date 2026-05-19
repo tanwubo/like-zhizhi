@@ -19,7 +19,7 @@ async function main() {
     update: {},
     create: {
       title: "Like Zhizhi",
-      slogan: "把每一天都认真收藏",
+      slogan: "每一个日子都普通，除了遇见你的那一天。",
       description: "一个从零重建的情侣纪念站。",
       togetherDate: new Date("2024-05-20T00:00:00+08:00"),
       footerText: "Like Zhizhi"

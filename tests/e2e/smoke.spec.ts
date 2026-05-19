@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("public home renders seeded site", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("banner").getByRole("link").first()).toBeVisible();
-  await expect(page.getByText("把每一天都认真收藏")).toBeVisible();
+  await expect(page.getByText("每一个日子都普通，除了遇见你的那一天。")).toBeVisible();
   await expect(page.getByRole("heading", { name: "纪念日", exact: true })).toBeVisible();
 });
 
