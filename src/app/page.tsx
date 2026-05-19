@@ -56,10 +56,7 @@ export default async function HomePage() {
         <section className="relative isolate min-h-[676px] overflow-hidden bg-[#dcefd5]">
           <HomeHeroCarousel slides={heroSlides} />
           <div className="mx-auto flex min-h-[585px] max-w-[1180px] flex-col items-center justify-center px-4 pb-32 pt-20 md:px-6">
-            <p className="rounded-full bg-white/45 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#557247] shadow-sm backdrop-blur-md">
-              {data.site.title}
-            </p>
-            <div className="mt-10 grid w-full items-center gap-8 md:gap-[70px] md:grid-cols-[1fr_auto_1fr]">
+            <div className="grid w-full items-center gap-8 md:gap-[70px] md:grid-cols-[1fr_auto_1fr]">
               <div className="flex justify-center md:justify-end">
                 {people[0] ? (
                   <HeroPerson person={people[0]} align="right" />
@@ -67,14 +64,8 @@ export default async function HomePage() {
                   <EmptyHeroPerson label="主角 A" slot={1} />
                 )}
               </div>
-              <div className="home-heart flex flex-col items-center gap-3">
-                <div className="rounded-full bg-white/75 px-4 py-2 text-xs font-semibold text-[#557247] shadow-[0_12px_34px_rgba(61,86,54,0.16)] backdrop-blur-md">
-                  相伴 {data.togetherDays.toLocaleString("zh-CN")} 天
-                </div>
+              <div className="home-heart grid place-items-center">
                 <HeartPulse />
-                <p className="rounded-full bg-white/70 px-3 py-1 text-xs text-[#557247] backdrop-blur-md">
-                  From {togetherDate}
-                </p>
               </div>
               <div className="flex justify-center md:justify-start">
                 {people[1] ? (
@@ -175,15 +166,13 @@ function HeroPerson({ person, align }: { person: Partner; align: "left" | "right
       ].join(" ")}
     >
       <AvatarMotionFrame>
-        <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#ff9a9e,#fad0c4,#fad0c4,#ff9a9e)] opacity-75 blur-[2px]" />
-        <div className="absolute inset-[4px] rounded-full bg-white/80" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={avatarSrc}
           alt={person.displayName}
-          className="absolute inset-[8px] z-10 size-[calc(100%-16px)] rounded-full object-cover"
+          className="absolute inset-[3px] z-10 size-[calc(100%-6px)] rounded-full object-cover"
         />
-        <span className="pointer-events-none absolute inset-[8px] z-20 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.36),transparent_48%,rgba(255,255,255,0.18))]" />
+        <span className="pointer-events-none absolute inset-[3px] z-20 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.22),transparent_46%,rgba(255,255,255,0.12))]" />
       </AvatarMotionFrame>
       <div className="mt-3 rounded-full border border-white/55 bg-white/24 px-5 py-1.5 text-sm font-bold text-white shadow-[0_14px_34px_rgba(61,86,54,0.2),inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-xl">
         {person.displayName}
@@ -203,14 +192,14 @@ function HeroPerson({ person, align }: { person: Partner; align: "left" | "right
 function EmptyHeroPerson({ label, slot }: { label: string; slot: number }) {
   return (
     <div className="home-hero-person from-left flex flex-col items-center">
-      <div className="relative grid size-32 place-items-center rounded-full border-[8px] border-white/80 bg-white/75 shadow-[0_18px_50px_rgba(61,86,54,0.18)] backdrop-blur-sm md:size-40">
+      <div className="relative grid size-28 place-items-center overflow-hidden rounded-full border-2 border-white/90 bg-white/20 shadow-[0_5px_14px_rgba(80,63,72,0.16),0_0_0_1px_rgba(255,255,255,0.35)] md:size-32">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={fallbackAvatar(slot)}
           alt={label}
-          className="size-full rounded-full object-cover"
+          className="absolute inset-[3px] size-[calc(100%-6px)] rounded-full object-cover"
         />
-        <span className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.36),transparent_48%,rgba(255,255,255,0.18))]" />
+        <span className="pointer-events-none absolute inset-[3px] rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.22),transparent_46%,rgba(255,255,255,0.12))]" />
       </div>
       <div className="mt-3 rounded-full bg-[#6e8a4d]/85 px-5 py-1.5 text-sm font-bold text-white">
         等待补充

@@ -70,13 +70,13 @@ export function HeartPulse() {
       <motion.button
         type="button"
         aria-label="heart animation"
-        className="relative z-10 grid size-[38px] cursor-pointer place-items-center rounded-full border-0 bg-[#ff5f86] text-[18px] text-white shadow-[0_10px_28px_rgba(255,95,134,0.34)] outline-none ring-[#ff9ab3]/90 transition focus-visible:ring-8"
+        className="relative z-10 grid size-7 cursor-pointer place-items-center rounded-full border-0 bg-[#ff6f96] text-[14px] text-white shadow-[0_0_8px_rgba(255,111,150,0.72),0_0_18px_rgba(255,111,150,0.46)] outline-none ring-[#ffbfd0]/75 transition before:absolute before:inset-[-5px] before:rounded-full before:bg-[#ff7fa2]/25 before:blur-[4px] focus-visible:ring-4"
         animate={{
           scale: [1, 1.16, 1],
           boxShadow: [
-            "0 10px 28px rgba(255,95,134,0.34)",
-            "0 22px 78px rgba(255,95,134,0.84)",
-            "0 10px 28px rgba(255,95,134,0.34)"
+            "0 0 8px rgba(255,111,150,0.72), 0 0 18px rgba(255,111,150,0.46)",
+            "0 0 10px rgba(255,111,150,0.88), 0 0 25px rgba(255,111,150,0.62)",
+            "0 0 8px rgba(255,111,150,0.72), 0 0 18px rgba(255,111,150,0.46)"
           ]
         }}
         transition={{
@@ -85,8 +85,8 @@ export function HeartPulse() {
           ease: "easeInOut"
         }}
         whileHover={{
-          scale: 1.28,
-          boxShadow: "0 28px 92px rgba(255,95,134,0.9)"
+          scale: 1.22,
+          boxShadow: "0 0 12px rgba(255,111,150,0.9), 0 0 30px rgba(255,111,150,0.68)"
         }}
         whileTap={{
           scale: 0.82,
@@ -96,7 +96,7 @@ export function HeartPulse() {
           setBurstId((current) => current + 1);
         }}
       >
-        {"\u2665"}
+        <span className="relative z-10 leading-none">{"\u2665"}</span>
       </motion.button>
     </div>
   );
@@ -105,8 +105,8 @@ export function HeartPulse() {
 export function AvatarMotionFrame({ children }: { children: ReactNode }) {
   return (
     <motion.div
-      className="relative grid size-32 place-items-center rounded-full bg-white/75 shadow-[0_18px_50px_rgba(61,86,54,0.18),0_0_20px_rgba(255,255,255,0.3)] backdrop-blur-sm md:size-40"
-      whileHover={{ scale: 1.05, boxShadow: "0 25px 60px rgba(61,86,54,0.25), 0 0 30px rgba(255,255,255,0.5)" }}
+      className="relative grid size-28 place-items-center overflow-hidden rounded-full border-2 border-white/90 bg-white/20 shadow-[0_5px_14px_rgba(80,63,72,0.16),0_0_0_1px_rgba(255,255,255,0.35)] md:size-32"
+      whileHover={{ scale: 1.04, boxShadow: "0 7px 18px rgba(80,63,72,0.2), 0 0 0 1px rgba(255,255,255,0.5)" }}
       transition={{ type: "spring", stiffness: 300 }}
     >
       {children}
