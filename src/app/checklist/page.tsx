@@ -15,6 +15,7 @@ export default async function ChecklistPage() {
       title={publicData.site.title}
       footerText={publicData.site.footerText}
       modules={publicData.navigation}
+      people={publicData.people}
       theme={publicData.theme}
       variant="home"
     >

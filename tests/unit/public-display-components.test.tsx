@@ -1,4 +1,6 @@
 import { render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { ContentCard } from "@/components/public/content-card";
@@ -29,5 +31,25 @@ describe("public display components", () => {
     expect(screen.getByText("Photo Album")).toHaveAttribute("data-slot", "badge");
     expect(screen.getByText("相册")).toHaveAttribute("data-slot", "page-title");
     expect(screen.getByText("暂无相册").closest("[data-slot='card']")).toBeInTheDocument();
+  });
+});
+
+describe("public page shell data", () => {
+  it("passes public people data into the shared home variant shell", () => {
+    const publicPages = [
+      "src/app/about/page.tsx",
+      "src/app/album/page.tsx",
+      "src/app/checklist/page.tsx",
+      "src/app/footprints/page.tsx",
+      "src/app/love-days/page.tsx",
+      "src/app/messages/page.tsx",
+      "src/app/notes/page.tsx",
+      "src/app/notes/[slug]/page.tsx"
+    ];
+
+    for (const page of publicPages) {
+      const source = readFileSync(join(process.cwd(), page), "utf8");
+      expect(source, page).toContain("people={publicData.people}");
+    }
   });
 });

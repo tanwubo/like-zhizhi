@@ -20,6 +20,7 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ slu
       title={publicData.site.title}
       footerText={publicData.site.footerText}
       modules={publicData.navigation}
+      people={publicData.people}
       theme={publicData.theme}
       variant="home"
     >
