@@ -217,16 +217,17 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       // zoom 联动：缩略图随地图放大而放大
       const updateGalleryScale = () => {
         const zoom = map.getZoom();
-        // 基准 zoom=6.2 时 scale=1，每增加 1 级 zoom 增加 0.18
-        const scale = Math.max(0.5, Math.min(2.5, 0.1 + zoom * 0.18));
+        const baseZoom = 6.2;
+        const scale = Math.max(0.5, Math.min(3.5, 1 + (zoom - baseZoom) * 0.35));
         for (const marker of markers) {
           const gallery = marker.getContent().querySelector(".marker-gallery") as HTMLElement | null;
           if (gallery) {
-            gallery.style.transform = `scale(${scale})`;
+            gallery.style.setProperty("transform", `scale(${scale})`, "important");
           }
         }
       };
       map.on("zoomend", updateGalleryScale);
+      map.on("zoomstart", updateGalleryScale);
       window.requestAnimationFrame(updateGalleryScale);
 
       setMapReady(true);
@@ -236,6 +237,10 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       disposed = true;
       if (animationRef.current !== null) {
         window.cancelAnimationFrame(animationRef.current);
+      }
+      if (map) {
+        map.off("zoomend", updateGalleryScale);
+        map.off("zoomstart", updateGalleryScale);
       }
       mapInstanceRef.current = null;
       markersRef.current = [];

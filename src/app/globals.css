@@ -821,17 +821,17 @@ nextjs-portal {
 
 .marker-gallery {
   position: relative;
-  width: 84px;
-  height: 66px;
+  width: 120px;
+  height: 96px;
   margin-top: 6px;
   transform-origin: center top;
-  transition: transform 120ms ease;
+  transition: transform 160ms ease;
 }
 
 .gallery-card {
   position: absolute;
-  width: 57px;
-  height: 45px;
+  width: 60px;
+  height: 48px;
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid #fff;
@@ -846,27 +846,27 @@ nextjs-portal {
 }
 
 .gallery-card:nth-child(1) {
-  transform: rotate(-4deg) translate(-3px, 0);
+  transform: rotate(-6deg) translate(-10px, 0);
   z-index: 4;
 }
 
 .gallery-card:nth-child(2) {
-  transform: rotate(3deg) translate(9px, 3px);
+  transform: rotate(5deg) translate(22px, 4px);
   z-index: 3;
 }
 
 .gallery-card:nth-child(3) {
-  transform: rotate(-2deg) translate(3px, 9px);
+  transform: rotate(-3deg) translate(4px, 22px);
   z-index: 2;
 }
 
 .gallery-card:nth-child(4) {
-  transform: rotate(1deg) translate(12px, 12px);
+  transform: rotate(2deg) translate(28px, 28px);
   z-index: 1;
 }
 
 .gallery-card:hover {
-  transform: scale(1.35) rotate(0deg) !important;
+  transform: scale(1.4) rotate(0deg) !important;
   z-index: 10 !important;
 }
 
