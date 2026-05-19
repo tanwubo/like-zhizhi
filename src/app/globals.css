@@ -669,3 +669,192 @@ nextjs-portal {
     transform: none !important;
   }
 }
+
+.footprint-map-shell {
+  min-height: calc(100vh - 84px);
+  overflow: hidden;
+  position: relative;
+  background: #f6f9ff;
+}
+
+.footprint-map-canvas {
+  min-height: calc(100vh - 84px);
+  width: 100%;
+}
+
+.footprint-journey-panel {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 10;
+  width: 180px;
+  border: 1px solid rgba(255, 176, 193, 0.45);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 48px rgba(31, 42, 68, 0.14);
+  padding: 16px;
+  backdrop-filter: blur(14px);
+}
+
+.footprint-journey-panel button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px;
+  padding: 7px 8px;
+  text-align: left;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.footprint-journey-panel button span {
+  display: inline-flex;
+  height: 22px;
+  width: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #c5cbd6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.footprint-journey-panel button.is-lit {
+  color: #db4f70;
+}
+
+.footprint-journey-panel button.is-lit span {
+  background: #ff6b8b;
+}
+
+.footprint-map-marker {
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: #172033;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.footprint-map-marker.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.78);
+}
+
+.footprint-map-marker.is-active .footprint-map-marker__order {
+  box-shadow: 0 0 0 8px rgba(255, 107, 139, 0.2), 0 0 28px rgba(255, 107, 139, 0.52);
+}
+
+.footprint-map-marker__order {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ff6b8b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 0 0 6px rgba(255, 107, 139, 0.16);
+}
+
+.footprint-map-marker__name {
+  margin-left: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0 1px 8px #fff;
+}
+
+.footprint-map-marker__photos {
+  position: absolute;
+  left: 18px;
+  bottom: 28px;
+  display: grid;
+  grid-template-columns: repeat(2, 34px);
+  gap: 3px;
+}
+
+.footprint-map-marker__photos img {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 6px 18px rgba(23, 32, 51, 0.22);
+  transition: transform 160ms ease, z-index 160ms ease;
+}
+
+.footprint-map-marker__photos img:hover {
+  position: relative;
+  z-index: 2;
+  transform: scale(1.45);
+}
+
+.footprint-detail-panel {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 11;
+  width: min(420px, calc(100vw - 48px));
+  max-height: calc(100vh - 132px);
+  overflow: auto;
+  border: 1px solid rgba(255, 176, 193, 0.42);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 20px 56px rgba(31, 42, 68, 0.18);
+  padding: 20px;
+  backdrop-filter: blur(16px);
+}
+
+.footprint-map-caption {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 32px rgba(31, 42, 68, 0.12);
+  padding: 10px 14px;
+}
+
+.footprint-map-caption p {
+  color: rgba(29, 29, 31, 0.5);
+  font-size: 12px;
+}
+
+.footprint-map-caption strong {
+  color: #172033;
+  font-size: 15px;
+}
+
+@media (max-width: 760px) {
+  .footprint-map-shell,
+  .footprint-map-canvas {
+    min-height: 680px;
+  }
+
+  .footprint-journey-panel {
+    top: 12px;
+    left: 12px;
+    width: min(180px, calc(100vw - 24px));
+    padding: 12px;
+  }
+
+  .footprint-detail-panel {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 72vh;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .footprint-map-caption {
+    right: 12px;
+    bottom: 12px;
+  }
+}

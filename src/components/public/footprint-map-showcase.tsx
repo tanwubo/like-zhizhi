@@ -1,0 +1,249 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { FootprintDetailPanel } from "@/components/public/footprint-detail-panel";
+import { FootprintMapFallback } from "@/components/public/footprint-map-fallback";
+import {
+  selectMarkerThumbnails,
+  toJourneyLabel,
+  type PublicFootprintPlace
+} from "@/features/public/footprint-map-data";
+import { loadAMap } from "@/lib/amap-loader";
+
+type AMapPixel = new (x: number, y: number) => unknown;
+type AMapMarkerInstance = {
+  getContent: () => HTMLElement;
+};
+type AMapPolylineInstance = {
+  setPath: (path: number[][]) => void;
+};
+type AMapInstance = {
+  add: (item: unknown) => void;
+  addControl: (control: unknown) => void;
+  destroy: () => void;
+  setFitView: (overlays: unknown[], immediately?: boolean, padding?: [number, number, number, number]) => void;
+};
+type AMapNamespace = {
+  Map: new (
+    container: HTMLDivElement,
+    options: { viewMode: "3D"; zoom: number; center: number[]; mapStyle: string }
+  ) => AMapInstance;
+  Marker: new (options: { position: number[]; content: HTMLElement; offset: unknown }) => AMapMarkerInstance;
+  Pixel: AMapPixel;
+  Polyline: new (options: {
+    path: number[][];
+    isOutline: boolean;
+    outlineColor: string;
+    borderWeight: number;
+    strokeColor: string;
+    strokeOpacity: number;
+    strokeWeight: number;
+    strokeStyle: "dashed" | "solid";
+    strokeDasharray: number[];
+    lineJoin: "round";
+    lineCap: "round";
+    zIndex: number;
+  }) => AMapPolylineInstance;
+  Scale: new () => unknown;
+};
+
+function cityPosition(place: PublicFootprintPlace) {
+  return [Number(place.longitude), Number(place.latitude)];
+}
+
+function createMarkerContent(place: PublicFootprintPlace, index: number, onSelect: () => void) {
+  const content = document.createElement("button");
+  content.type = "button";
+  content.className = "footprint-map-marker is-hidden";
+  content.setAttribute("aria-label", `打开${place.name}足迹`);
+
+  const order = document.createElement("span");
+  order.className = "footprint-map-marker__order";
+  order.textContent = String(index + 1);
+  content.append(order);
+
+  const name = document.createElement("span");
+  name.className = "footprint-map-marker__name";
+  name.textContent = place.name;
+  content.append(name);
+
+  const photos = document.createElement("span");
+  photos.className = "footprint-map-marker__photos";
+  for (const thumbnail of selectMarkerThumbnails(place)) {
+    const img = document.createElement("img");
+    img.alt = thumbnail.filename;
+    img.src = thumbnail.url;
+    photos.append(img);
+  }
+  content.append(photos);
+  content.addEventListener("click", onSelect);
+
+  return content;
+}
+
+export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[] }) {
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const markersRef = useRef<AMapMarkerInstance[]>([]);
+  const routeRef = useRef<AMapPolylineInstance | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const routePath = useMemo(
+    () => places.slice(0, Math.max(0, revealedCount + 1)).map(cityPosition),
+    [places, revealedCount]
+  );
+
+  useEffect(() => {
+    if (!mapRef.current || !places.length) {
+      return;
+    }
+
+    let map: AMapInstance | null = null;
+    let disposed = false;
+
+    loadAMap({
+      key: process.env.NEXT_PUBLIC_AMAP_JSAPI_KEY,
+      securityJsCode: process.env.NEXT_PUBLIC_AMAP_SECURITY_JS_CODE,
+      serviceHost: process.env.NEXT_PUBLIC_AMAP_SERVICE_HOST,
+      plugins: ["AMap.Scale"]
+    }).then((result) => {
+      if (disposed) {
+        return;
+      }
+
+      if (!result.ok) {
+        setFailed(result.reason === "missing-key" ? "未配置高德地图 Key，先显示轨迹列表。" : "高德地图加载失败，先显示轨迹列表。");
+        return;
+      }
+
+      const AMap = result.AMap as AMapNamespace;
+      map = new AMap.Map(mapRef.current as HTMLDivElement, {
+        viewMode: "3D",
+        zoom: 4.2,
+        center: [104.1954, 35.8617],
+        mapStyle: "amap://styles/light"
+      });
+      map.addControl(new AMap.Scale());
+
+      const route = new AMap.Polyline({
+        path: places.slice(0, 1).map(cityPosition),
+        isOutline: true,
+        outlineColor: "#fff7fb",
+        borderWeight: 3,
+        strokeColor: "#ff6b8b",
+        strokeOpacity: 0.85,
+        strokeWeight: 4,
+        strokeStyle: "dashed",
+        strokeDasharray: [10, 8],
+        lineJoin: "round",
+        lineCap: "round",
+        zIndex: 20
+      });
+      routeRef.current = route;
+      map.add(route);
+
+      const markers = places.map((place, index) => {
+        const marker = new AMap.Marker({
+          position: cityPosition(place),
+          content: createMarkerContent(place, index, () => {
+            setRevealedCount(places.length);
+            setSelectedIndex(index);
+          }),
+          offset: new AMap.Pixel(-70, -88)
+        });
+        return marker;
+      });
+      markersRef.current = markers;
+      map.add(markers);
+      map.setFitView([...markers, route], false, [80, 80, 80, 80]);
+    });
+
+    return () => {
+      disposed = true;
+      markersRef.current = [];
+      routeRef.current = null;
+      map?.destroy();
+    };
+  }, [places]);
+
+  useEffect(() => {
+    for (const [index, marker] of markersRef.current.entries()) {
+      const content = marker.getContent();
+      content.classList.toggle("is-hidden", index > revealedCount);
+      content.classList.toggle("is-active", index === activeIndex && index <= revealedCount);
+    }
+    routeRef.current?.setPath(routePath);
+  }, [activeIndex, revealedCount, routePath]);
+
+  useEffect(() => {
+    if (!places.length || revealedCount >= places.length - 1 || selectedIndex !== null) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setRevealedCount((value) => Math.min(value + 1, places.length - 1));
+      setActiveIndex((value) => Math.min(value + 1, places.length - 1));
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [places.length, revealedCount, selectedIndex]);
+
+  if (failed) {
+    return <FootprintMapFallback places={places} reason={failed} />;
+  }
+
+  return (
+    <section className="footprint-map-shell">
+      <aside className="footprint-journey-panel">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blush-700">Journey</p>
+        <h2 className="mt-2 text-lg font-semibold text-ink">点亮顺序</h2>
+        <div className="mt-4 grid gap-2">
+          {places.map((place, index) => (
+            <button
+              key={place.id}
+              className={index <= revealedCount ? "is-lit" : ""}
+              onClick={() => {
+                setRevealedCount(places.length - 1);
+                setSelectedIndex(index);
+              }}
+              type="button"
+            >
+              <span>{index + 1}</span>
+              {place.name}
+            </button>
+          ))}
+        </div>
+        <button
+          className="mt-4 rounded-md border border-blush-100 px-3 py-2 text-sm text-ink/65 hover:border-blush-200 hover:text-blush-700"
+          onClick={() => setRevealedCount(places.length - 1)}
+          type="button"
+        >
+          跳过动画
+        </button>
+        <p className="mt-3 text-xs text-ink/45">
+          已点亮 {Math.min(revealedCount + 1, places.length)} / {places.length}
+        </p>
+      </aside>
+
+      <div ref={mapRef} className="footprint-map-canvas" />
+
+      {selectedIndex !== null ? (
+        <FootprintDetailPanel
+          index={selectedIndex}
+          onClose={() => setSelectedIndex(null)}
+          onNext={() => setSelectedIndex((selectedIndex + 1) % places.length)}
+          onPrev={() => setSelectedIndex((selectedIndex + places.length - 1) % places.length)}
+          place={places[selectedIndex]}
+        />
+      ) : null}
+
+      <div className="footprint-map-caption">
+        <p>{toJourneyLabel(activeIndex)}</p>
+        <strong>{places[activeIndex]?.name}</strong>
+      </div>
+    </section>
+  );
+}
