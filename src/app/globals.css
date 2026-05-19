@@ -142,6 +142,184 @@ nextjs-portal {
   z-index: 2147483647;
 }
 
+.home-music-guide {
+  align-items: center;
+  animation: home-music-guide-in 220ms ease-out both;
+  background: rgba(224, 226, 230, 0.48);
+  backdrop-filter: blur(14px) saturate(95%);
+  display: grid;
+  inset: 0;
+  justify-items: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 2147483646;
+}
+
+.home-music-guide-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.66));
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  border-radius: 30px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 22px 62px rgba(38, 47, 65, 0.18);
+  color: #273044;
+  display: grid;
+  justify-items: center;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 31px 31px 30px;
+  text-align: center;
+  width: 100%;
+}
+
+.home-music-guide-visual {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  box-shadow: inset 0 1px 8px rgba(255, 255, 255, 0.58);
+  display: flex;
+  gap: 7px;
+  height: 90px;
+  justify-content: center;
+  width: 100%;
+}
+
+.home-music-guide-visual span {
+  animation: home-music-guide-bars 1.2s ease-in-out infinite;
+  background: linear-gradient(180deg, #ff7c92, #ff365f);
+  border-radius: 999px;
+  display: block;
+  height: 24px;
+  width: 6px;
+}
+
+.home-music-guide-visual span:nth-child(1) {
+  animation-delay: -0.24s;
+  height: 11px;
+}
+
+.home-music-guide-visual span:nth-child(2) {
+  animation-delay: -0.12s;
+  height: 27px;
+}
+
+.home-music-guide-visual span:nth-child(4) {
+  animation-delay: 0.12s;
+  height: 28px;
+}
+
+.home-music-guide-visual span:nth-child(5) {
+  animation-delay: 0.24s;
+  height: 23px;
+}
+
+.home-music-guide-card h2 {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.35;
+  margin: 20px 0 6px;
+}
+
+.home-music-guide-card p {
+  color: #6f7f9b;
+  font-size: 14px;
+  line-height: 1.72;
+  margin: 0;
+}
+
+.home-music-guide-features {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 28px;
+  width: 100%;
+}
+
+.home-music-guide-features span {
+  align-items: center;
+  color: #74849f;
+  display: grid;
+  font-size: 12px;
+  gap: 8px;
+  justify-items: center;
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.home-music-guide-features svg {
+  background: rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  box-sizing: content-box;
+  color: #7890ad;
+  padding: 12px;
+}
+
+.home-music-guide-never {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.48);
+  border-radius: 999px;
+  color: #8fa1bb;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  gap: 6px;
+  line-height: 1;
+  margin-top: 28px;
+  padding: 7px 13px;
+}
+
+.home-music-guide-never input {
+  accent-color: #ff4168;
+  height: 14px;
+  margin: 0;
+  width: 14px;
+}
+
+.home-music-guide-actions {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: 18px;
+  width: 100%;
+}
+
+.home-music-guide-actions button {
+  align-items: center;
+  appearance: none;
+  border: 0;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  gap: 8px;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 16px;
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease;
+  white-space: nowrap;
+}
+
+.home-music-guide-actions button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.home-music-guide-secondary {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.84) !important;
+  color: #6f7f99;
+}
+
+.home-music-guide-primary {
+  background: linear-gradient(135deg, #ff5378, #ff1f58);
+  box-shadow: 0 12px 24px rgba(255, 47, 91, 0.28);
+  color: #fff;
+}
+
 .home-music-player button {
   -webkit-tap-highlight-color: transparent;
 }
@@ -582,6 +760,27 @@ nextjs-portal {
   }
 }
 
+@keyframes home-music-guide-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes home-music-guide-bars {
+  0%,
+  100% {
+    transform: scaleY(0.72);
+  }
+
+  50% {
+    transform: scaleY(1.12);
+  }
+}
+
 @keyframes home-reveal {
   from {
     opacity: 0;
@@ -595,6 +794,38 @@ nextjs-portal {
 }
 
 @media (max-width: 900px) {
+  .home-music-guide {
+    padding: 18px;
+  }
+
+  .home-music-guide-card {
+    border-radius: 26px;
+    padding: 26px 20px 22px;
+  }
+
+  .home-music-guide-visual {
+    height: 78px;
+  }
+
+  .home-music-guide-features {
+    gap: 8px;
+  }
+
+  .home-music-guide-features span {
+    font-size: 11px;
+  }
+
+  .home-music-guide-features svg {
+    padding: 10px;
+  }
+
+  .home-music-guide-actions button {
+    border-radius: 18px;
+    font-size: 14px;
+    min-height: 48px;
+    padding: 0 12px;
+  }
+
   .home-music-player {
     bottom: max(10px, env(safe-area-inset-bottom));
     left: max(10px, env(safe-area-inset-left));
@@ -661,6 +892,8 @@ nextjs-portal {
 @media (prefers-reduced-motion: reduce) {
   .home-hero-person,
   .home-heart,
+  .home-music-guide,
+  .home-music-guide-visual span,
   .home-music-player,
   .home-reveal,
   .theme-page-animation main {
