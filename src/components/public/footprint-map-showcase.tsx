@@ -22,15 +22,23 @@ type AMapInstance = {
   add: (item: unknown) => void;
   addControl: (control: unknown) => void;
   destroy: () => void;
+  getZoom: () => number;
+  on: (event: string, callback: () => void) => void;
+  off: (event: string, callback: () => void) => void;
   setCenter: (center: number[], immediately?: boolean, duration?: number) => void;
   setFitView: (overlays: unknown[], immediately?: boolean, padding?: [number, number, number, number]) => void;
+};
+type AMapMarkerOptions = {
+  position: number[];
+  content: HTMLElement;
+  offset: unknown;
 };
 type AMapNamespace = {
   Map: new (
     container: HTMLDivElement,
     options: { viewMode: "3D"; zoom: number; center: number[]; mapStyle: string }
   ) => AMapInstance;
-  Marker: new (options: { position: number[]; content: HTMLElement; offset: unknown }) => AMapMarkerInstance;
+  Marker: new (options: AMapMarkerOptions) => AMapMarkerInstance;
   Pixel: AMapPixel;
   Polyline: new (options: {
     path: number[][];
@@ -63,25 +71,45 @@ function createMarkerContent(place: PublicFootprintPlace, index: number, onSelec
   content.className = "footprint-map-marker is-hidden";
   content.setAttribute("aria-label", `打开${place.name}足迹`);
 
+  const label = document.createElement("div");
+  label.className = "marker-label";
+
   const order = document.createElement("span");
-  order.className = "footprint-map-marker__order";
+  order.className = "marker-order";
   order.textContent = String(index + 1);
-  content.append(order);
+  label.append(order);
 
   const name = document.createElement("span");
-  name.className = "footprint-map-marker__name";
+  name.className = "marker-name";
   name.textContent = place.name;
-  content.append(name);
+  label.append(name);
+  content.append(label);
 
-  const photos = document.createElement("span");
-  photos.className = "footprint-map-marker__photos";
-  for (const thumbnail of selectMarkerThumbnails(place)) {
+  const anchor = document.createElement("div");
+  anchor.className = "marker-anchor";
+
+  const pulse = document.createElement("div");
+  pulse.className = "marker-pulse";
+  anchor.append(pulse);
+
+  const dot = document.createElement("div");
+  dot.className = "marker-dot";
+  anchor.append(dot);
+  content.append(anchor);
+
+  const gallery = document.createElement("div");
+  gallery.className = "marker-gallery";
+  const thumbs = selectMarkerThumbnails(place);
+  for (const thumbnail of thumbs) {
+    const card = document.createElement("div");
+    card.className = "gallery-card";
     const img = document.createElement("img");
     img.alt = thumbnail.filename;
     img.src = thumbnail.url;
-    photos.append(img);
+    card.append(img);
+    gallery.append(card);
   }
-  content.append(photos);
+  content.append(gallery);
   content.addEventListener("click", onSelect);
 
   return content;
@@ -157,19 +185,50 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       map.add(route);
 
       const markers = places.map((place, index) => {
+        const content = createMarkerContent(place, index, () => {
+          setRevealedCount(places.length - 1);
+          setActiveIndex(index);
+          setSelectedIndex(index);
+        });
         const marker = new AMap.Marker({
           position: cityPosition(place),
-          content: createMarkerContent(place, index, () => {
-            setRevealedCount(places.length - 1);
-            setActiveIndex(index);
-            setSelectedIndex(index);
-          }),
-          offset: new AMap.Pixel(-6, -6)
+          content,
+          offset: new AMap.Pixel(0, 0)
         });
         return marker;
       });
       markersRef.current = markers;
       map.add(markers);
+
+      // 动态校准 offset，让 anchor（地点标识）中心对准坐标点
+      window.requestAnimationFrame(() => {
+        for (const marker of markers) {
+          const el = marker.getContent();
+          const anchor = el.querySelector(".marker-anchor") as HTMLElement | null;
+          if (!anchor) continue;
+          const contentRect = el.getBoundingClientRect();
+          const anchorRect = anchor.getBoundingClientRect();
+          const offsetX = -(anchorRect.left - contentRect.left + anchorRect.width / 2);
+          const offsetY = -(anchorRect.top - contentRect.top + anchorRect.height / 2);
+          (marker as unknown as { setOffset: (offset: unknown) => void }).setOffset(new AMap.Pixel(offsetX, offsetY));
+        }
+      });
+
+      // zoom 联动：缩略图随地图放大而放大
+      const updateGalleryScale = () => {
+        const zoom = map.getZoom();
+        // 基准 zoom=6.2 时 scale=1，每增加 1 级 zoom 增加 0.18
+        const scale = Math.max(0.5, Math.min(2.5, 0.1 + zoom * 0.18));
+        for (const marker of markers) {
+          const gallery = marker.getContent().querySelector(".marker-gallery") as HTMLElement | null;
+          if (gallery) {
+            gallery.style.transform = `scale(${scale})`;
+          }
+        }
+      };
+      map.on("zoomend", updateGalleryScale);
+      window.requestAnimationFrame(updateGalleryScale);
+
       setMapReady(true);
     });
 
@@ -278,7 +337,11 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
           onClick={() => {
             setRevealedCount(places.length - 1);
             setActiveIndex(places.length - 1);
-            mapInstanceRef.current?.setFitView([...markersRef.current, routeRef.current].filter(Boolean), false, [80, 80, 80, 80]);
+            mapInstanceRef.current?.setFitView(
+              [...markersRef.current, routeRef.current].filter(Boolean),
+              false,
+              [80, 80, 80, 80]
+            );
           }}
           type="button"
         >
