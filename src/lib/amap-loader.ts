@@ -1,5 +1,3 @@
-import AMapLoader from "@amap/amap-jsapi-loader";
-
 type AMapSecurityWindow = Window &
   typeof globalThis & {
     _AMapSecurityConfig?: {
@@ -18,6 +16,12 @@ export type AMapLoadConfig = {
 export type AMapLoadResult =
   | { ok: true; AMap: unknown }
   | { ok: false; reason: "missing-key" | "load-failed"; error?: unknown };
+
+type AMapLoaderModule = {
+  default: {
+    load: (config: { key: string; version: "2.0"; plugins: string[] }) => Promise<unknown>;
+  };
+};
 
 export function configureAMapSecurity(config: AMapLoadConfig) {
   const win = window as AMapSecurityWindow;
@@ -40,6 +44,7 @@ export async function loadAMap(config: AMapLoadConfig): Promise<AMapLoadResult> 
   configureAMapSecurity(config);
 
   try {
+    const AMapLoader = ((await import("@amap/amap-jsapi-loader")) as AMapLoaderModule).default;
     const AMap = await AMapLoader.load({
       key: config.key,
       version: "2.0",

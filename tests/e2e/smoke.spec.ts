@@ -2,9 +2,9 @@ import { expect, test } from "@playwright/test";
 
 test("public home renders seeded site", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Like Zhizhi" })).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link").first()).toBeVisible();
   await expect(page.getByText("把每一天都认真收藏")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "点滴", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "纪念日", exact: true })).toBeVisible();
 });
 
 test("public module routes render", async ({ page }) => {
@@ -24,6 +24,12 @@ test("public module routes render", async ({ page }) => {
   }
 });
 
+test("footprints page renders without amap credentials", async ({ page }) => {
+  await page.goto("/footprints");
+  await expect(page.getByRole("heading", { name: "轨迹", exact: true })).toBeVisible();
+  await expect(page.getByText("未配置高德地图 Key，先显示轨迹列表。")).toBeVisible();
+});
+
 test("public pages render representative seed content", async ({ page }) => {
   const expectations = [
     ["/notes", "第一条点滴"],
@@ -35,11 +41,11 @@ test("public pages render representative seed content", async ({ page }) => {
   ] as const;
 
   for (const [route, text] of expectations) {
-    await page.goto(route);
+    await page.goto(route, { waitUntil: "domcontentloaded" });
     await expect(page.getByText(text)).toBeVisible();
   }
 
-  await page.goto("/album");
+  await page.goto("/album", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("img", { name: "海边日落" })).toBeVisible();
 });
 
@@ -174,7 +180,7 @@ test("seed owner can create an admin checklist draft", async ({ page }) => {
 
 test("seed owner can create an admin footprint place", async ({ page }) => {
   const suffix = Date.now().toString();
-  const name = `端到端足迹 ${suffix}`;
+  const name = `端到端城市 ${suffix}`;
 
   await page.goto("/login");
   await page.getByLabel("邮箱").fill("owner@example.com");
@@ -185,14 +191,12 @@ test("seed owner can create an admin footprint place", async ({ page }) => {
   await page.goto("/admin/content/footprints");
   await expect(page.getByRole("heading", { name: "足迹管理" })).toBeVisible();
   await page.getByRole("link", { name: "新建足迹" }).click();
-  await page.getByLabel("地点名称").fill(name);
-  await page.getByLabel("地点说明").fill("这是一条端到端创建的足迹地点。");
+  await page.getByLabel("城市地点").fill(name);
+  await page.getByLabel("排序值").fill("99");
   await page.getByLabel("纬度").fill("31.2397");
   await page.getByLabel("经度").fill("121.4998");
-  await page.getByLabel("访问标题").fill("第一次记录");
-  await page.getByLabel("访问说明").fill("用来验证足迹访问记录。");
-  await page.getByLabel("访问日期").fill("2026-05-15");
-  await page.getByRole("button", { name: "保存足迹" }).click();
+  await page.getByLabel("城市说明").fill("这是一条端到端创建的城市足迹。");
+  await page.getByRole("button", { name: "保存城市" }).click();
   await expect(page).toHaveURL(/\/admin\/content\/footprints$/);
   await expect(page.getByText(name)).toBeVisible();
 });
@@ -262,6 +266,15 @@ test("seed owner can update theme settings", async ({ page }) => {
 test("seed owner can register media in admin media center", async ({ page }) => {
   const suffix = Date.now().toString();
   const mediaUrl = `https://example.com/e2e-media-${suffix}.jpg`;
+
+  await page.route("**/*", async (route) => {
+    if (route.request().resourceType() === "image") {
+      await route.abort();
+      return;
+    }
+
+    await route.continue();
+  });
 
   await page.goto("/login");
   await page.getByLabel("邮箱").fill("owner@example.com");

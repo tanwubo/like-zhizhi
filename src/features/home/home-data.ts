@@ -93,10 +93,11 @@ export async function getHomeData() {
       }
     }),
     prisma.footprintPlace.findMany({
-      orderBy: { createdAt: "desc" },
+      where: { enabled: true },
+      orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
       take: 4,
       include: {
-        visits: {
+        memories: {
           orderBy: { visitedAt: "desc" },
           take: 1
         }
@@ -116,7 +117,7 @@ export async function getHomeData() {
     prisma.message.count({ where: { status: MessageStatus.APPROVED } }),
     prisma.checklistItem.count({ where: { status: PublishStatus.PUBLISHED } }),
     prisma.albumItem.count({ where: { status: PublishStatus.PUBLISHED } }),
-    prisma.footprintPlace.count(),
+    prisma.footprintPlace.count({ where: { enabled: true } }),
     prisma.loveDayEvent.count(),
     getEnabledMusicTracks(),
     prisma.dailyStat.findFirst({ orderBy: { date: "desc" } })

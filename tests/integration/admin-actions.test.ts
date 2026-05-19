@@ -20,9 +20,12 @@ const deleteChecklistRecord = vi.fn(async () => ({ id: "checklist_1" }));
 const createFootprintPlaceRecord = vi.fn(async () => ({ id: "place_1" }));
 const updateFootprintPlaceRecord = vi.fn(async () => ({ id: "place_1" }));
 const deleteFootprintPlaceRecord = vi.fn(async () => ({ id: "place_1" }));
-const createFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
-const updateFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
-const deleteFootprintVisitRecord = vi.fn(async () => ({ id: "visit_1" }));
+const createFootprintMemoryRecord = vi.fn(async () => ({ id: "memory_1", placeId: "place_1" }));
+const updateFootprintMemoryRecord = vi.fn(async () => ({ id: "memory_1", placeId: "place_1" }));
+const deleteFootprintMemoryRecord = vi.fn(async () => ({ id: "memory_1", placeId: "place_1" }));
+const findFootprintMemoryRecord = vi.fn(async () => ({ id: "memory_1", placeId: "place_1" }));
+const deleteManyFootprintMemoryImages = vi.fn(async () => ({ count: 2 }));
+const createManyFootprintMemoryImages = vi.fn(async () => ({ count: 2 }));
 const createLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
 const updateLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
 const deleteLoveDayRecord = vi.fn(async () => ({ id: "love_day_1" }));
@@ -50,9 +53,13 @@ const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>
       create: createFootprintPlaceRecord,
       update: updateFootprintPlaceRecord
     },
-    footprintVisit: {
-      create: createFootprintVisitRecord,
-      update: updateFootprintVisitRecord
+    footprintMemory: {
+      create: createFootprintMemoryRecord,
+      update: updateFootprintMemoryRecord
+    },
+    footprintMemoryImage: {
+      deleteMany: deleteManyFootprintMemoryImages,
+      createMany: createManyFootprintMemoryImages
     }
   })
 );
@@ -83,10 +90,15 @@ vi.mock("@/server/db/prisma", () => ({
       update: updateFootprintPlaceRecord,
       delete: deleteFootprintPlaceRecord
     },
-    footprintVisit: {
-      create: createFootprintVisitRecord,
-      update: updateFootprintVisitRecord,
-      delete: deleteFootprintVisitRecord
+    footprintMemory: {
+      create: createFootprintMemoryRecord,
+      update: updateFootprintMemoryRecord,
+      delete: deleteFootprintMemoryRecord,
+      findUnique: findFootprintMemoryRecord
+    },
+    footprintMemoryImage: {
+      deleteMany: deleteManyFootprintMemoryImages,
+      createMany: createManyFootprintMemoryImages
     },
     loveDayEvent: {
       create: createLoveDayRecord,
@@ -150,9 +162,13 @@ beforeEach(() => {
   createFootprintPlaceRecord.mockClear();
   updateFootprintPlaceRecord.mockClear();
   deleteFootprintPlaceRecord.mockClear();
-  createFootprintVisitRecord.mockClear();
-  updateFootprintVisitRecord.mockClear();
-  deleteFootprintVisitRecord.mockClear();
+  createFootprintMemoryRecord.mockClear();
+  updateFootprintMemoryRecord.mockClear();
+  deleteFootprintMemoryRecord.mockClear();
+  findFootprintMemoryRecord.mockReset();
+  findFootprintMemoryRecord.mockResolvedValue({ id: "memory_1", placeId: "place_1" });
+  deleteManyFootprintMemoryImages.mockClear();
+  createManyFootprintMemoryImages.mockClear();
   createLoveDayRecord.mockClear();
   updateLoveDayRecord.mockClear();
   deleteLoveDayRecord.mockClear();
@@ -523,7 +539,7 @@ describe("admin note actions", () => {
 });
 
 describe("admin footprint actions", () => {
-  it("creates a footprint place and first visit", async () => {
+  it("creates a footprint city node", async () => {
     const { createFootprintPlace } = await import("@/features/admin/footprint-actions");
     const formData = new FormData();
 
@@ -532,9 +548,8 @@ describe("admin footprint actions", () => {
     formData.set("latitude", "31.2397");
     formData.set("longitude", "121.4998");
     formData.set("coverUrl", "https://example.com/bund.jpg");
-    formData.set("visitTitle", "Evening walk");
-    formData.set("visitDescription", "Watched the lights.");
-    formData.set("visitedAt", "2026-05-10");
+    formData.set("sortOrder", "2");
+    formData.set("enabled", "on");
 
     await createFootprintPlace(formData);
 
@@ -545,35 +560,24 @@ describe("admin footprint actions", () => {
           description: "A riverside walk.",
           latitude: "31.2397",
           longitude: "121.4998",
-          coverUrl: "https://example.com/bund.jpg"
-        })
-      })
-    );
-    expect(createFootprintVisitRecord).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          placeId: "place_1",
-          title: "Evening walk",
-          description: "Watched the lights.",
-          visitedAt: expect.any(Date)
+          coverUrl: "https://example.com/bund.jpg",
+          sortOrder: 2,
+          enabled: true
         })
       })
     );
   });
 
-  it("updates a footprint place and existing visit", async () => {
+  it("updates a footprint city node", async () => {
     const { updateFootprintPlace } = await import("@/features/admin/footprint-actions");
     const formData = new FormData();
 
     formData.set("id", "place_1");
-    formData.set("visitId", "visit_1");
     formData.set("name", "Updated place");
     formData.set("description", "Updated description.");
     formData.set("latitude", "30.0001");
     formData.set("longitude", "120.0001");
-    formData.set("visitTitle", "Updated visit");
-    formData.set("visitDescription", "Updated visit description.");
-    formData.set("visitedAt", "2026-05-11");
+    formData.set("sortOrder", "3");
 
     await updateFootprintPlace(formData);
 
@@ -583,17 +587,9 @@ describe("admin footprint actions", () => {
         data: expect.objectContaining({
           name: "Updated place",
           latitude: "30.0001",
-          longitude: "120.0001"
-        })
-      })
-    );
-    expect(updateFootprintVisitRecord).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: "visit_1" },
-        data: expect.objectContaining({
-          title: "Updated visit",
-          description: "Updated visit description.",
-          visitedAt: expect.any(Date)
+          longitude: "120.0001",
+          sortOrder: 3,
+          enabled: false
         })
       })
     );
@@ -610,15 +606,54 @@ describe("admin footprint actions", () => {
     expect(deleteFootprintPlaceRecord).toHaveBeenCalledWith({ where: { id: "place_1" } });
   });
 
-  it("deletes a footprint visit", async () => {
-    const { deleteFootprintVisit } = await import("@/features/admin/footprint-actions");
+  it("creates a footprint memory with image bindings", async () => {
+    const { createFootprintMemory } = await import("@/features/admin/footprint-actions");
     const formData = new FormData();
 
-    formData.set("id", "visit_1");
+    formData.set("placeId", "place_1");
+    formData.set("locationName", "Orange Isle");
+    formData.set("address", "Changsha");
+    formData.set("visitedAt", "2026-05-10");
+    formData.set("mood", "Wind was soft");
+    formData.set("story", "Watched the river.");
+    formData.append("mediaAssetIds", "media_1");
+    formData.append("mediaAssetIds", "media_2");
 
-    await deleteFootprintVisit(formData);
+    await createFootprintMemory(formData);
 
-    expect(deleteFootprintVisitRecord).toHaveBeenCalledWith({ where: { id: "visit_1" } });
+    expect(createFootprintMemoryRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          placeId: "place_1",
+          locationName: "Orange Isle",
+          address: "Changsha",
+          visitedAt: expect.any(Date),
+          mood: "Wind was soft",
+          story: "Watched the river."
+        })
+      })
+    );
+    expect(deleteManyFootprintMemoryImages).toHaveBeenCalledWith({ where: { memoryId: "memory_1" } });
+    expect(createManyFootprintMemoryImages).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [
+          { memoryId: "memory_1", mediaAssetId: "media_1", sortOrder: 0 },
+          { memoryId: "memory_1", mediaAssetId: "media_2", sortOrder: 1 }
+        ],
+        skipDuplicates: true
+      })
+    );
+  });
+
+  it("deletes a footprint memory", async () => {
+    const { deleteFootprintMemory } = await import("@/features/admin/footprint-actions");
+    const formData = new FormData();
+
+    formData.set("id", "memory_1");
+
+    await deleteFootprintMemory(formData);
+
+    expect(deleteFootprintMemoryRecord).toHaveBeenCalledWith({ where: { id: "memory_1" } });
   });
 
   it("does not create footprint records for invalid coordinates", async () => {
@@ -629,11 +664,12 @@ describe("admin footprint actions", () => {
     formData.set("description", "Broken description.");
     formData.set("latitude", "999");
     formData.set("longitude", "121.4998");
+    formData.set("sortOrder", "1");
 
     await createFootprintPlace(formData);
 
     expect(createFootprintPlaceRecord).not.toHaveBeenCalled();
-    expect(createFootprintVisitRecord).not.toHaveBeenCalled();
+    expect(createFootprintMemoryRecord).not.toHaveBeenCalled();
   });
 });
 
