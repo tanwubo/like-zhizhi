@@ -1,15 +1,45 @@
+import { MediaType } from "@prisma/client";
+
 import { prisma } from "@/server/db/prisma";
 
 export async function getAdminFootprintPlaces() {
   return prisma.footprintPlace.findMany({
-    orderBy: [{ updatedAt: "desc" }],
-    include: { visits: { orderBy: { visitedAt: "desc" } } }
+    orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
+    include: {
+      memories: {
+        orderBy: [{ sortOrder: "asc" }, { visitedAt: "desc" }],
+        include: {
+          images: {
+            include: { mediaAsset: true },
+            orderBy: { sortOrder: "asc" }
+          }
+        }
+      }
+    }
   });
 }
 
 export async function getAdminFootprintPlace(id: string) {
   return prisma.footprintPlace.findUnique({
     where: { id },
-    include: { visits: { orderBy: { visitedAt: "desc" } } }
+    include: {
+      memories: {
+        orderBy: [{ sortOrder: "asc" }, { visitedAt: "desc" }],
+        include: {
+          images: {
+            include: { mediaAsset: true },
+            orderBy: { sortOrder: "asc" }
+          }
+        }
+      }
+    }
+  });
+}
+
+export async function getFootprintImageAssets() {
+  return prisma.mediaAsset.findMany({
+    where: { type: MediaType.IMAGE },
+    orderBy: { createdAt: "desc" },
+    take: 100
   });
 }
