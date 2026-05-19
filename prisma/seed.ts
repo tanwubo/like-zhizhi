@@ -164,33 +164,83 @@ async function main() {
     }
   });
 
-  await prisma.footprintPlace.upsert({
-    where: { id: "seed-place-bund" },
-    update: {
-      name: "外滩",
-      description: "一起走过江边，看灯光慢慢亮起来。"
+  const footprintSeeds = [
+    {
+      id: "seed-place-changsha",
+      name: "长沙",
+      description: "第一站留给一起吹过江风的城市。",
+      latitude: "28.2282000",
+      longitude: "112.9388000",
+      amapAdcode: "430100",
+      amapCityCode: "0731",
+      coverUrl: "https://images.unsplash.com/photo-1548919973-5cef591cdbc9",
+      sortOrder: 1,
+      memories: [
+        {
+          id: "seed-memory-changsha-orange-isle",
+          locationName: "橘子洲",
+          address: "湖南省长沙市岳麓区橘子洲头",
+          visitedAt: new Date("2024-05-01T00:00:00+08:00"),
+          mood: "那天江边的风刚刚好",
+          story: "把第一段旅程放在长沙，是因为这里有热闹的街和慢下来的黄昏。",
+          sortOrder: 1
+        }
+      ]
     },
-    create: {
-      id: "seed-place-bund",
-      name: "外滩",
-      description: "一起走过江边，看灯光慢慢亮起来。",
-      latitude: 31.2400000,
-      longitude: 121.4900000,
-      coverUrl: "https://images.unsplash.com/photo-1548919973-5cef591cdbc9"
+    {
+      id: "seed-place-shanghai",
+      name: "上海",
+      description: "把外滩的灯光也放进我们的路线里。",
+      latitude: "31.2304000",
+      longitude: "121.4737000",
+      amapAdcode: "310000",
+      amapCityCode: "021",
+      coverUrl: "https://images.unsplash.com/photo-1548919973-5cef591cdbc9",
+      sortOrder: 2,
+      memories: [
+        {
+          id: "seed-memory-shanghai-bund",
+          locationName: "外滩",
+          address: "上海市黄浦区中山东一路",
+          visitedAt: new Date("2025-09-03T20:00:00+08:00"),
+          mood: "那天风很轻，适合慢慢走",
+          story: "一起走过江边，看灯光慢慢亮起来。",
+          sortOrder: 1
+        }
+      ]
     }
-  });
+  ];
 
-  await prisma.footprintVisit.upsert({
-    where: { id: "seed-visit-bund" },
-    update: {},
-    create: {
-      id: "seed-visit-bund",
-      placeId: "seed-place-bund",
-      visitedAt: new Date("2025-09-03T20:00:00+08:00"),
-      title: "夜游外滩",
-      description: "那天风很轻，适合慢慢走。"
-    }
-  });
+  await prisma.footprintPlace.deleteMany();
+
+  for (const seed of footprintSeeds) {
+    await prisma.footprintPlace.create({
+      data: {
+        id: seed.id,
+        name: seed.name,
+        description: seed.description,
+        latitude: seed.latitude,
+        longitude: seed.longitude,
+        amapAdcode: seed.amapAdcode,
+        amapCityCode: seed.amapCityCode,
+        coverUrl: seed.coverUrl,
+        sortOrder: seed.sortOrder,
+        enabled: true,
+        memories: {
+          create: seed.memories.map((memory) => ({
+            ...memory,
+            images: {
+              create: {
+                mediaAssetId: sunsetMedia.id,
+                sortOrder: 0,
+                caption: memory.locationName
+              }
+            }
+          }))
+        }
+      }
+    });
+  }
 
   await prisma.dailyStat.upsert({
     where: { date: new Date("2026-05-15T00:00:00+08:00") },

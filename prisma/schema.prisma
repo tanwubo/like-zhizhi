@@ -135,19 +135,20 @@ model IntegrationSetting {
 }
 
 model MediaAsset {
-  id          String      @id @default(cuid())
-  type        MediaType
-  bucket      String
-  objectKey   String
-  publicUrl   String
-  filename    String
-  contentType String
-  sizeBytes   Int
-  width       Int?
-  height      Int?
-  createdAt   DateTime    @default(now())
-  noteMedia   NoteMedia[]
-  albumItems  AlbumItem[]
+  id              String                 @id @default(cuid())
+  type            MediaType
+  bucket          String
+  objectKey       String
+  publicUrl       String
+  filename        String
+  contentType     String
+  sizeBytes       Int
+  width           Int?
+  height          Int?
+  createdAt       DateTime               @default(now())
+  noteMedia       NoteMedia[]
+  albumItems      AlbumItem[]
+  footprintImages FootprintMemoryImage[]
 }
 
 model Note {
@@ -250,24 +251,55 @@ model ChecklistItem {
 }
 
 model FootprintPlace {
-  id          String           @id @default(cuid())
-  name        String
-  description String
-  latitude    Decimal          @db.Decimal(10, 7)
-  longitude   Decimal          @db.Decimal(10, 7)
-  coverUrl    String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  visits      FootprintVisit[]
+  id           String            @id @default(cuid())
+  name         String
+  description  String            @default("")
+  latitude     Decimal           @db.Decimal(10, 7)
+  longitude    Decimal           @db.Decimal(10, 7)
+  amapAdcode   String?
+  amapCityCode String?
+  coverUrl     String?
+  sortOrder    Int               @default(0)
+  enabled      Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  memories     FootprintMemory[]
+
+  @@index([enabled, sortOrder])
 }
 
-model FootprintVisit {
-  id          String         @id @default(cuid())
-  placeId     String
-  visitedAt   DateTime
-  title       String
-  description String
-  place       FootprintPlace @relation(fields: [placeId], references: [id], onDelete: Cascade)
+model FootprintMemory {
+  id           String                 @id @default(cuid())
+  placeId      String
+  locationName String
+  address      String                 @default("")
+  amapPoiId    String?
+  latitude     Decimal?               @db.Decimal(10, 7)
+  longitude    Decimal?               @db.Decimal(10, 7)
+  visitedAt    DateTime
+  mood         String                 @default("")
+  story        String                 @default("")
+  sortOrder    Int?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  place        FootprintPlace         @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  images       FootprintMemoryImage[]
+
+  @@index([placeId, visitedAt])
+}
+
+model FootprintMemoryImage {
+  id           String          @id @default(cuid())
+  memoryId     String
+  mediaAssetId String
+  sortOrder    Int             @default(0)
+  caption      String          @default("")
+  createdAt    DateTime        @default(now())
+  memory       FootprintMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  mediaAsset   MediaAsset      @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@unique([memoryId, mediaAssetId])
+  @@index([mediaAssetId])
 }
 
 model LoveDayEvent {
