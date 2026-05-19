@@ -745,46 +745,46 @@ nextjs-portal {
 }
 
 .footprint-map-marker.is-active .footprint-map-marker__order {
-  box-shadow: 0 0 0 8px rgba(255, 107, 139, 0.2), 0 0 28px rgba(255, 107, 139, 0.52);
+  box-shadow: 0 0 0 4px rgba(255, 107, 139, 0.2), 0 0 14px rgba(255, 107, 139, 0.52);
 }
 
 .footprint-map-marker__order {
   display: inline-flex;
-  width: 24px;
-  height: 24px;
+  width: 12px;
+  height: 12px;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
   background: #ff6b8b;
   color: #fff;
-  font-size: 12px;
+  font-size: 8px;
   font-weight: 700;
-  box-shadow: 0 0 0 6px rgba(255, 107, 139, 0.16);
+  box-shadow: 0 0 0 3px rgba(255, 107, 139, 0.16);
 }
 
 .footprint-map-marker__name {
-  margin-left: 6px;
-  font-size: 13px;
+  margin-left: 3px;
+  font-size: 10px;
   font-weight: 700;
   text-shadow: 0 1px 8px #fff;
 }
 
 .footprint-map-marker__photos {
   position: absolute;
-  left: 18px;
-  bottom: 28px;
+  left: 6px;
+  bottom: 14px;
   display: grid;
-  grid-template-columns: repeat(2, 34px);
-  gap: 3px;
+  grid-template-columns: repeat(2, 20px);
+  gap: 2px;
 }
 
 .footprint-map-marker__photos img {
-  width: 34px;
-  height: 34px;
-  border: 2px solid #fff;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #fff;
+  border-radius: 4px;
   object-fit: cover;
-  box-shadow: 0 6px 18px rgba(23, 32, 51, 0.22);
+  box-shadow: 0 3px 9px rgba(23, 32, 51, 0.22);
   transition: transform 160ms ease, z-index 160ms ease;
 }
 

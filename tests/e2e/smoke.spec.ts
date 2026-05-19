@@ -11,7 +11,6 @@ test("public module routes render", async ({ page }) => {
   const routes = [
     ["/notes", "点滴"],
     ["/messages", "留言"],
-    ["/footprints", "轨迹"],
     ["/album", "相册"],
     ["/checklist", "清单"],
     ["/love-days", "纪念日"],
@@ -22,12 +21,15 @@ test("public module routes render", async ({ page }) => {
     await page.goto(route);
     await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
   }
+
+  await page.goto("/footprints");
+  await expect(page.getByText("未配置高德地图 Key，先显示轨迹列表。")).toBeVisible();
 });
 
 test("footprints page renders without amap credentials", async ({ page }) => {
   await page.goto("/footprints");
-  await expect(page.getByRole("heading", { name: "轨迹", exact: true })).toBeVisible();
   await expect(page.getByText("未配置高德地图 Key，先显示轨迹列表。")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "长沙", exact: true })).toBeVisible();
 });
 
 test("public pages render representative seed content", async ({ page }) => {

@@ -22,6 +22,7 @@ type AMapInstance = {
   add: (item: unknown) => void;
   addControl: (control: unknown) => void;
   destroy: () => void;
+  setCenter: (center: number[], immediately?: boolean, duration?: number) => void;
   setFitView: (overlays: unknown[], immediately?: boolean, padding?: [number, number, number, number]) => void;
 };
 type AMapNamespace = {
@@ -50,6 +51,10 @@ type AMapNamespace = {
 
 function cityPosition(place: PublicFootprintPlace) {
   return [Number(place.longitude), Number(place.latitude)];
+}
+
+function interpolatePosition(from: number[], to: number[], progress: number) {
+  return [from[0] + (to[0] - from[0]) * progress, from[1] + (to[1] - from[1]) * progress];
 }
 
 function createMarkerContent(place: PublicFootprintPlace, index: number, onSelect: () => void) {
@@ -84,9 +89,13 @@ function createMarkerContent(place: PublicFootprintPlace, index: number, onSelec
 
 export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[] }) {
   const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<AMapInstance | null>(null);
   const markersRef = useRef<AMapMarkerInstance[]>([]);
   const routeRef = useRef<AMapPolylineInstance | null>(null);
+  const animationRef = useRef<number | null>(null);
+  const animatingRef = useRef(false);
   const [failed, setFailed] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [revealedCount, setRevealedCount] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -103,6 +112,7 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
 
     let map: AMapInstance | null = null;
     let disposed = false;
+    setMapReady(false);
 
     loadAMap({
       key: process.env.NEXT_PUBLIC_AMAP_JSAPI_KEY,
@@ -122,10 +132,11 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       const AMap = result.AMap as AMapNamespace;
       map = new AMap.Map(mapRef.current as HTMLDivElement, {
         viewMode: "3D",
-        zoom: 4.2,
-        center: [104.1954, 35.8617],
+        zoom: 6.2,
+        center: cityPosition(places[0]),
         mapStyle: "amap://styles/light"
       });
+      mapInstanceRef.current = map;
       map.addControl(new AMap.Scale());
 
       const route = new AMap.Polyline({
@@ -149,20 +160,25 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
         const marker = new AMap.Marker({
           position: cityPosition(place),
           content: createMarkerContent(place, index, () => {
-            setRevealedCount(places.length);
+            setRevealedCount(places.length - 1);
+            setActiveIndex(index);
             setSelectedIndex(index);
           }),
-          offset: new AMap.Pixel(-70, -88)
+          offset: new AMap.Pixel(-6, -6)
         });
         return marker;
       });
       markersRef.current = markers;
       map.add(markers);
-      map.setFitView([...markers, route], false, [80, 80, 80, 80]);
+      setMapReady(true);
     });
 
     return () => {
       disposed = true;
+      if (animationRef.current !== null) {
+        window.cancelAnimationFrame(animationRef.current);
+      }
+      mapInstanceRef.current = null;
       markersRef.current = [];
       routeRef.current = null;
       map?.destroy();
@@ -175,21 +191,61 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       content.classList.toggle("is-hidden", index > revealedCount);
       content.classList.toggle("is-active", index === activeIndex && index <= revealedCount);
     }
-    routeRef.current?.setPath(routePath);
-  }, [activeIndex, revealedCount, routePath]);
+    if (!animatingRef.current) {
+      routeRef.current?.setPath(routePath);
+    }
+  }, [activeIndex, mapReady, revealedCount, routePath]);
 
   useEffect(() => {
-    if (!places.length || revealedCount >= places.length - 1 || selectedIndex !== null) {
+    if (!mapReady || !places.length || revealedCount >= places.length - 1 || selectedIndex !== null) {
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      setRevealedCount((value) => Math.min(value + 1, places.length - 1));
-      setActiveIndex((value) => Math.min(value + 1, places.length - 1));
-    }, 900);
+    const map = mapInstanceRef.current;
+    const route = routeRef.current;
+    if (!map || !route) {
+      return;
+    }
 
-    return () => window.clearTimeout(timer);
-  }, [places.length, revealedCount, selectedIndex]);
+    const startIndex = revealedCount;
+    const endIndex = revealedCount + 1;
+    const startPosition = cityPosition(places[startIndex]);
+    const endPosition = cityPosition(places[endIndex]);
+    const stablePath = places.slice(0, startIndex + 1).map(cityPosition);
+    const duration = 3000;
+    const startedAt = window.performance.now();
+
+    animatingRef.current = true;
+
+    const frame = (now: number) => {
+      const progress = Math.min((now - startedAt) / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const currentPosition = interpolatePosition(startPosition, endPosition, easedProgress);
+
+      route.setPath([...stablePath, currentPosition]);
+      map.setCenter(currentPosition, true);
+
+      if (progress < 1) {
+        animationRef.current = window.requestAnimationFrame(frame);
+        return;
+      }
+
+      animatingRef.current = false;
+      animationRef.current = null;
+      setRevealedCount(endIndex);
+      setActiveIndex(endIndex);
+    };
+
+    animationRef.current = window.requestAnimationFrame(frame);
+
+    return () => {
+      if (animationRef.current !== null) {
+        window.cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      animatingRef.current = false;
+    };
+  }, [mapReady, places, places.length, revealedCount, selectedIndex]);
 
   if (failed) {
     return <FootprintMapFallback places={places} reason={failed} />;
@@ -207,6 +263,7 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
               className={index <= revealedCount ? "is-lit" : ""}
               onClick={() => {
                 setRevealedCount(places.length - 1);
+                setActiveIndex(index);
                 setSelectedIndex(index);
               }}
               type="button"
@@ -218,7 +275,11 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
         </div>
         <button
           className="mt-4 rounded-md border border-blush-100 px-3 py-2 text-sm text-ink/65 hover:border-blush-200 hover:text-blush-700"
-          onClick={() => setRevealedCount(places.length - 1)}
+          onClick={() => {
+            setRevealedCount(places.length - 1);
+            setActiveIndex(places.length - 1);
+            mapInstanceRef.current?.setFitView([...markersRef.current, routeRef.current].filter(Boolean), false, [80, 80, 80, 80]);
+          }}
           type="button"
         >
           跳过动画
