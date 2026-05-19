@@ -220,3 +220,4 @@ pm2 restart like-zhizhi
 - Uploaded media URL returns 403: check bucket public read policy or custom public domain.
 - Sitemap or Open Graph URLs point to localhost: update `APP_URL`.
 - Build fails after pulling code: run `pnpm install --frozen-lockfile`, then `pnpm build` again and inspect the first real error.
+- Build exits with `signal: SIGKILL` during `Creating an optimized production build`: check for an OS out-of-memory kill with `dmesg -T | tail -80` and `free -h`. The project config limits Next.js build concurrency, but very small servers may still need temporary swap or a larger build machine.

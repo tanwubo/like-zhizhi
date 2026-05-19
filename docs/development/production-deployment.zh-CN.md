@@ -272,3 +272,12 @@ pnpm build
 ```
 
 优先查看构建日志里的第一个真实错误，不要只看最后的退出信息。
+
+如果构建在 `Creating an optimized production build` 阶段出现 `signal: SIGKILL`，先执行：
+
+```bash
+dmesg -T | tail -80
+free -h
+```
+
+这通常表示构建进程被系统 OOM 杀掉。项目配置已限制 Next.js 构建并发，但很小的服务器仍可能需要临时 Swap 或更大的构建机器。
