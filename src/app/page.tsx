@@ -56,8 +56,8 @@ export default async function HomePage() {
       <div className="home-page min-h-[calc(100vh-60px)] bg-white text-[#243047]">
         <section className="relative isolate min-h-[676px] overflow-hidden bg-[#dcefd5]">
           <HomeHeroCarousel slides={heroSlides} />
-          <div className="mx-auto flex min-h-[585px] max-w-[1180px] flex-col items-center justify-center px-4 pb-32 pt-20 md:px-6">
-            <div className="grid w-full items-center gap-8 md:gap-[70px] md:grid-cols-[1fr_auto_1fr]">
+          <div className="absolute inset-0 z-10 grid place-items-center px-4 md:px-6">
+            <div className="mx-auto grid w-full max-w-[760px] grid-cols-[1fr_auto_1fr] items-center gap-5 md:max-w-[900px] md:gap-[70px]">
               <div className="flex justify-center md:justify-end">
                 {people[0] ? (
                   <HeroPerson person={people[0]} align="right" />
@@ -193,7 +193,7 @@ function HeroPerson({ person, align }: { person: Partner; align: "left" | "right
 function EmptyHeroPerson({ label, slot }: { label: string; slot: number }) {
   return (
     <div className="home-hero-person from-left flex flex-col items-center">
-      <div className="relative grid size-28 place-items-center overflow-hidden rounded-full border-2 border-white/90 bg-white/20 shadow-[0_5px_14px_rgba(80,63,72,0.16),0_0_0_1px_rgba(255,255,255,0.35)] md:size-32">
+      <div className="relative grid size-[134px] place-items-center overflow-hidden rounded-full border-2 border-white/90 bg-white/20 shadow-[0_5px_14px_rgba(80,63,72,0.16),0_0_0_1px_rgba(255,255,255,0.35)] md:size-[154px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={fallbackAvatar(slot)}

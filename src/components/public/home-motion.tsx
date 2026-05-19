@@ -105,7 +105,7 @@ export function HeartPulse() {
 export function AvatarMotionFrame({ children }: { children: ReactNode }) {
   return (
     <motion.div
-      className="relative grid size-28 place-items-center overflow-hidden rounded-full border-2 border-white/90 bg-white/20 shadow-[0_5px_14px_rgba(80,63,72,0.16),0_0_0_1px_rgba(255,255,255,0.35)] md:size-32"
+      className="relative grid size-[134px] place-items-center overflow-hidden rounded-full border-2 border-white/90 bg-white/20 shadow-[0_5px_14px_rgba(80,63,72,0.16),0_0_0_1px_rgba(255,255,255,0.35)] md:size-[154px]"
       whileHover={{ scale: 1.04, boxShadow: "0 7px 18px rgba(80,63,72,0.2), 0 0 0 1px rgba(255,255,255,0.5)" }}
       transition={{ type: "spring", stiffness: 300 }}
     >
