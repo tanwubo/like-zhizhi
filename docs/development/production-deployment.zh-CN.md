@@ -116,6 +116,7 @@ pnpm build
 说明：
 
 - `pnpm db:deploy` 用于执行 Prisma 生产迁移。
+- `pnpm db:seed` 会先重新生成 Prisma Client，再写入种子数据，因此可以直接跟在 schema 变更后执行。
 - 首次部署时执行 `pnpm db:seed`，用于创建初始站点数据和管理员账号。
 - 站点已有真实内容后，不要不经检查反复执行 `pnpm db:seed`。
 

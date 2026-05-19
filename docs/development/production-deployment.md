@@ -105,6 +105,7 @@ pnpm db:seed
 pnpm build
 ```
 
+`pnpm db:seed` regenerates Prisma Client before loading seed data, so it is safe to run immediately after pulling schema changes.
 Run `pnpm db:seed` on first deployment to create initial site data and the owner account. Do not rerun it blindly after the site has real content unless you have reviewed the seed behavior.
 
 ## 6. Start With PM2
