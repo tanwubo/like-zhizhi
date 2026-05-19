@@ -22,9 +22,6 @@ type AMapInstance = {
   add: (item: unknown) => void;
   addControl: (control: unknown) => void;
   destroy: () => void;
-  getZoom: () => number;
-  on: (event: string, callback: () => void) => void;
-  off: (event: string, callback: () => void) => void;
   setCenter: (center: number[], immediately?: boolean, duration?: number) => void;
   setFitView: (overlays: unknown[], immediately?: boolean, padding?: [number, number, number, number]) => void;
 };
@@ -214,22 +211,6 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
         }
       });
 
-      // zoom 联动：缩略图随地图放大而放大
-      const updateGalleryScale = () => {
-        const zoom = map.getZoom();
-        const baseZoom = 6.2;
-        const scale = Math.max(0.5, Math.min(3.5, 1 + (zoom - baseZoom) * 0.35));
-        for (const marker of markers) {
-          const gallery = marker.getContent().querySelector(".marker-gallery") as HTMLElement | null;
-          if (gallery) {
-            gallery.style.setProperty("transform", `scale(${scale})`, "important");
-          }
-        }
-      };
-      map.on("zoomend", updateGalleryScale);
-      map.on("zoomstart", updateGalleryScale);
-      window.requestAnimationFrame(updateGalleryScale);
-
       setMapReady(true);
     });
 
@@ -237,10 +218,6 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       disposed = true;
       if (animationRef.current !== null) {
         window.cancelAnimationFrame(animationRef.current);
-      }
-      if (map) {
-        map.off("zoomend", updateGalleryScale);
-        map.off("zoomstart", updateGalleryScale);
       }
       mapInstanceRef.current = null;
       markersRef.current = [];

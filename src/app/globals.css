@@ -824,8 +824,6 @@ nextjs-portal {
   width: 120px;
   height: 96px;
   margin-top: 6px;
-  transform-origin: center top;
-  transition: transform 160ms ease;
 }
 
 .gallery-card {
