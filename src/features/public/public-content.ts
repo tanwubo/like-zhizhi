@@ -107,8 +107,19 @@ export async function getAlbumItems(limit = 24) {
 
 export async function getFootprintPlaces() {
   return prisma.footprintPlace.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { visits: { orderBy: { visitedAt: "desc" } } }
+    where: { enabled: true },
+    orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
+    include: {
+      memories: {
+        orderBy: [{ sortOrder: "asc" }, { visitedAt: "desc" }],
+        include: {
+          images: {
+            orderBy: { sortOrder: "asc" },
+            include: { mediaAsset: true }
+          }
+        }
+      }
+    }
   });
 }
 
