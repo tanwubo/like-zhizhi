@@ -63,11 +63,43 @@ function interpolatePosition(from: number[], to: number[], progress: number) {
   return [from[0] + (to[0] - from[0]) * progress, from[1] + (to[1] - from[1]) * progress];
 }
 
-function createMarkerContent(place: PublicFootprintPlace, index: number, onSelect: () => void) {
+function withVisibleMarker<T>(content: HTMLElement, measure: () => T) {
+  const wasHidden = content.classList.contains("is-hidden");
+
+  if (wasHidden) {
+    content.classList.remove("is-hidden");
+  }
+
+  const result = measure();
+
+  if (wasHidden) {
+    content.classList.add("is-hidden");
+  }
+
+  return result;
+}
+
+export function calculateMarkerLabelOffset(content: HTMLElement, label: HTMLElement, gap = 24) {
+  return withVisibleMarker(content, () => {
+    const contentRect = content.getBoundingClientRect();
+    const labelRect = label.getBoundingClientRect();
+
+    return {
+      x: -(labelRect.left - contentRect.left + labelRect.width / 2),
+      y: -(labelRect.top - contentRect.top + labelRect.height + gap)
+    };
+  });
+}
+
+function createAnchorOffset(AMap: AMapNamespace) {
+  return new AMap.Pixel(-6, -6);
+}
+
+function createMarkerLabelContent(place: PublicFootprintPlace, index: number, onSelect: () => void) {
   const content = document.createElement("button");
   content.type = "button";
-  content.className = "footprint-map-marker is-hidden";
-  content.setAttribute("aria-label", `打开${place.name}足迹`);
+  content.className = "footprint-map-marker footprint-map-marker-label is-hidden";
+  content.setAttribute("aria-label", `打开${place.name}足迹详情`);
 
   const label = document.createElement("div");
   label.className = "marker-label";
@@ -82,18 +114,6 @@ function createMarkerContent(place: PublicFootprintPlace, index: number, onSelec
   name.textContent = place.name;
   label.append(name);
   content.append(label);
-
-  const anchor = document.createElement("div");
-  anchor.className = "marker-anchor";
-
-  const pulse = document.createElement("div");
-  pulse.className = "marker-pulse";
-  anchor.append(pulse);
-
-  const dot = document.createElement("div");
-  dot.className = "marker-dot";
-  anchor.append(dot);
-  content.append(anchor);
 
   const gallery = document.createElement("div");
   gallery.className = "marker-gallery";
@@ -113,10 +133,32 @@ function createMarkerContent(place: PublicFootprintPlace, index: number, onSelec
   return content;
 }
 
+function createMarkerAnchorContent(place: PublicFootprintPlace, onSelect: () => void) {
+  const content = document.createElement("button");
+  content.type = "button";
+  content.className = "footprint-map-marker footprint-map-marker-anchor is-hidden";
+  content.setAttribute("aria-label", `打开${place.name}足迹位置`);
+
+  const anchor = document.createElement("div");
+  anchor.className = "marker-anchor";
+
+  const pulse = document.createElement("div");
+  pulse.className = "marker-pulse";
+  anchor.append(pulse);
+
+  const dot = document.createElement("div");
+  dot.className = "marker-dot";
+  anchor.append(dot);
+  content.append(anchor);
+  content.addEventListener("click", onSelect);
+
+  return content;
+}
+
 export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[] }) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<AMapInstance | null>(null);
-  const markersRef = useRef<AMapMarkerInstance[]>([]);
+  const markerGroupsRef = useRef<Array<{ anchor: AMapMarkerInstance; label: AMapMarkerInstance }>>([]);
   const routeRef = useRef<AMapPolylineInstance | null>(null);
   const animationRef = useRef<number | null>(null);
   const animatingRef = useRef(false);
@@ -183,34 +225,38 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       routeRef.current = route;
       map.add(route);
 
-      const markers = places.map((place, index) => {
-        const content = createMarkerContent(place, index, () => {
+      const markerGroups = places.map((place, index) => {
+        const selectPlace = () => {
           setRevealedCount(places.length - 1);
           setActiveIndex(index);
           setSelectedIndex(index);
           setPreviewImage(null);
-        });
-        const marker = new AMap.Marker({
+        };
+        const labelContent = createMarkerLabelContent(place, index, selectPlace);
+        const anchorContent = createMarkerAnchorContent(place, selectPlace);
+        const labelMarker = new AMap.Marker({
           position: cityPosition(place),
-          content,
+          content: labelContent,
           offset: new AMap.Pixel(0, 0)
         });
-        return marker;
+        const anchorMarker = new AMap.Marker({
+          position: cityPosition(place),
+          content: anchorContent,
+          offset: createAnchorOffset(AMap)
+        });
+        return { anchor: anchorMarker, label: labelMarker };
       });
-      markersRef.current = markers;
-      map.add(markers);
+      markerGroupsRef.current = markerGroups;
+      map.add(markerGroups.flatMap((group) => [group.label, group.anchor]));
 
-      // 动态校准 offset，让 anchor（地点标识）中心对准坐标点
+      // 动态校准 label offset，让城市标签显示在坐标点上方；anchor 使用固定 offset 精确压在坐标点。
       window.requestAnimationFrame(() => {
-        for (const marker of markers) {
-          const el = marker.getContent();
-          const anchor = el.querySelector(".marker-anchor") as HTMLElement | null;
-          if (!anchor) continue;
-          const contentRect = el.getBoundingClientRect();
-          const anchorRect = anchor.getBoundingClientRect();
-          const offsetX = -(anchorRect.left - contentRect.left + anchorRect.width / 2);
-          const offsetY = -(anchorRect.top - contentRect.top + anchorRect.height / 2);
-          (marker as unknown as { setOffset: (offset: unknown) => void }).setOffset(new AMap.Pixel(offsetX, offsetY));
+        for (const { label } of markerGroups) {
+          const el = label.getContent();
+          const labelElement = el.querySelector(".marker-label") as HTMLElement | null;
+          if (!labelElement) continue;
+          const offset = calculateMarkerLabelOffset(el, labelElement);
+          (label as unknown as { setOffset: (offset: unknown) => void }).setOffset(new AMap.Pixel(offset.x, offset.y));
         }
       });
 
@@ -223,17 +269,19 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
         window.cancelAnimationFrame(animationRef.current);
       }
       mapInstanceRef.current = null;
-      markersRef.current = [];
+      markerGroupsRef.current = [];
       routeRef.current = null;
       map?.destroy();
     };
   }, [places]);
 
   useEffect(() => {
-    for (const [index, marker] of markersRef.current.entries()) {
-      const content = marker.getContent();
-      content.classList.toggle("is-hidden", index > revealedCount);
-      content.classList.toggle("is-active", index === activeIndex && index <= revealedCount);
+    for (const [index, group] of markerGroupsRef.current.entries()) {
+      for (const marker of [group.label, group.anchor]) {
+        const content = marker.getContent();
+        content.classList.toggle("is-hidden", index > revealedCount);
+        content.classList.toggle("is-active", index === activeIndex && index <= revealedCount);
+      }
     }
     if (!animatingRef.current) {
       routeRef.current?.setPath(routePath);
@@ -349,7 +397,7 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
             setSelectedIndex(null);
             setPreviewImage(null);
             mapInstanceRef.current?.setFitView(
-              [...markersRef.current, routeRef.current].filter(Boolean),
+              [...markerGroupsRef.current.map((group) => group.anchor), routeRef.current].filter(Boolean),
               false,
               [80, 80, 80, 80]
             );
