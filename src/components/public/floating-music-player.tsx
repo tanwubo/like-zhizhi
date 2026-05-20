@@ -27,6 +27,7 @@ type MusicTrack = {
 type PlayerMode = "compact" | "bar" | "expanded";
 
 const MUSIC_GUIDE_STORAGE_KEY = "like-zhizhi:home-music-guide-dismissed";
+const MUSIC_AUTOPLAY_STORAGE_KEY = "like-zhizhi:home-music-autoplay-enabled";
 
 export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -38,7 +39,7 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [showMusicGuide, setShowMusicGuide] = useState(false);
-  const [neverRemind, setNeverRemind] = useState(true);
+  const [neverRemind, setNeverRemind] = useState(false);
 
   const currentTrack = tracks[trackIndex] ?? tracks[0];
   const hasPlaylist = tracks.length > 1;
@@ -55,11 +56,30 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
     setMounted(true);
 
     try {
-      setShowMusicGuide(window.localStorage.getItem(MUSIC_GUIDE_STORAGE_KEY) !== "true");
+      const shouldAutoPlay = window.localStorage.getItem(MUSIC_AUTOPLAY_STORAGE_KEY) === "true";
+      setShowMusicGuide(!shouldAutoPlay && window.localStorage.getItem(MUSIC_GUIDE_STORAGE_KEY) !== "true");
     } catch {
       setShowMusicGuide(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
+    try {
+      if (window.localStorage.getItem(MUSIC_AUTOPLAY_STORAGE_KEY) !== "true") {
+        return;
+      }
+    } catch {
+      return;
+    }
+
+    startPlayback({ expand: false });
+    // Run once after the audio node is mounted. Later track changes are handled
+    // by the isPlaying/currentTrack playback effect below.
+  }, [mounted]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -100,18 +120,25 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
     return null;
   }
 
-  const play = () => {
+  const startPlayback = ({ expand = true }: { expand?: boolean } = {}) => {
     const audio = audioRef.current;
 
     if (!audio) {
       return;
     }
 
-    setMode((value) => (value === "compact" ? "bar" : value));
+    if (expand) {
+      setMode((value) => (value === "compact" ? "bar" : value));
+    }
+
     void audio
       .play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false));
+  };
+
+  const play = () => {
+    startPlayback();
   };
 
   const dismissMusicGuide = () => {
@@ -128,7 +155,10 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
 
   const playFromGuide = () => {
     try {
-      window.localStorage.setItem(MUSIC_GUIDE_STORAGE_KEY, "true");
+      if (neverRemind) {
+        window.localStorage.setItem(MUSIC_GUIDE_STORAGE_KEY, "true");
+        window.localStorage.setItem(MUSIC_AUTOPLAY_STORAGE_KEY, "true");
+      }
     } catch {
       // Ignore private-mode storage failures; the current click still starts playback.
     }
