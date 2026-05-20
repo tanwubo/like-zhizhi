@@ -45,6 +45,14 @@ export default async function AlbumPage() {
                       unoptimized
                     />
                   )}
+                  {item.takenAt ? (
+                    <time
+                      className="absolute bottom-3 right-3 rounded-full bg-black/45 px-3 py-1.5 text-xs font-medium leading-none text-white shadow-sm backdrop-blur"
+                      dateTime={item.takenAt.toISOString()}
+                    >
+                      {formatTakenAt(item.takenAt)}
+                    </time>
+                  ) : null}
                 </div>
                 <div className="p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -66,4 +74,8 @@ export default async function AlbumPage() {
       </div>
     </PublicShell>
   );
+}
+
+function formatTakenAt(date: Date) {
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
 }

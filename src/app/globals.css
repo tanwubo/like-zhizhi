@@ -1125,6 +1125,54 @@ nextjs-portal {
   backdrop-filter: blur(16px);
 }
 
+.footprint-image-preview {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 12;
+  width: min(720px, calc(100vw - 48px));
+  max-height: calc(100vh - 132px);
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  border-radius: 10px;
+  background: rgba(24, 31, 45, 0.82);
+  box-shadow: 0 24px 72px rgba(14, 21, 36, 0.34);
+  padding: 12px;
+  backdrop-filter: blur(16px);
+}
+
+.footprint-image-preview img {
+  display: block;
+  width: 100%;
+  max-height: calc(100vh - 190px);
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.footprint-image-preview p {
+  margin: 10px 40px 0 4px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+}
+
+.footprint-image-preview-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #172033;
+  font-size: 24px;
+  line-height: 1;
+  box-shadow: 0 8px 22px rgba(14, 21, 36, 0.22);
+}
+
 .footprint-map-caption {
   position: absolute;
   right: 24px;
@@ -1166,6 +1214,16 @@ nextjs-portal {
     width: 100%;
     max-height: 72vh;
     border-radius: 8px 8px 0 0;
+  }
+
+  .footprint-image-preview {
+    top: 44%;
+    width: calc(100vw - 24px);
+    max-height: 58vh;
+  }
+
+  .footprint-image-preview img {
+    max-height: calc(58vh - 70px);
   }
 
   .footprint-map-caption {

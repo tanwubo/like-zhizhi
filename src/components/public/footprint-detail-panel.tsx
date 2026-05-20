@@ -2,18 +2,25 @@
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
-import { firstLitDate, formatFootprintDate, type PublicFootprintPlace } from "@/features/public/footprint-map-data";
+import {
+  firstLitDate,
+  formatFootprintDate,
+  type PublicFootprintImage,
+  type PublicFootprintPlace
+} from "@/features/public/footprint-map-data";
 
 export function FootprintDetailPanel({
   place,
   index,
   onClose,
+  onImageOpen,
   onPrev,
   onNext
 }: {
   place: PublicFootprintPlace;
   index: number;
   onClose: () => void;
+  onImageOpen: (image: PublicFootprintImage) => void;
   onPrev: () => void;
   onNext: () => void;
 }) {
@@ -52,13 +59,20 @@ export function FootprintDetailPanel({
             {memory.images.length ? (
               <div className="grid grid-cols-3 gap-2">
                 {memory.images.map((image) => (
-                  // eslint-disable-next-line @next/next/no-img-element -- memory media may be served from user-configured storage hosts
-                  <img
+                  <button
                     key={image.id}
-                    alt={image.caption || image.filename}
-                    className="aspect-square w-full rounded-md object-cover"
-                    src={image.url}
-                  />
+                    aria-label={`查看${image.caption || image.filename}`}
+                    className="overflow-hidden rounded-md"
+                    onClick={() => onImageOpen(image)}
+                    type="button"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- memory media may be served from user-configured storage hosts */}
+                    <img
+                      alt={image.caption || image.filename}
+                      className="aspect-square w-full object-cover transition duration-200 hover:scale-105"
+                      src={image.url}
+                    />
+                  </button>
                 ))}
               </div>
             ) : null}

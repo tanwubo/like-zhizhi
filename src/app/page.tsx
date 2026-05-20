@@ -18,6 +18,7 @@ import {
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { FloatingMusicPlayer } from "@/components/public/floating-music-player";
+import { HomeClockCards } from "@/components/public/home-clock-cards";
 import { HomeAnimations } from "@/components/public/home-animations";
 import { HomeHeroCarousel } from "@/components/public/home-hero-carousel";
 import { AvatarMotionFrame, HeartPulse } from "@/components/public/home-motion";
@@ -227,13 +228,8 @@ function AnniversaryPanel({
   slogan: string;
   togetherDays: number;
 }) {
-  const now = new Date();
-  const timeParts = [
-    { value: now.getHours(), label: "时" },
-    { value: now.getMinutes(), label: "分" },
-    { value: now.getSeconds(), label: "秒" }
-  ];
   const poemLines = buildPoemLines(description, slogan);
+  const initialTime = new Date().toISOString();
 
   return (
     <div className="grid overflow-hidden rounded-[22px] border border-[#f1edf0] bg-white px-7 py-8 shadow-[0_18px_54px_rgba(36,48,71,0.08)] md:grid-cols-[1fr_1.15fr] md:px-12 md:py-11">
@@ -269,16 +265,7 @@ function AnniversaryPanel({
               <span className="pb-2 text-lg text-[#50535d]">天</span>
             </div>
           </div>
-          <div className="grid max-w-[420px] grid-cols-3 gap-5">
-            {timeParts.map((item) => (
-              <div key={item.label} className="rounded-[12px] bg-[#fff4f6] px-5 py-4 text-center">
-                <p className="font-number text-4xl font-light text-[#30323b]">
-                  {String(item.value).padStart(2, "0")}
-                </p>
-                <p className="mt-2 text-sm text-[#50535d]">{item.label}</p>
-              </div>
-            ))}
-          </div>
+          <HomeClockCards initialTime={initialTime} />
         </div>
       </div>
     </div>
@@ -320,6 +307,14 @@ function AlbumPreviewCard({ albumCount, items }: { albumCount: number; items: Al
                 unoptimized
               />
             )}
+            {item.takenAt ? (
+              <time
+                className="absolute bottom-2 right-2 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium leading-none text-white shadow-sm backdrop-blur"
+                dateTime={item.takenAt.toISOString()}
+              >
+                {formatAlbumTakenAt(item.takenAt)}
+              </time>
+            ) : null}
           </div>
         ))}
         {Array.from({ length: placeholders }).map((_, index) => (
@@ -527,7 +522,7 @@ function EmptyCardLine({ text }: { text: string }) {
 
 function buildPoemLines(description: string, slogan: string) {
   const source =
-    description || slogan || "你要是丑点，我或许可以带你逛逛街看场电影……可你长得那么好看，让我只想和你恋爱。";
+    description || slogan || "爱像是一场小雨，淅沥沥淅沥沥，滴入我回忆。爱又像一场旅行，走停停走停停，忽然遇见你，停下了足迹。";
   const parts = source
     .replace(/([，；。])/g, "$1|")
     .split("|")
@@ -537,11 +532,22 @@ function buildPoemLines(description: string, slogan: string) {
 
   return parts.length >= 2
     ? parts
-    : ["你要是丑点", "我或许可以带你逛逛街看场电影", "可你长得那么好看", "让我只想和你恋爱。"];
+    : [
+        "爱像是一场小雨",
+        "淅沥沥淅沥沥",
+        "滴入我回忆",
+        "爱又像一场旅行",
+        "走停停走停停，忽然遇见你",
+        "停下了足迹"
+      ];
 }
 
 function formatMonthDay(date: Date) {
   return `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatAlbumTakenAt(date: Date) {
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function formatEventDelta(date: Date) {

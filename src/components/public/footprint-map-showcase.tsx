@@ -7,6 +7,7 @@ import { FootprintMapFallback } from "@/components/public/footprint-map-fallback
 import {
   selectMarkerThumbnails,
   toJourneyLabel,
+  type PublicFootprintImage,
   type PublicFootprintPlace
 } from "@/features/public/footprint-map-data";
 import { loadAMap } from "@/lib/amap-loader";
@@ -124,6 +125,7 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
   const [activeIndex, setActiveIndex] = useState(0);
   const [revealedCount, setRevealedCount] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [previewImage, setPreviewImage] = useState<PublicFootprintImage | null>(null);
 
   const routePath = useMemo(
     () => places.slice(0, Math.max(0, revealedCount + 1)).map(cityPosition),
@@ -186,6 +188,7 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
           setRevealedCount(places.length - 1);
           setActiveIndex(index);
           setSelectedIndex(index);
+          setPreviewImage(null);
         });
         const marker = new AMap.Marker({
           position: cityPosition(place),
@@ -288,6 +291,31 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
     };
   }, [mapReady, places, places.length, revealedCount, selectedIndex]);
 
+  function cancelRouteAnimation() {
+    if (animationRef.current !== null) {
+      window.cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    animatingRef.current = false;
+  }
+
+  function showAllPlaces(index: number) {
+    setRevealedCount(places.length - 1);
+    setActiveIndex(index);
+    setSelectedIndex(index);
+    setPreviewImage(null);
+  }
+
+  function replayAnimation() {
+    cancelRouteAnimation();
+    setSelectedIndex(null);
+    setPreviewImage(null);
+    setRevealedCount(0);
+    setActiveIndex(0);
+    routeRef.current?.setPath(places.slice(0, 1).map(cityPosition));
+    mapInstanceRef.current?.setCenter(cityPosition(places[0]), true);
+  }
+
   if (failed) {
     return <FootprintMapFallback places={places} reason={failed} />;
   }
@@ -303,9 +331,7 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
               key={place.id}
               className={index <= revealedCount ? "is-lit" : ""}
               onClick={() => {
-                setRevealedCount(places.length - 1);
-                setActiveIndex(index);
-                setSelectedIndex(index);
+                showAllPlaces(index);
               }}
               type="button"
             >
@@ -317,8 +343,11 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
         <button
           className="mt-4 rounded-md border border-blush-100 px-3 py-2 text-sm text-ink/65 hover:border-blush-200 hover:text-blush-700"
           onClick={() => {
+            cancelRouteAnimation();
             setRevealedCount(places.length - 1);
             setActiveIndex(places.length - 1);
+            setSelectedIndex(null);
+            setPreviewImage(null);
             mapInstanceRef.current?.setFitView(
               [...markersRef.current, routeRef.current].filter(Boolean),
               false,
@@ -328,6 +357,13 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
           type="button"
         >
           跳过动画
+        </button>
+        <button
+          className="mt-2 rounded-md border border-blush-100 px-3 py-2 text-sm text-ink/65 hover:border-blush-200 hover:text-blush-700"
+          onClick={replayAnimation}
+          type="button"
+        >
+          重放动画
         </button>
         <p className="mt-3 text-xs text-ink/45">
           已点亮 {Math.min(revealedCount + 1, places.length)} / {places.length}
@@ -339,11 +375,37 @@ export function FootprintMapShowcase({ places }: { places: PublicFootprintPlace[
       {selectedIndex !== null ? (
         <FootprintDetailPanel
           index={selectedIndex}
-          onClose={() => setSelectedIndex(null)}
-          onNext={() => setSelectedIndex((selectedIndex + 1) % places.length)}
-          onPrev={() => setSelectedIndex((selectedIndex + places.length - 1) % places.length)}
+          onClose={() => {
+            setSelectedIndex(null);
+            setPreviewImage(null);
+          }}
+          onImageOpen={setPreviewImage}
+          onNext={() => {
+            setPreviewImage(null);
+            setSelectedIndex((selectedIndex + 1) % places.length);
+          }}
+          onPrev={() => {
+            setPreviewImage(null);
+            setSelectedIndex((selectedIndex + places.length - 1) % places.length);
+          }}
           place={places[selectedIndex]}
         />
+      ) : null}
+
+      {previewImage ? (
+        <div className="footprint-image-preview" role="dialog" aria-label="足迹大图">
+          <button
+            aria-label="关闭大图"
+            className="footprint-image-preview-close"
+            onClick={() => setPreviewImage(null)}
+            type="button"
+          >
+            ×
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element -- memory media may be served from user-configured storage hosts */}
+          <img alt={previewImage.caption || previewImage.filename} src={previewImage.url} />
+          {previewImage.caption ? <p>{previewImage.caption}</p> : null}
+        </div>
       ) : null}
 
       <div className="footprint-map-caption">
