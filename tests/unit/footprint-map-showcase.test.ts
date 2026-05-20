@@ -46,27 +46,23 @@ describe("footprint map showcase marker positioning", () => {
     expect(marker).toHaveClass("is-hidden");
   });
 
-  it("keeps city names visible while revealing detail labels and photos by route progress", () => {
-    const firstCityName = document.createElement("button");
-    const secondCityName = document.createElement("button");
+  it("reveals detail labels and photos by route progress without a separate city-name marker", () => {
     const firstLabel = document.createElement("button");
     const firstAnchor = document.createElement("button");
     const secondLabel = document.createElement("button");
     const secondAnchor = document.createElement("button");
 
-    for (const content of [firstCityName, secondCityName, firstLabel, firstAnchor, secondLabel, secondAnchor]) {
+    for (const content of [firstLabel, firstAnchor, secondLabel, secondAnchor]) {
       content.className = "footprint-map-marker is-hidden";
     }
 
     applyMarkerVisualState(
       [
         {
-          cityName: { getContent: () => firstCityName },
           label: { getContent: () => firstLabel },
           anchor: { getContent: () => firstAnchor }
         },
         {
-          cityName: { getContent: () => secondCityName },
           label: { getContent: () => secondLabel },
           anchor: { getContent: () => secondAnchor }
         }
@@ -75,8 +71,6 @@ describe("footprint map showcase marker positioning", () => {
       0
     );
 
-    expect(firstCityName).not.toHaveClass("is-hidden");
-    expect(secondCityName).not.toHaveClass("is-hidden");
     expect(firstAnchor).not.toHaveClass("is-hidden");
     expect(secondAnchor).not.toHaveClass("is-hidden");
     expect(firstLabel).not.toHaveClass("is-hidden");
