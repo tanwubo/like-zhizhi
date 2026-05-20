@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 
 import { PublicShell } from "@/components/layout/public-shell";
-import { FloatingMusicPlayer } from "@/components/public/floating-music-player";
 import { HomeClockCards } from "@/components/public/home-clock-cards";
 import { HomeAnimations } from "@/components/public/home-animations";
 import { HomeHeroCarousel } from "@/components/public/home-hero-carousel";
@@ -143,7 +142,6 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        {data.musicTracks.length ? <FloatingMusicPlayer tracks={data.musicTracks} /> : null}
       </div>
     </PublicShell>
   );

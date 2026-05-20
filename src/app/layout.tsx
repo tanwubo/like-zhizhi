@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { PublicMusicPlayer } from "@/components/public/public-music-player";
+import { getEnabledMusicTracks } from "@/features/public/public-content";
 import { buildSiteMetadata } from "@/features/public/seo";
 import { prisma } from "@/server/db/prisma";
 import "./globals.css";
@@ -15,10 +17,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return site ? buildSiteMetadata(site) : fallbackMetadata;
 }
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const musicTracks = await getEnabledMusicTracks();
+
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        {children}
+        <PublicMusicPlayer tracks={musicTracks} />
+      </body>
     </html>
   );
 }
