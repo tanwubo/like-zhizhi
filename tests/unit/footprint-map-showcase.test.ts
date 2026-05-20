@@ -1,6 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { calculateMarkerLabelOffset } from "@/components/public/footprint-map-showcase";
+import {
+  applyMarkerVisualState,
+  calculateMarkerLabelOffset,
+  paintRouteAnimationFrame,
+  waitForMapComplete
+} from "@/components/public/footprint-map-showcase";
 
 describe("footprint map showcase marker positioning", () => {
   it("places the label above the coordinate without using gallery height as the anchor", () => {
@@ -37,7 +42,76 @@ describe("footprint map showcase marker positioning", () => {
       } as DOMRect;
     };
 
-    expect(calculateMarkerLabelOffset(marker, label)).toEqual({ x: -60, y: -68 });
+    expect(calculateMarkerLabelOffset(marker, label)).toEqual({ x: -60, y: -56 });
     expect(marker).toHaveClass("is-hidden");
+  });
+
+  it("keeps city names visible while revealing detail labels and photos by route progress", () => {
+    const firstCityName = document.createElement("button");
+    const secondCityName = document.createElement("button");
+    const firstLabel = document.createElement("button");
+    const firstAnchor = document.createElement("button");
+    const secondLabel = document.createElement("button");
+    const secondAnchor = document.createElement("button");
+
+    for (const content of [firstCityName, secondCityName, firstLabel, firstAnchor, secondLabel, secondAnchor]) {
+      content.className = "footprint-map-marker is-hidden";
+    }
+
+    applyMarkerVisualState(
+      [
+        {
+          cityName: { getContent: () => firstCityName },
+          label: { getContent: () => firstLabel },
+          anchor: { getContent: () => firstAnchor }
+        },
+        {
+          cityName: { getContent: () => secondCityName },
+          label: { getContent: () => secondLabel },
+          anchor: { getContent: () => secondAnchor }
+        }
+      ],
+      0,
+      0
+    );
+
+    expect(firstCityName).not.toHaveClass("is-hidden");
+    expect(secondCityName).not.toHaveClass("is-hidden");
+    expect(firstAnchor).not.toHaveClass("is-hidden");
+    expect(secondAnchor).not.toHaveClass("is-hidden");
+    expect(firstLabel).not.toHaveClass("is-hidden");
+    expect(secondLabel).toHaveClass("is-hidden");
+    expect(firstLabel).toHaveClass("is-active");
+    expect(secondLabel).not.toHaveClass("is-active");
+  });
+
+  it("waits for the AMap complete event before allowing the route animation to start", () => {
+    let completeHandler: (() => void) | null = null;
+    const map = {
+      on: (event: string, handler: () => void) => {
+        if (event === "complete") completeHandler = handler;
+      },
+      off: () => {}
+    };
+    const ready = vi.fn();
+
+    waitForMapComplete(map, ready);
+
+    expect(ready).not.toHaveBeenCalled();
+    completeHandler?.();
+    expect(ready).toHaveBeenCalledTimes(1);
+  });
+
+  it("animates the route line while keeping the camera on the current line position", () => {
+    const route = { setPath: vi.fn() };
+    const map = { setCenter: vi.fn() };
+
+    paintRouteAnimationFrame(route, map, [[116, 39]], [117, 40]);
+
+    expect(route.setPath).toHaveBeenCalledWith([
+      [116, 39],
+      [117, 40]
+    ]);
+    expect(map.setCenter).toHaveBeenCalledWith([117, 40], true);
   });
 });
