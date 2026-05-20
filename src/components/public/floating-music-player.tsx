@@ -292,48 +292,46 @@ export function FloatingMusicPlayer({ tracks }: { tracks: MusicTrack[] }) {
           onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
         />
 
-        {mode === "compact" ? (
-          <button
-            type="button"
-            className="home-music-compact"
-            aria-label={`播放 ${currentTrack.title}`}
-            onClick={play}
-          >
-            {record}
-          </button>
-        ) : null}
-
-        {mode === "bar" ? (
+        {mode === "compact" || mode === "bar" ? (
           <div className="home-music-bar" role="group" aria-label={`${currentTrack.title} 播放控制`}>
-            <button type="button" className="home-music-record-button" aria-label={isPlaying ? "暂停音乐" : "播放音乐"} onClick={togglePlay}>
+            <button
+              type="button"
+              className="home-music-record-button"
+              aria-label={mode === "compact" ? `展开 ${currentTrack.title} 播放控制` : isPlaying ? "暂停音乐" : "播放音乐"}
+              onClick={mode === "compact" ? play : togglePlay}
+            >
               {record}
             </button>
-            <PlayerButton label="上一首" onClick={goToPrevious} disabled={!hasPlaylist}>
-              <SkipBack className="size-7" fill="currentColor" aria-hidden="true" />
-            </PlayerButton>
-            <PlayerButton label={isPlaying ? "暂停" : "播放"} onClick={togglePlay} className="home-music-play">
-              {isPlaying ? <Pause className="size-12" fill="currentColor" aria-hidden="true" /> : <Play className="size-11" fill="currentColor" aria-hidden="true" />}
-            </PlayerButton>
-            <PlayerButton label="下一首" onClick={goToNext} disabled={!hasPlaylist}>
-              <SkipForward className="size-7" fill="currentColor" aria-hidden="true" />
-            </PlayerButton>
-            <span className="home-music-divider" aria-hidden="true" />
-            <PlayerButton label="展开播放列表" onClick={() => setMode("expanded")}>
-              <ChevronUp className="size-7" aria-hidden="true" />
-            </PlayerButton>
-            <div className="home-music-bar-progress-row">
-              <input
-                aria-label="播放进度"
-                className="home-music-progress"
-                max="100"
-                min="0"
-                step="0.1"
-                style={{ "--music-progress": `${progress}%` } as CSSProperties}
-                type="range"
-                value={progress}
-                onChange={(event) => seek(event.currentTarget.value)}
-              />
-            </div>
+            {mode === "bar" ? (
+              <>
+                <PlayerButton label="上一首" onClick={goToPrevious} disabled={!hasPlaylist}>
+                  <SkipBack className="size-7" fill="currentColor" aria-hidden="true" />
+                </PlayerButton>
+                <PlayerButton label={isPlaying ? "暂停" : "播放"} onClick={togglePlay} className="home-music-play">
+                  {isPlaying ? <Pause className="size-12" fill="currentColor" aria-hidden="true" /> : <Play className="size-11" fill="currentColor" aria-hidden="true" />}
+                </PlayerButton>
+                <PlayerButton label="下一首" onClick={goToNext} disabled={!hasPlaylist}>
+                  <SkipForward className="size-7" fill="currentColor" aria-hidden="true" />
+                </PlayerButton>
+                <span className="home-music-divider" aria-hidden="true" />
+                <PlayerButton label="展开播放列表" onClick={() => setMode("expanded")}>
+                  <ChevronUp className="size-7" aria-hidden="true" />
+                </PlayerButton>
+                <div className="home-music-bar-progress-row">
+                  <input
+                    aria-label="播放进度"
+                    className="home-music-progress"
+                    max="100"
+                    min="0"
+                    step="0.1"
+                    style={{ "--music-progress": `${progress}%` } as CSSProperties}
+                    type="range"
+                    value={progress}
+                    onChange={(event) => seek(event.currentTarget.value)}
+                  />
+                </div>
+              </>
+            ) : null}
           </div>
         ) : null}
 
