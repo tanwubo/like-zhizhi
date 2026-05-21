@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
+    "build:cloudflare": "prisma generate && opennextjs-cloudflare build",
     "start": "next start",
+    "preview:cloudflare": "pnpm build:cloudflare && wrangler dev",
+    "deploy:cloudflare": "pnpm build:cloudflare && wrangler deploy",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
@@ -15,6 +18,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
+    "db:d1:migrate:local": "wrangler d1 migrations apply like-zhizhi --local",
+    "db:d1:migrate:remote": "wrangler d1 migrations apply like-zhizhi --remote",
     "db:seed": "prisma generate && tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },
@@ -22,6 +27,7 @@
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@aws-sdk/client-s3": "^3.812.0",
     "@aws-sdk/s3-request-presigner": "^3.812.0",
+    "@prisma/adapter-d1": "^5.22.0",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
@@ -38,7 +44,9 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260521.1",
     "@eslint/eslintrc": "^3.3.1",
+    "@opennextjs/cloudflare": "^1.19.11",
     "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -57,7 +65,8 @@
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.3"
+    "vitest": "^3.1.3",
+    "wrangler": "^4.93.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
