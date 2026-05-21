@@ -1,4 +1,4 @@
-import { MediaType, PublishStatus } from "@prisma/client";
+import { MediaType, PublishStatus } from "@/server/db/enums";
 
 import { AdminActionForm } from "@/components/admin/action-form";
 import { MediaSelector, type MediaSelectorAsset } from "@/components/admin/media-selector";

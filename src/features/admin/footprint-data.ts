@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@/server/db/enums";
 
 import { prisma } from "@/server/db/prisma";
 

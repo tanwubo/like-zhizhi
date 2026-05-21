@@ -3,33 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-enum UserRole {
-  OWNER
-  PARTNER
-  MODERATOR
-}
-
-enum PublishStatus {
-  DRAFT
-  PUBLISHED
-  HIDDEN
-}
-
-enum MessageStatus {
-  PENDING
-  APPROVED
-  HIDDEN
-}
-
-enum MediaType {
-  IMAGE
-  VIDEO
-  AUDIO
-  FILE
 }
 
 model User {
@@ -37,7 +12,7 @@ model User {
   email        String    @unique
   name         String
   passwordHash String
-  role         UserRole  @default(PARTNER)
+  role         String    @default("PARTNER")
   disabledAt   DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -128,15 +103,15 @@ model IntegrationSetting {
   key       String   @unique
   enabled   Boolean  @default(false)
   provider  String   @default("none")
-  config    Json     @default("{}")
-  secrets   Json     @default("{}")
+  config    String   @default("{}")
+  secrets   String   @default("{}")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model MediaAsset {
   id              String                 @id @default(cuid())
-  type            MediaType
+  type            String
   bucket          String
   objectKey       String
   publicUrl       String
@@ -157,7 +132,7 @@ model Note {
   title       String
   excerpt     String
   content     String
-  status      PublishStatus  @default(DRAFT)
+  status      String         @default("DRAFT")
   mood        String?
   weather     String?
   location    String?
@@ -198,7 +173,7 @@ model Message {
   id          String         @id @default(cuid())
   nickname    String
   content     String
-  status      MessageStatus  @default(PENDING)
+  status      String         @default("PENDING")
   ipHash      String?
   userAgent   String?
   location    String?
@@ -223,7 +198,7 @@ model AlbumItem {
   mediaId     String
   title       String
   caption     String
-  status      PublishStatus @default(PUBLISHED)
+  status      String        @default("PUBLISHED")
   takenAt     DateTime?
   location    String?
   authorLabel String?
@@ -239,7 +214,7 @@ model ChecklistItem {
   id          String        @id @default(cuid())
   title       String
   description String
-  status      PublishStatus @default(PUBLISHED)
+  status      String        @default("PUBLISHED")
   completed   Boolean       @default(false)
   completedAt DateTime?
   targetDate  DateTime?
@@ -254,8 +229,8 @@ model FootprintPlace {
   id           String            @id @default(cuid())
   name         String
   description  String            @default("")
-  latitude     Decimal           @db.Decimal(10, 7)
-  longitude    Decimal           @db.Decimal(10, 7)
+  latitude     Decimal
+  longitude    Decimal
   amapAdcode   String?
   amapCityCode String?
   coverUrl     String?
@@ -274,8 +249,8 @@ model FootprintMemory {
   locationName String
   address      String                 @default("")
   amapPoiId    String?
-  latitude     Decimal?               @db.Decimal(10, 7)
-  longitude    Decimal?               @db.Decimal(10, 7)
+  latitude     Decimal?
+  longitude    Decimal?
   visitedAt    DateTime
   mood         String                 @default("")
   story        String                 @default("")

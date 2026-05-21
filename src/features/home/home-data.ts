@@ -1,4 +1,4 @@
-import { MessageStatus, PublishStatus } from "@prisma/client";
+import { MessageStatus, PublishStatus } from "@/server/db/enums";
 
 import { prisma } from "@/server/db/prisma";
 import { normalizeThemeSetting } from "@/features/admin/settings-data";

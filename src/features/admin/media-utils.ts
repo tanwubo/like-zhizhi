@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@/server/db/enums";
 import { z } from "zod";
 
 export type MediaActionResult = { ok: true } | { ok: false; errors: Record<string, string[]> };

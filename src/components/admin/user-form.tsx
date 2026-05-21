@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/server/db/enums";
 
 import { AdminActionForm } from "@/components/admin/action-form";
 import { SubmitButton } from "@/components/admin/submit-button";

@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Prisma } from "@prisma/client";
 
 import { extractExistingSecrets, parseIntegrationSettingsInput } from "@/features/admin/integration-utils";
 import { requireAdminCapability } from "@/server/auth/guards";
@@ -32,8 +31,8 @@ export async function updateIntegrationSettings(formData: FormData): Promise<voi
 
   await Promise.all(
     Object.values(parsed.records).map((record) => {
-      const config = record.config as Prisma.InputJsonObject;
-      const secrets = record.secrets as Prisma.InputJsonObject;
+      const config = JSON.stringify(record.config);
+      const secrets = JSON.stringify(record.secrets);
 
       return prisma.integrationSetting.upsert({
         where: { key: record.key },

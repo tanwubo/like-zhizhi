@@ -82,6 +82,15 @@ export function encryptIntegrationSecret(value: string) {
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      return asRecord(parsed);
+    } catch {
+      return {};
+    }
+  }
+
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }

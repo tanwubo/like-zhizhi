@@ -1,4 +1,4 @@
-import { PublishStatus } from "@prisma/client";
+import { PublishStatus } from "@/server/db/enums";
 import Link from "next/link";
 
 import { AdminActionForm } from "@/components/admin/action-form";

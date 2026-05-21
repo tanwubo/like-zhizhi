@@ -1,6 +1,6 @@
 "use client";
 
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@/server/db/enums";
 import { FileText, Film, ImageIcon, Music, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";

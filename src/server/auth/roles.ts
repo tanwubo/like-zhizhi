@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/server/db/enums";
 
 type AdminNavItem = {
   label: string;

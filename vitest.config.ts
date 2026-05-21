@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["@testing-library/jest-dom/vitest"],
+    setupFiles: ["./tests/setup/vitest.ts"],
     include: [
       "tests/unit/**/*.{test,spec}.ts",
       "tests/unit/**/*.{test,spec}.tsx",
@@ -14,7 +14,7 @@ export default defineConfig({
       "tests/integration/**/*.{test,spec}.tsx"
     ],
     env: {
-      DATABASE_URL: "postgresql://test:test@localhost:5432/test",
+      DATABASE_URL: "file:./prisma/test.db",
       APP_URL: "http://localhost:3000",
       AUTH_SESSION_SECRET: "test-session-secret-with-enough-length",
       S3_ENDPOINT: "http://localhost:9000",

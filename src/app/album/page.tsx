@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@/server/db/enums";
 import Image from "next/image";
 
 import { PublicShell } from "@/components/layout/public-shell";

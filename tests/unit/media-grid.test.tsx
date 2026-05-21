@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@/server/db/enums";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
