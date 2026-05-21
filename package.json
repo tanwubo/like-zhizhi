@@ -20,6 +20,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:d1:migrate:local": "wrangler d1 migrations apply like-zhizhi --local",
     "db:d1:migrate:remote": "wrangler d1 migrations apply like-zhizhi --remote",
+    "db:d1:seed:local": "tsx prisma/seed-d1.ts --local",
+    "db:d1:seed:remote": "tsx prisma/seed-d1.ts --remote",
     "db:seed": "prisma generate && tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },

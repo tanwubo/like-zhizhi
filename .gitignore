@@ -11,6 +11,8 @@ rebel.xml
 *.diff
 *.patch
 *.tmp
+.generated/
+.wrangler/
 
 # system ignore
 .DS_Store

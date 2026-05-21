@@ -100,10 +100,18 @@ D1 迁移文件位于 `prisma/migrations-d1`。Cloudflare 部署不使用 `pnpm 
 首次部署需要初始化站点数据和管理员账号：
 
 ```bash
-pnpm db:seed
+pnpm db:d1:seed:remote
 ```
 
-注意：站点已有真实内容后，不要不经检查反复执行 seed。
+这个命令会读取 `SEED_OWNER_EMAIL` 和 `SEED_OWNER_PASSWORD`，生成带 bcrypt 密码哈希的 `.generated/d1-seed.sql`，再通过 Wrangler 写入远程 D1。
+
+本地 D1 初始化可以使用：
+
+```bash
+pnpm db:d1:seed:local
+```
+
+注意：D1 初始化脚本只 upsert 固定种子记录，不会清空生产内容。传统 `pnpm db:seed` 只用于本地 Prisma/SQLite 或传统服务器部署路径，不会直接写入远程 D1。
 
 ## 7. 构建和本地预览
 
