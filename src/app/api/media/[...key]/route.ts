@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { storage } from "@/server/storage/s3-storage";
+import { getStorage } from "@/server/storage";
 
-export const runtime = "nodejs";
-
-function toResponseBody(body: unknown): BodyInit | null {
+export function toResponseBody(body: unknown): BodyInit | null {
   if (!body) return null;
+  if (body instanceof ReadableStream) return body;
   if (body instanceof Uint8Array) {
     return new Uint8Array(body).buffer;
   }
@@ -26,6 +25,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ key
   }
 
   try {
+    const storage = await getStorage();
     const object = await storage.getObject(key);
     const body = toResponseBody(object.body);
 

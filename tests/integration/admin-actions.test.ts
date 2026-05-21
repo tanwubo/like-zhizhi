@@ -45,6 +45,10 @@ const getCurrentUserMock = vi.fn(async () => ({
   role: "OWNER"
 }));
 
+function parseJsonField(value: unknown) {
+  return typeof value === "string" ? (JSON.parse(value) as Record<string, unknown>) : value;
+}
+
 const transactionMock = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) =>
   callback({
     mediaAsset: { create: createMediaAsset, update: updateMediaAsset, deleteMany: deleteManyMediaAssets },
@@ -330,41 +334,40 @@ describe("admin integration actions", () => {
 
     await updateIntegrationSettings(formData);
 
-    expect(upsertIntegrationSetting).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { key: "map" },
-        create: expect.objectContaining({
-          key: "map",
-          enabled: true,
-          provider: "amap",
-          config: expect.objectContaining({
-            apiBaseUrl: "https://restapi.amap.com",
-            publicKey: "public-map-key"
-          }),
-          secrets: expect.objectContaining({
-            secretKey: expect.any(String)
-          })
-        })
-      })
-    );
-    expect(upsertIntegrationSetting).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { key: "email" },
-        update: expect.objectContaining({
-          enabled: true,
-          provider: "smtp",
-          config: expect.objectContaining({
-            host: "smtp.example.com",
-            port: 465,
-            fromEmail: "hello@example.com",
-            username: "mailer"
-          }),
-          secrets: expect.objectContaining({
-            smtpPassword: expect.any(String)
-          })
-        })
-      })
-    );
+    const mapCall = upsertIntegrationSetting.mock.calls.find(([input]) => input.where.key === "map")?.[0];
+    expect(mapCall).toMatchObject({
+      where: { key: "map" },
+      create: {
+        key: "map",
+        enabled: true,
+        provider: "amap"
+      }
+    });
+    expect(parseJsonField(mapCall.create.config)).toMatchObject({
+      apiBaseUrl: "https://restapi.amap.com",
+      publicKey: "public-map-key"
+    });
+    expect(parseJsonField(mapCall.create.secrets)).toMatchObject({
+      secretKey: expect.any(String)
+    });
+
+    const emailCall = upsertIntegrationSetting.mock.calls.find(([input]) => input.where.key === "email")?.[0];
+    expect(emailCall).toMatchObject({
+      where: { key: "email" },
+      update: {
+        enabled: true,
+        provider: "smtp"
+      }
+    });
+    expect(parseJsonField(emailCall.update.config)).toMatchObject({
+      host: "smtp.example.com",
+      port: 465,
+      fromEmail: "hello@example.com",
+      username: "mailer"
+    });
+    expect(parseJsonField(emailCall.update.secrets)).toMatchObject({
+      smtpPassword: expect.any(String)
+    });
     expect(JSON.stringify(upsertIntegrationSetting.mock.calls)).not.toContain("smtp-secret");
     expect(JSON.stringify(upsertIntegrationSetting.mock.calls)).not.toContain("private-map-key");
   });
@@ -380,8 +383,8 @@ describe("admin integration actions", () => {
         key: "weather",
         enabled: true,
         provider: "openweather",
-        config: {},
-        secrets: { apiKey: existingSecret }
+        config: "{}",
+        secrets: JSON.stringify({ apiKey: existingSecret })
       }
     ]);
     formData.set("weatherEnabled", "on");
@@ -391,14 +394,11 @@ describe("admin integration actions", () => {
 
     await updateIntegrationSettings(formData);
 
-    expect(upsertIntegrationSetting).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { key: "weather" },
-        update: expect.objectContaining({
-          secrets: { apiKey: existingSecret }
-        })
-      })
-    );
+    const weatherCall = upsertIntegrationSetting.mock.calls.find(([input]) => input.where.key === "weather")?.[0];
+    expect(weatherCall).toMatchObject({
+      where: { key: "weather" }
+    });
+    expect(parseJsonField(weatherCall.update.secrets)).toEqual({ apiKey: existingSecret });
   });
 
   it("does not save invalid provider URLs", async () => {

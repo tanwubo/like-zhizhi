@@ -1,15 +1,10 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { joinPublicUrl } from "@/lib/public-url";
 import { env } from "@/server/config/env";
+import type { PutObjectInput, StorageAdapter } from "@/server/storage/types";
 
 type SendableClient = {
   send(command: GetObjectCommand | PutObjectCommand): Promise<unknown>;
-};
-
-export type PutObjectInput = {
-  key: string;
-  body: Buffer | Uint8Array | string;
-  contentType: string;
 };
 
 export function resolveStoragePublicBaseUrl({
@@ -42,8 +37,9 @@ export function createStorageAdapter({
   client: SendableClient;
   bucket: string;
   publicBaseUrl: string;
-}) {
+}): StorageAdapter {
   return {
+    kind: "s3",
     async putObject(input: PutObjectInput) {
       await client.send(
         new PutObjectCommand({

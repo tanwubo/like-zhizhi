@@ -10,15 +10,8 @@ import {
 } from "@/features/admin/media-utils";
 import { requireAdminCapability } from "@/server/auth/guards";
 import { prisma } from "@/server/db/prisma";
-import { storage } from "@/server/storage/s3-storage";
-
-type StorageAdapter = {
-  putObject(input: { key: string; body: Buffer; contentType: string }): Promise<{
-    bucket: string;
-    key: string;
-    publicUrl: string;
-  }>;
-};
+import { getStorage } from "@/server/storage";
+import type { StorageAdapter } from "@/server/storage/types";
 
 export { validateExternalMediaInput as validateMediaInput };
 
@@ -84,10 +77,11 @@ export async function registerExternalMedia(formData: FormData): Promise<UploadR
   return { ok: true };
 }
 
-export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapter = storage): Promise<UploadResult> {
+export async function uploadMediaAsset(formData: FormData, adapter?: StorageAdapter): Promise<UploadResult> {
   "use server";
 
   await requireAdminCapability("content");
+  const resolvedAdapter = adapter ?? (await getStorage());
 
   const file = fileFromFormData(formData);
   if (!file) {
@@ -101,7 +95,7 @@ export async function uploadMediaAsset(formData: FormData, adapter: StorageAdapt
 
   const contentType = inferContentType(file.name, file.type);
   const key = buildMediaObjectKey(file.name);
-  const uploaded = await adapter.putObject({
+  const uploaded = await resolvedAdapter.putObject({
     key,
     body,
     contentType
