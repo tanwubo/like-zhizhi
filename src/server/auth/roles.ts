@@ -1,5 +1,3 @@
-import type { UserRole } from "@/server/db/enums";
-
 type AdminNavItem = {
   label: string;
   href: string;
@@ -48,31 +46,31 @@ const adminNavGroups: AdminNavGroup[] = [
   }
 ];
 
-export function canAccessAdmin(role: UserRole) {
+export function canAccessAdmin(role: string) {
   return role === "OWNER" || role === "PARTNER" || role === "MODERATOR";
 }
 
-export function canManageContent(role: UserRole) {
+export function canManageContent(role: string) {
   return role === "OWNER" || role === "PARTNER";
 }
 
-export function canManageUsers(role: UserRole) {
+export function canManageUsers(role: string) {
   return role === "OWNER";
 }
 
-export function canManageSettings(role: UserRole) {
+export function canManageSettings(role: string) {
   return role === "OWNER" || role === "PARTNER";
 }
 
-export function canModerateMessages(role: UserRole) {
+export function canModerateMessages(role: string) {
   return role === "OWNER" || role === "PARTNER" || role === "MODERATOR";
 }
 
-export function canManageIntegrations(role: UserRole) {
+export function canManageIntegrations(role: string) {
   return role === "OWNER";
 }
 
-function canUseCapability(role: UserRole, capability: AdminNavItem["capability"]) {
+function canUseCapability(role: string, capability: AdminNavItem["capability"]) {
   if (capability === "admin") return canAccessAdmin(role);
   if (capability === "content") return canManageContent(role);
   if (capability === "moderation") return canModerateMessages(role);
@@ -81,7 +79,7 @@ function canUseCapability(role: UserRole, capability: AdminNavItem["capability"]
   return canManageUsers(role);
 }
 
-export function getVisibleAdminNavGroups(role: UserRole) {
+export function getVisibleAdminNavGroups(role: string) {
   return adminNavGroups
     .map((group) => ({
       label: group.label,

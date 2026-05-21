@@ -10,7 +10,7 @@ type NoteFormValue = {
   slug?: string;
   excerpt?: string;
   content?: string;
-  status?: PublishStatus;
+  status?: string;
   mood?: string | null;
   weather?: string | null;
   location?: string | null;

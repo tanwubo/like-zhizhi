@@ -1,5 +1,5 @@
 import { PrismaD1 } from "@prisma/adapter-d1";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import { getCloudflareContextSafe } from "@/server/cloudflare/bindings";
 
 const globalForPrisma = globalThis as unknown as {
@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 
 async function createPrismaClient() {
   const context = await getCloudflareContextSafe();
-  const log = process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"];
+  const log: Prisma.LogLevel[] = process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"];
 
   if (context?.env.DB) {
     return new PrismaClient({

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { R2Bucket } from "@cloudflare/workers-types";
 import { createStorageFromBindings } from "@/server/storage";
 import { createR2StorageAdapter } from "@/server/storage/r2-storage";
 import { createStorageAdapter, resolveStoragePublicBaseUrl } from "@/server/storage/s3-storage";

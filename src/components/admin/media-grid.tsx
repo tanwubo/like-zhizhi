@@ -12,7 +12,7 @@ import { formatDateLabel } from "@/lib/date";
 
 type MediaAssetItem = {
   id: string;
-  type: MediaType;
+  type: string;
   filename: string;
   publicUrl: string;
   contentType: string;
@@ -22,14 +22,14 @@ type MediaAssetItem = {
   createdAt: Date;
 };
 
-const mediaTypeLabels: Record<MediaType, string> = {
+const mediaTypeLabels: Record<string, string> = {
   IMAGE: "图片",
   VIDEO: "视频",
   AUDIO: "音频",
   FILE: "文件"
 };
 
-const typeIconMap: Record<MediaType, typeof ImageIcon> = {
+const typeIconMap: Record<string, typeof ImageIcon> = {
   IMAGE: ImageIcon,
   VIDEO: Film,
   AUDIO: Music,
@@ -65,7 +65,7 @@ function MediaCard({
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }) {
-  const Icon = typeIconMap[asset.type];
+  const Icon = typeIconMap[asset.type] ?? FileText;
   const isImage = asset.type === MediaType.IMAGE;
 
   return (
@@ -104,7 +104,7 @@ function MediaCard({
             {asset.filename}
           </p>
           <div className="mt-1.5 flex items-center gap-1.5">
-            <Badge variant="secondary">{mediaTypeLabels[asset.type]}</Badge>
+            <Badge variant="secondary">{mediaTypeLabels[asset.type] ?? "文件"}</Badge>
             <span className="text-[10px] text-ink/45">{formatSize(asset.sizeBytes)}</span>
           </div>
           <p className="mt-1 text-[10px] text-ink/35">{formatDateLabel(asset.createdAt)}</p>

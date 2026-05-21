@@ -1,20 +1,6 @@
 import { NextResponse } from "next/server";
 import { getStorage } from "@/server/storage";
-
-export function toResponseBody(body: unknown): BodyInit | null {
-  if (!body) return null;
-  if (body instanceof ReadableStream) return body;
-  if (body instanceof Uint8Array) {
-    return new Uint8Array(body).buffer;
-  }
-  if (typeof body === "string" || body instanceof Blob || body instanceof ArrayBuffer) {
-    return body;
-  }
-  if (typeof body === "object" && "transformToWebStream" in body && typeof body.transformToWebStream === "function") {
-    return body.transformToWebStream() as ReadableStream;
-  }
-  return null;
-}
+import { toResponseBody } from "@/server/storage/media-response";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ key?: string[] }> }) {
   const { key: keyParts = [] } = await params;

@@ -14,7 +14,7 @@ export default defineConfig({
       "tests/integration/**/*.{test,spec}.tsx"
     ],
     env: {
-      DATABASE_URL: "file:./prisma/test.db",
+      DATABASE_URL: "file:./test.db",
       APP_URL: "http://localhost:3000",
       AUTH_SESSION_SECRET: "test-session-secret-with-enough-length",
       S3_ENDPOINT: "http://localhost:9000",

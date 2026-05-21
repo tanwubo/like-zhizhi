@@ -1,3 +1,4 @@
+import type { R2Bucket } from "@cloudflare/workers-types";
 import { getCloudflareContextSafe } from "@/server/cloudflare/bindings";
 import { env } from "@/server/config/env";
 import { createR2StorageAdapter } from "@/server/storage/r2-storage";

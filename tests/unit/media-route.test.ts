@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toResponseBody } from "@/app/api/media/[...key]/route";
+import { toResponseBody } from "@/server/storage/media-response";
 
 describe("media route response body", () => {
   it("accepts a ReadableStream from R2 objects", () => {

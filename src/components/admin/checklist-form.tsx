@@ -8,7 +8,7 @@ type ChecklistFormValue = {
   id?: string;
   title?: string;
   description?: string;
-  status?: PublishStatus;
+  status?: string;
   completed?: boolean;
   completedAt?: Date | null;
   targetDate?: Date | null;

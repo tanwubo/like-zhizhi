@@ -9,13 +9,13 @@ type AlbumFormValue = {
   mediaId?: string;
   title?: string;
   caption?: string;
-  status?: PublishStatus;
+  status?: string;
   takenAt?: Date | null;
   location?: string | null;
   authorLabel?: string | null;
   sortOrder?: number;
   media?: {
-    type?: MediaType;
+    type?: string;
     publicUrl?: string;
     filename?: string;
     contentType?: string;

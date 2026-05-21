@@ -639,8 +639,7 @@ describe("admin footprint actions", () => {
         data: [
           { memoryId: "memory_1", mediaAssetId: "media_1", sortOrder: 0 },
           { memoryId: "memory_1", mediaAssetId: "media_2", sortOrder: 1 }
-        ],
-        skipDuplicates: true
+        ]
       })
     );
   });

@@ -1,4 +1,4 @@
-import { MediaType, PublishStatus } from "@/server/db/enums";
+import { PublishStatus } from "@/server/db/enums";
 import Link from "next/link";
 
 import { AdminActionForm } from "@/components/admin/action-form";
@@ -10,13 +10,13 @@ import { formatDateLabel } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
 
-const statusLabels: Record<PublishStatus, string> = {
+const statusLabels: Record<string, string> = {
   DRAFT: "草稿",
   PUBLISHED: "已发布",
   HIDDEN: "已隐藏"
 };
 
-const mediaTypeLabels: Record<MediaType, string> = {
+const mediaTypeLabels: Record<string, string> = {
   IMAGE: "图片",
   VIDEO: "视频",
   AUDIO: "音频",

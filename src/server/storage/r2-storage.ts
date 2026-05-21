@@ -1,3 +1,4 @@
+import type { R2Bucket } from "@cloudflare/workers-types";
 import { joinPublicUrl } from "@/lib/public-url";
 import type { PutObjectInput, StorageAdapter } from "@/server/storage/types";
 

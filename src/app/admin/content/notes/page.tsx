@@ -10,7 +10,7 @@ import { formatDateLabel } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
 
-const statusLabels: Record<PublishStatus, string> = {
+const statusLabels: Record<string, string> = {
   DRAFT: "草稿",
   PUBLISHED: "已发布",
   HIDDEN: "已隐藏"

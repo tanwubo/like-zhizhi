@@ -221,13 +221,14 @@ async function replaceMemoryImages(
     return;
   }
 
+  const uniqueMediaAssetIds = Array.from(new Set(mediaAssetIds));
+
   await tx.footprintMemoryImage.createMany({
-    data: mediaAssetIds.map((mediaAssetId, index) => ({
+    data: uniqueMediaAssetIds.map((mediaAssetId, index) => ({
       memoryId,
       mediaAssetId,
       sortOrder: index
-    })),
-    skipDuplicates: true
+    }))
   });
 }
 

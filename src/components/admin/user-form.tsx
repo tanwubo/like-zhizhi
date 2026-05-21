@@ -1,5 +1,3 @@
-import type { UserRole } from "@/server/db/enums";
-
 import { AdminActionForm } from "@/components/admin/action-form";
 import { SubmitButton } from "@/components/admin/submit-button";
 
@@ -7,7 +5,7 @@ type UserFormValue = {
   id?: string;
   email?: string;
   name?: string;
-  role?: UserRole;
+  role?: string;
 };
 
 const fieldClass =
