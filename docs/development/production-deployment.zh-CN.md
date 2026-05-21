@@ -2,6 +2,8 @@
 
 本文档说明如何把 Like Zhizhi 部署到一台 Linux 服务器上。默认方案是 PostgreSQL、Nginx、PM2 和 S3 兼容对象存储。
 
+如果要部署到 Cloudflare Workers + D1 + R2，请阅读 `docs/development/cloudflare-deployment.zh-CN.md`。
+
 ## 目标运行环境
 
 - Ubuntu Linux 服务器

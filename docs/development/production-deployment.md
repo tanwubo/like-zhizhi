@@ -2,6 +2,8 @@
 
 This document describes how to deploy Like Zhizhi to a Linux server with PostgreSQL, Nginx, PM2, and S3-compatible object storage.
 
+For Cloudflare Workers + D1 + R2 deployment, see `docs/development/cloudflare-deployment.zh-CN.md`.
+
 ## Target Runtime
 
 - Ubuntu Linux server
